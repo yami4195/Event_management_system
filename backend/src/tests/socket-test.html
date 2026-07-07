@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Socket.IO Notification Test</title>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    input,
+    select,
+    button {
+      padding: 10px;
+      margin: 8px 0;
+      width: 100%;
+    }
+
+    #log {
+      white-space: pre-wrap;
+      background: #111;
+      color: #eee;
+      padding: 12px;
+      min-height: 220px;
+      max-height: 320px;
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Socket.IO Notification Test</h2>
+  <p>Open this page in a browser, connect with a valid JWT, and send a test notification from the page.</p>
+
+  <label>JWT Token</label>
+  <input id="token" placeholder="Paste your JWT token" />
+
+  <label>Target User ID</label>
+  <input id="userId" placeholder="User ID that should receive notifications" />
+
+  <label>Message</label>
+  <input id="message" value="Hello from the browser test page" />
+
+  <label>Type</label>
+  <select id="type">
+    <option value="reminder">reminder</option>
+    <option value="update">update</option>
+    <option value="cancellation">cancellation</option>
+  </select>
+
+  <label>Event ID (optional)</label>
+  <input id="eventId" placeholder="UUID of an event" />
+
+  <button onclick="connectSocket()">Connect</button>
+  <button onclick="disconnectSocket()">Disconnect</button>
+  <button onclick="sendTestNotification()">Send Test Notification</button>
+
+  <h3>Log</h3>
+  <div id="log">Waiting...</div>
+
+  <script>
+    let socket = null;
+
+    function log(message) {
+      const el = document.getElementById('log');
+      el.textContent += '\n' + message;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function getFormValues() {
+      return {
+        token: document.getElementById('token').value.trim(),
+        userId: document.getElementById('userId').value.trim(),
+        message: document.getElementById('message').value.trim(),
+        type: document.getElementById('type').value,
+        eventId: document.getElementById('eventId').value.trim(),
+      };
+    }
+
+    function connectSocket() {
+      const { token, userId } = getFormValues();
+
+      if (!token) {
+        alert('Please enter a JWT token');
+        return;
+      }
+
+      if (!userId) {
+        alert('Please enter a user ID');
+        return;
+      }
+
+      if (socket) {
+        socket.disconnect();
+      }
+
+      log('Connecting to http://localhost:3000...');
+
+      socket = io('http://localhost:3000', {
+        auth: { token },
+        transports: ['websocket']
+      });
+
+      socket.on('connect', () => {
+        log('✅ Connected with socket id: ' + socket.id);
+        log('Listening for notifications for user ' + userId);
+      });
+
+      socket.on('connect_error', (err) => {
+        log('❌ Connection error: ' + err.message);
+      });
+
+      socket.on('disconnect', (reason) => {
+        log('🔌 Disconnected: ' + reason);
+      });
+
+      socket.on('notification', (data) => {
+        log('🔔 Notification received:');
+        log(JSON.stringify(data, null, 2));
+      });
+    }
+
+    async function sendTestNotification() {
+      const { token, userId, message, type, eventId } = getFormValues();
+
+      if (!token) {
+        alert('Please enter a JWT token');
+        return;
+      }
+
+      if (!userId) {
+        alert('Please enter a user ID');
+        return;
+      }
+
+      if (!message) {
+        alert('Please enter a message');
+        return;
+      }
+
+      try {
+        log('Sending notification request to the backend...');
+        const response = await fetch('http://localhost:3000/api/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            message,
+            type,
+            event_id: eventId || null,
+          }),
+        });
+
+        const result = await response.json();
+        log('Server response:');
+        log(JSON.stringify(result, null, 2));
+      } catch (error) {
+        log('❌ Failed to send notification: ' + error.message);
+      }
+    }
+
+    function disconnectSocket() {
+      if (socket) {
+        socket.disconnect();
+        socket = null;
+        log('Disconnected manually');
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,7 +1,8 @@
 import pool from "../config/db.js";
+import { validate as isUuid } from "uuid";
 
-// Helper to validate positive integer IDs (PostgreSQL bigint)
-const isValidId = (id) => /^\d+$/.test(id);
+// Helper to validate UUID-based IDs
+const isValidId = (id) => typeof id === "string" && isUuid(id);
 const EVENT_STATUSES = ["upcoming", "ongoing", "completed", "cancelled"];
 const normalizeEventStatus = (status) => String(status).trim().toLowerCase();
 
@@ -11,7 +12,13 @@ const normalizeEventStatus = (status) => String(status).trim().toLowerCase();
  */
 export async function listEvents(req, res) {
   try {
-    const { category_id, status, date, search } = req.query;
+    const { category_id, status, date, search, page = 1, limit = 10 } = req.query;
+
+    const pageNum = Number.isNaN(parseInt(page)) ? 1 : Math.max(parseInt(page), 1);
+    const limitNum = Number.isNaN(parseInt(limit)) ? 10 : Math.min(Math.max(parseInt(limit), 1), 100);
+    const offset = (pageNum - 1) * limitNum;
+
+
 
     const conditions = [];
     const values = [];
@@ -56,16 +63,22 @@ export async function listEvents(req, res) {
       conditions.push(`title ILIKE $${values.length}`);
     }
 
+    const whereClause = conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : "";
+    // --- Count query (uses filters only, no limit/offset) ---
+    const countQuery = `SELECT COUNT(*) FROM events${whereClause}`;
+    const countResult = await pool.query(countQuery, values);
+    const totalItems = parseInt(countResult.rows[0].count);
+
+
+
     let queryText = `
       SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at 
-      FROM events
+      FROM events ${whereClause}
+      ORDER BY date ASC, time ASC
     `;
 
-    if (conditions.length > 0) {
-      queryText += " WHERE " + conditions.join(" AND ");
-    }
-
-    queryText += " ORDER BY date ASC, time ASC";
+    values.push(limitNum, offset);
+    queryText += ` LIMIT $${values.length - 1} OFFSET $${values.length}`;
 
     const result = await pool.query(queryText, values);
 
@@ -73,6 +86,12 @@ export async function listEvents(req, res) {
       success: true,
       message: "Events retrieved successfully.",
       data: { events: result.rows },
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limitNum),
+      },
     });
   } catch (error) {
     console.error("List events error:", error.message);

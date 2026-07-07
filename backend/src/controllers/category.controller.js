@@ -1,7 +1,8 @@
 import pool from "../config/db.js";
+import { validate as isUuid } from "uuid";
 
-// Helper to validate positive integer IDs (PostgreSQL bigint)
-const isValidId = (id) => /^\d+$/.test(id);
+// Helper to validate UUID-based IDs
+const isValidId = (id) => typeof id === "string" && isUuid(id);
 
 /**
  * GET /api/categories
@@ -10,7 +11,7 @@ const isValidId = (id) => /^\d+$/.test(id);
 export async function listCategories(req, res) {
   try {
     const result = await pool.query(
-      "SELECT category_id, name, description FROM categories ORDER BY name ASC"
+      "SELECT category_id, name, description, created_at FROM categories ORDER BY name ASC"
     );
 
     return res.json({
@@ -43,7 +44,7 @@ export async function getCategoryById(req, res) {
     }
 
     const result = await pool.query(
-      "SELECT category_id, name, description FROM categories WHERE category_id = $1",
+      "SELECT category_id, name, description, created_at FROM categories WHERE category_id = $1",
       [id]
     );
 
@@ -107,7 +108,7 @@ export async function createCategory(req, res) {
     const result = await pool.query(
       `INSERT INTO categories (name, description)
        VALUES ($1, $2)
-       RETURNING category_id, name, description`,
+       RETURNING category_id, name, description, created_at`,
       [normalizedName, description ? description.trim() : null]
     );
 
@@ -150,7 +151,7 @@ export async function updateCategory(req, res) {
 
     // Retrieve existing category
     const existing = await pool.query(
-      "SELECT category_id, name, description FROM categories WHERE category_id = $1",
+      "SELECT category_id, name, description, created_at FROM categories WHERE category_id = $1",
       [id]
     );
 
@@ -196,7 +197,7 @@ export async function updateCategory(req, res) {
       `UPDATE categories
        SET name = $1, description = $2
        WHERE category_id = $3
-       RETURNING category_id, name, description`,
+       RETURNING category_id, name, description, created_at`,
       [finalName, finalDesc, id]
     );
 

@@ -8,17 +8,33 @@ import {
     deleteEvent,
     updateEventStatus,
 } from '../controllers/event.controller.js';
+import { getEventFeedback } from '../controllers/feedback.controller.js';
+import { getEventRegistrations } from '../controllers/registration.controller.js';
+import {
+    getEventImages,
+    getEventImageById,
+    addEventImage,
+    updateEventImage,
+    deleteEventImage,
+} from '../controllers/eventImage.controller.js';
 
 const router = Router();
 
-// All routes here require authentication
-
-
+// Public routes
 router.get('/', listEvents);
+router.get('/:id/feedback', getEventFeedback);
+router.get('/:id/images', getEventImages);
+router.get('/:id/images/:imageId', getEventImageById);
 router.get('/:id', getEventById);
+
+// Authenticated routes
+router.get('/:id/registrations', authenticate, getEventRegistrations);
 router.post('/', authenticate, createEvent);
+router.post('/:id/images', authenticate, addEventImage);
 router.put('/:id', authenticate, updateEvent);
+router.put('/:id/images/:imageId', authenticate, updateEventImage);
 router.delete('/:id', authenticate, deleteEvent);
+router.delete('/:id/images/:imageId', authenticate, deleteEventImage);
 router.patch('/:id/status', authenticate, updateEventStatus);
 
 export default router;

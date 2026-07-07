@@ -7,7 +7,18 @@ import userRouter from "./routes/user.routes.js";
 import profileRouter from "./routes/profile.routes.js";
 import categoryRouter from "./routes/category.routes.js";
 import eventRouter from "./routes/event.routes.js";
+import notificationRouter from "./routes/notification.routes.js";
+import feedbackRouter from "./routes/feedback.routes.js";
+import paymentRouter from "./routes/payment.routes.js";
+import registrationRouter from "./routes/registration.routes.js";
 
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_change_in_production";
 const blacklistedTokens = new Set();
@@ -19,11 +30,12 @@ app.use(cors());
 app.use(express.json());
 
 export function formatUser(row) {
-  const [firstname, ...rest] = row.name?.trim().split(/\s+/) || [];
+  const firstname = row.firstname?.trim() || "";
+  const lastname = row.lastname?.trim() || "";
   return {
     id: row.user_id,
-    firstname: firstname || "",
-    lastname: rest.join(" ") || "",
+    firstname,
+    lastname,
     email: row.email,
     role: ROLE_FROM_DB[row.role] || row.role,
     phone: row.phone,
@@ -66,18 +78,77 @@ export function authenticate(req, res, next) {
     return res.status(401).json({ success: false, message: "Invalid or expired token." });
   }
 }
+  
+
 
 app.post("/api/auth/register", async (req, res) => {
   try {
-    const { firstname, lastname, email, password, role = "CUSTOMER" } = req.body;
+    const { firstname, lastname, email, password, role = "CUSTOMER" ,phone} = req.body;
 
-    if (!firstname?.trim() || !lastname?.trim() || !email?.trim() || !password) {
+    if (!firstname?.trim() || !lastname?.trim() || !email?.trim() || !password ||!phone?.trim()) {
       return res.status(400).json({ success: false, message: "All fields are required." });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ success: false, message: "Password must be at least 6 characters." });
+    //email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(email)) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid email format."
+  });
+}
+
+
+//phone number validation
+let phoneNum = req.body.phone.trim();
+if (phoneNum.startsWith("09")) {
+    phoneNum = "+251" + phoneNum.substring(1);
+}
+
+const phoneRegex = /^\+2519\d{8}$/;
+if (!phoneRegex.test(phoneNum)) {
+    return res.status(400).json({
+        success: false,
+        message: "Invalid phone number format."
+    });
+}
+
+
+
+//password length check
+    if (password.length < 8) {
+      return res.status(400).json({ success: false, message: "Password must be at least 8 characters." });
     }
+
+
+
+    //password complexity check
+    const errors = [];
+if (password.length < 8)
+  errors.push("at least 8 characters");
+
+if (!/[A-Z]/.test(password))
+  errors.push("one uppercase letter");
+
+if (!/[a-z]/.test(password))
+  errors.push("one lowercase letter");
+
+if (!/\d/.test(password))
+  errors.push("one number");
+
+if (!/[@$!%*?&.#_-]/.test(password))
+  errors.push("one special character");
+
+if (errors.length > 0) {
+  return res.status(400).json({
+    success: false,
+    message: `Password must contain ${errors.join(", ")}.`
+  });
+}
+
+
+
+
 
     const normalizedRole = role.toUpperCase();
     if (!ROLE_TO_DB[normalizedRole]) {
@@ -93,10 +164,10 @@ app.post("/api/auth/register", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      `INSERT INTO users (name, email, password, role)
-       VALUES ($1, $2, $3, $4)
-       RETURNING user_id, name, email, role, phone, created_at`,
-      [`${firstname.trim()} ${lastname.trim()}`, normalizedEmail, passwordHash, ROLE_TO_DB[normalizedRole]]
+      `INSERT INTO users (firstname, lastname, email, password, role, phone)
+       VALUES ($1, $2, $3, $4,$5,$6)
+       RETURNING user_id, firstname,lastname, email, role, phone, created_at`,
+      [firstname.trim(), lastname.trim(), normalizedEmail, passwordHash, ROLE_TO_DB[normalizedRole], phone.trim()]
     );
 
     const user = formatUser(result.rows[0]);
@@ -120,7 +191,7 @@ app.post("/api/auth/login", async (req, res) => {
     }
 
     const result = await pool.query(
-      "SELECT user_id, name, email, password, role, phone, created_at FROM users WHERE email = $1",
+      "SELECT user_id, firstname, lastname, email, password, role, phone, created_at FROM users WHERE email = $1",
       [email.trim().toLowerCase()]
     );
 
@@ -163,7 +234,7 @@ app.post("/api/auth/logout", (req, res) => {
 app.get("/api/auth/me", authenticate, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT user_id, name, email, role, phone, created_at FROM users WHERE user_id = $1",
+      "SELECT user_id, firstname, lastname, email, role, phone, created_at FROM users WHERE user_id = $1",
       [req.user.id]
     );
 
@@ -177,11 +248,31 @@ app.get("/api/auth/me", authenticate, async (req, res) => {
     return res.status(500).json({ success: false, message: "Failed to fetch profile." });
   }
 });
-console.log("Logout route loaded");
 
 app.use("/api/users", userRouter);
 app.use("/api/profiles", profileRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/events", eventRouter);
+app.use("/api/notifications", notificationRouter);
+app.use("/api/feedback", feedbackRouter);
+app.use("/api/payments", paymentRouter);
+app.use("/api/registrations", registrationRouter);
+
+
+
+
+let swaggerDocument = YAML.load(path.join(__dirname, "..", "docs", "openapi.yaml"));
+if (!swaggerDocument || Object.keys(swaggerDocument).length === 0) {
+  swaggerDocument = {
+    openapi: "3.0.3",
+    info: {
+      title: "Event Management API",
+      version: "1.0.0",
+      description: "API documentation for the Event Management System",
+    },
+    paths: {},
+  };
+}
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 export default app;

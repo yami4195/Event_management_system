@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 import pool from "../config/db.js";
 import { formatUser, ROLE_TO_DB, ROLE_FROM_DB } from "../app.js";
+import { validate as isUuid } from "uuid";
 
-// Helper to validate positive integer IDs (PostgreSQL bigint)
-const isValidId = (id) => /^\d+$/.test(id);
+// Helper to validate UUID-based user IDs
+const isValidId = (id) => typeof id === "string" && isUuid(id);
 
 /**
  * GET /api/users
@@ -19,7 +20,7 @@ export async function listUsers(req, res) {
     }
 
     const result = await pool.query(
-      "SELECT user_id, name, email, role, phone, created_at FROM users ORDER BY created_at DESC"
+      "SELECT user_id, firstname,lastname, email, role, phone, created_at FROM users ORDER BY created_at DESC"
     );
 
     const formattedUsers = result.rows.map(row => formatUser(row));
@@ -42,6 +43,7 @@ export async function listUsers(req, res) {
  * GET /api/users/:id
  * View one user's information (Admin or own profile)
  */
+
 export async function getUserById(req, res) {
   try {
     const { id } = req.params;
@@ -62,7 +64,7 @@ export async function getUserById(req, res) {
     }
 
     const result = await pool.query(
-      "SELECT user_id, name, email, role, phone, created_at FROM users WHERE user_id = $1",
+      "SELECT user_id, firstname, lastname, email, role, phone, created_at FROM users WHERE user_id = $1",
       [id]
     );
 
@@ -113,7 +115,7 @@ export async function updateUser(req, res) {
 
     // Retrieve existing user
     const existingResult = await pool.query(
-      "SELECT user_id, name, email, role, phone, password FROM users WHERE user_id = $1",
+      "SELECT user_id, firstname, lastname, email, role, phone, password FROM users WHERE user_id = $1",
       [id]
     );
 
@@ -156,13 +158,12 @@ export async function updateUser(req, res) {
     }
 
     // Name formatting logic
-    const [currFirst, ...currRest] = currentUser.name?.trim().split(/\s+/) || [];
-    const currLast = currRest.join(" ");
-    const finalFirst = (firstname !== undefined ? firstname : currFirst).trim();
-    const finalLast = (lastname !== undefined ? lastname : currLast).trim();
-    const finalName = `${finalFirst} ${finalLast}`.trim();
+    const currFirst = currentUser.firstname?.trim() || "";
+    const currLast = currentUser.lastname?.trim() || "";
+    const finalFirst = firstname !== undefined ? firstname.trim() : currFirst;
+    const finalLast = lastname !== undefined ? lastname.trim() : currLast;
 
-    const finalEmail = (email !== undefined ? email.trim().toLowerCase() : currentUser.email);
+    const finalEmail = email !== undefined ? email.trim().toLowerCase() : currentUser.email;
     const finalPhone = (phone !== undefined ? phone : currentUser.phone);
 
     // Role change check
@@ -196,10 +197,10 @@ export async function updateUser(req, res) {
     // Execute update
     const updateResult = await pool.query(
       `UPDATE users
-       SET name = $1, email = $2, phone = $3, role = $4, password = $5
-       WHERE user_id = $6
-       RETURNING user_id, name, email, role, phone, created_at`,
-      [finalName, finalEmail, finalPhone, finalRole, finalPassword, id]
+       SET firstname = $1, lastname=$2, email = $3, phone = $4, role = $5, password = $6
+       WHERE user_id = $7
+       RETURNING user_id, firstname, lastname, email, role, phone, created_at`,
+      [finalFirst, finalLast, finalEmail, finalPhone, finalRole, finalPassword, id]
     );
 
     return res.json({
