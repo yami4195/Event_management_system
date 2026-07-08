@@ -1,9 +1,9 @@
-import Navbar from "../../Component/navbar/Navbar";
+import Navbar from "../../components/layout/Navbar";
 
 function Dashboard(){
 return(
     <div>
-        <h1>Event Management System</h1>
+        
      <Navbar/>
         <h2>Dashboard</h2> 
 
