@@ -1,29 +1,18 @@
-import { useState, useEffect } from "react";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 /**
- * Hook to get and watch the currently authenticated user from localStorage.
- * Replace body with your AuthContext logic once set up.
+ * Hook to access authentication state and actions.
+ * Must be used within an <AuthProvider>.
  */
 const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const context = useContext(AuthContext);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        setUser(null);
-      }
-    }
-    setIsLoading(false);
-  }, []);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
 
-  const isAuthenticated = !!user;
-  const role = user?.role || null;
-
-  return { user, isAuthenticated, role, isLoading };
+  return context;
 };
 
 export default useAuth;

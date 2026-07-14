@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Navbar from "../../components/layout/Navbar";
+import Footer from "../../components/layout/Footer";
 import "./HomePage.css";
 
 /* ── Static data ─────────────────────────────── */
@@ -275,20 +276,7 @@ const HomePage = () => {
       </section>
 
       {/* ── FOOTER ───────────────────────────── */}
-      <footer className="footer">
-        <div className="container footer__inner">
-          <div className="footer__brand">
-            <span className="footer__logo">⚡ EventFlow</span>
-            <p>The platform for extraordinary events.</p>
-          </div>
-          <div className="footer__links">
-            <Link to="/events">Browse Events</Link>
-            <Link to="/register">Host an Event</Link>
-            <Link to="/login">Sign In</Link>
-          </div>
-          <p className="footer__copy">© 2025 EventFlow. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

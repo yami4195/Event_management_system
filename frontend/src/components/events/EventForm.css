@@ -1,0 +1,107 @@
+/* =============================================
+   EVENT FORM STYLES
+   ============================================= */
+
+.event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.event-form__row {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.event-form__row > .form-group {
+  flex: 1;
+}
+
+.event-form__textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.event-form__actions {
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Base form group styles (reused from auth, but scoped locally if needed) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.form-group__input,
+.form-group__select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.form-group__input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.form-group__input:focus,
+.form-group__select:focus {
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+}
+
+.form-group__input--error {
+  border-color: #ff6584;
+}
+
+.form-group__error {
+  font-size: 0.8rem;
+  color: #ff6584;
+}
+
+.form-group__select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.form-group__select option {
+  background: var(--color-bg);
+  color: #fff;
+}
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 768px) {
+  .event-form {
+    padding: 1.5rem;
+  }
+  
+  .event-form__row {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}

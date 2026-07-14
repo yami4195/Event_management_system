@@ -1,0 +1,62 @@
+/* =============================================
+   PAGINATION STYLES
+   ============================================= */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination__btn,
+.pagination__page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.pagination__page {
+  width: 36px;
+  height: 36px;
+  font-size: 0.9rem;
+}
+
+.pagination__btn {
+  width: 36px;
+  height: 36px;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+}
+
+.pagination__btn:hover:not(:disabled),
+.pagination__page:hover:not(.pagination__page--active) {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border-hover);
+  color: #fff;
+}
+
+.pagination__page--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary-light);
+  color: #fff;
+  cursor: default;
+}
+
+.pagination__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

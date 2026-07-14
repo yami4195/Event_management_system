@@ -94,6 +94,12 @@
   flex-shrink: 0;
 }
 
+.navbar__user-greeting {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
 .navbar__btn {
   text-decoration: none;
   font-size: 0.875rem;
@@ -103,6 +109,10 @@
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
 }
 
 .navbar__btn--ghost {
