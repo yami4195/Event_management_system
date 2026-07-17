@@ -100,7 +100,7 @@ if (!emailRegex.test(email)) {
 
 
 //phone number validation
-let phoneNum = req.body.phone.trim();
+let phoneNum = phone.trim().replace(/[\s-]/g, "");
 if (phoneNum.startsWith("09")) {
     phoneNum = "+251" + phoneNum.substring(1);
 }
@@ -156,18 +156,23 @@ if (errors.length > 0) {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    const existing = await pool.query("SELECT user_id FROM users WHERE email = $1", [normalizedEmail]);
+    const existingEmail = await pool.query("SELECT user_id FROM users WHERE email = $1", [normalizedEmail]);
+    const existingPhone = await pool.query("SELECT user_id FROM users WHERE phone = $1", [phoneNum]);
 
-    if (existing.rows.length > 0) {
+    if (existingEmail.rows.length > 0) {
       return res.status(409).json({ success: false, message: "Email already exists." });
+    }
+
+    if (existingPhone.rows.length > 0) {
+      return res.status(409).json({ success: false, message: "Phone number already exists." });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await pool.query(
       `INSERT INTO users (firstname, lastname, email, password, role, phone)
-       VALUES ($1, $2, $3, $4,$5,$6)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING user_id, firstname,lastname, email, role, phone, created_at`,
-      [firstname.trim(), lastname.trim(), normalizedEmail, passwordHash, ROLE_TO_DB[normalizedRole], phone.trim()]
+      [firstname.trim(), lastname.trim(), normalizedEmail, passwordHash, ROLE_TO_DB[normalizedRole], phoneNum]
     );
 
     const user = formatUser(result.rows[0]);

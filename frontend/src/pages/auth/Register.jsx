@@ -15,7 +15,7 @@ const Register = () => {
     phone: "",
     password: "",
     confirmPassword: "",
-    role: "CUSTOMER",
+    role: "CUSTOMER", 
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -49,14 +49,31 @@ const Register = () => {
       newErrors.email = "Enter a valid email address";
     }
 
-    if (formData.phone && !/^[\d+\-() ]{7,20}$/.test(formData.phone)) {
-      newErrors.phone = "Enter a valid phone number";
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else {
+      // Allow spaces/dashes and accept 09xxxxxxxx or +2519xxxxxxxx
+      const cleanedPhone = formData.phone.trim().replace(/[\s-]/g, "");
+      const normalized = cleanedPhone.startsWith("09")
+        ? "+251" + cleanedPhone.substring(1)
+        : cleanedPhone;
+      if (!/^\+2519\d{8}$/.test(normalized)) {
+        newErrors.phone = "Enter a valid Ethiopian phone number (e.g. 0912345678)";
+      }
     }
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else {
+      const pwdErrors = [];
+      if (formData.password.length < 8) pwdErrors.push("at least 8 characters");
+      if (!/[A-Z]/.test(formData.password)) pwdErrors.push("one uppercase letter");
+      if (!/[a-z]/.test(formData.password)) pwdErrors.push("one lowercase letter");
+      if (!/\d/.test(formData.password)) pwdErrors.push("one number");
+      if (!/[@$!%*?&.#_-]/.test(formData.password)) pwdErrors.push("one special character (@$!%*?&.#_-)");
+      if (pwdErrors.length > 0) {
+        newErrors.password = `Password must contain ${pwdErrors.join(", ")}.`;
+      }
     }
 
     if (!formData.confirmPassword) {
@@ -77,11 +94,16 @@ const Register = () => {
     setServerError("");
 
     try {
+      const cleanedPhone = formData.phone.trim().replace(/[\s-]/g, "");
+      const normalizedPhone = cleanedPhone.startsWith("09")
+        ? "+251" + cleanedPhone.substring(1)
+        : cleanedPhone;
+
       await register({
         firstname: formData.firstname.trim(),
         lastname: formData.lastname.trim(),
         email: formData.email.trim(),
-        phone: formData.phone.trim() || undefined,
+        phone: normalizedPhone,
         password: formData.password,
         role: formData.role,
       });
@@ -186,7 +208,7 @@ const Register = () => {
           {/* Phone */}
           <div className="form-group">
             <label className="form-group__label" htmlFor="register-phone">
-              Phone Number <span style={{ color: "rgba(255,255,255,0.25)" }}>(optional)</span>
+              Phone Number
             </label>
             <input
               id="register-phone"
@@ -214,7 +236,7 @@ const Register = () => {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 className={`form-group__input form-group__input--password ${errors.password ? "form-group__input--error" : ""}`}
-                placeholder="Min. 6 characters"
+                placeholder="Min. 8 characters"
                 value={formData.password}
                 onChange={handleChange}
                 autoComplete="new-password"
