@@ -72,7 +72,14 @@ export async function listEvents(req, res) {
 
 
     let queryText = `
-      SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at 
+      SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at,
+             (
+               SELECT ei.image_url
+               FROM event_images ei
+               WHERE ei.event_id = events.event_id
+               ORDER BY ei.uploaded_at ASC, ei.image_id ASC
+               LIMIT 1
+             ) AS "imageUrl"
       FROM events ${whereClause}
       ORDER BY date ASC, time ASC
     `;
@@ -118,7 +125,14 @@ export async function getEventById(req, res) {
     }
 
     const result = await pool.query(
-      `SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at 
+      `SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at,
+              (
+                SELECT ei.image_url
+                FROM event_images ei
+                WHERE ei.event_id = events.event_id
+                ORDER BY ei.uploaded_at ASC, ei.image_id ASC
+                LIMIT 1
+              ) AS "imageUrl"
        FROM events 
        WHERE event_id = $1`,
       [id]
@@ -159,7 +173,7 @@ export async function createEvent(req, res) {
       });
     }
 
-    const { title, description, date, time, location, capacity, status = "upcoming", category_id, organizer_id, price } = req.body;
+    const { title, description, date, time, location, capacity, status = "upcoming", category_id, organizer_id, price, imageUrl } = req.body;
 
     // Validation checks
     if (!title?.trim()) {
@@ -255,10 +269,22 @@ export async function createEvent(req, res) {
       ]
     );
 
+    const newEvent = result.rows[0];
+
+    // If an image URL was provided, insert into event_images table
+    if (imageUrl?.trim()) {
+      await pool.query(
+        `INSERT INTO event_images (event_id, image_url, caption)
+         VALUES ($1, $2, $3)`,
+        [newEvent.event_id, imageUrl.trim(), null]
+      );
+      newEvent.imageUrl = imageUrl.trim();
+    }
+
     return res.status(201).json({
       success: true,
       message: "Event created successfully.",
-      data: { event: result.rows[0] },
+      data: { event: newEvent },
     });
   } catch (error) {
     console.error("Create event error:", error.message);
@@ -309,7 +335,7 @@ export async function updateEvent(req, res) {
       });
     }
 
-    const { title, description, date, time, location, capacity, status, category_id, price } = req.body;
+    const { title, description, date, time, location, capacity, status, category_id, price, imageUrl } = req.body;
 
     // Field-level validations if provided
     if (title !== undefined && !title.trim()) {
@@ -391,10 +417,26 @@ export async function updateEvent(req, res) {
       ]
     );
 
+    const updatedEvent = updateResult.rows[0];
+
+    // Handle imageUrl update in event_images table
+    if (imageUrl !== undefined) {
+      // Remove existing images for this event
+      await pool.query(`DELETE FROM event_images WHERE event_id = $1`, [id]);
+      // Insert the new image if provided
+      if (imageUrl?.trim()) {
+        await pool.query(
+          `INSERT INTO event_images (event_id, image_url, caption) VALUES ($1, $2, $3)`,
+          [id, imageUrl.trim(), null]
+        );
+      }
+      updatedEvent.imageUrl = imageUrl?.trim() || null;
+    }
+
     return res.json({
       success: true,
       message: "Event updated successfully.",
-      data: { event: updateResult.rows[0] },
+      data: { event: updatedEvent },
     });
   } catch (error) {
     console.error("Update event error:", error.message);

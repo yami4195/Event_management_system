@@ -26,15 +26,24 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isAuthEndpoint =
-      error.config?.url?.includes("/auth/login") ||
-      error.config?.url?.includes("/auth/register") ||
-      error.config?.url?.includes("/auth/me");
-    if (error.response?.status === 401 && !isAuthEndpoint) {
+    const url = error.config?.url || "";
+
+    // Endpoints that are allowed to return 401 without forcing a logout redirect.
+    // Auth endpoints: expected to 401 on bad credentials.
+    // Public read endpoints: unauthenticated users can browse events/categories.
+    const isBypassEndpoint =
+      url.includes("/auth/login") ||
+      url.includes("/auth/register") ||
+      url.includes("/auth/me") ||
+      url.includes("/events") ||
+      url.includes("/categories");
+
+    if (error.response?.status === 401 && !isBypassEndpoint) {
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
       window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );

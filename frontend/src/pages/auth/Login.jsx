@@ -36,10 +36,10 @@ const Login = () => {
 
   const validate = () => {
     const newErrors = {};
-
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+    } else if (!emailRegex.test(formData.email.trim())) {
       newErrors.email = "Enter a valid email address";
     }
 
@@ -82,8 +82,7 @@ const Login = () => {
       <div className="auth-card">
         {/* Logo */}
         <Link to="/" className="auth-card__logo">
-          <span className="auth-card__logo-icon">⚡</span>
-          <span className="auth-card__logo-text">EventFlow</span>
+          <span className="auth-card__logo-text">MeetSphere</span>
         </Link>
 
         <h1 className="auth-card__title">Welcome Back</h1>

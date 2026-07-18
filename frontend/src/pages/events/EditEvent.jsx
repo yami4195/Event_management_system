@@ -17,7 +17,7 @@ const EditEvent = () => {
     const fetchEvent = async () => {
       try {
         const res = await eventsService.getById(id);
-        const data = res.data?.data || res.data;
+        const data = res.data?.data?.event || res.data?.data || res.data;
         if (data) setInitialData(data);
       } catch (err) {
         setError("Failed to load event details.");

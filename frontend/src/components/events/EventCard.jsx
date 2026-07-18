@@ -4,52 +4,78 @@ import { formatDate } from "../../utils/helpers";
 import "./EventCard.css";
 
 const EventCard = ({ event }) => {
-  // Use a fallback gradient if no specific background/image is provided
-  const bgGradient = event.gradient || "linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(192, 132, 252, 0.1))";
-  const tagColor = event.category?.color || "#6c63ff";
-
+  // Safe defaults for image fallback and capacity calculations
+  const displayImage = event.imageUrl ;
+  const isFree = event.price === 0 || event.price === "Free";
+  
+  // Custom international specific variables (fallback if fields are added to DB later)
+  const languages = event.languages || "English (Interpretation Available)";
+  const timezone = event.time ? `${event.time} UTC` : "TBD";
+console.log("event_list",displayImage);
   return (
-    <div className="event-card" style={{ background: bgGradient }}>
-      {/* Background Image handling if available */}
-      {event.imageUrl && (
-        <div 
-          className="event-card__image-bg" 
-          style={{ backgroundImage: `url(${event.imageUrl})` }} 
-        />
-      )}
-
-      <div className="event-card__content">
-        <div className="event-card__top">
-          <span
-            className="event-card__tag"
-            style={{ 
-              color: tagColor, 
-              borderColor: `${tagColor}44`, 
-              background: `${tagColor}15` 
-            }}
-          >
-            {event.category?.name || "General"}
+    <div className="intl-card">
+      {/* 1. Header Media Region */}
+      <div className="intl-card__media">
+        <img src={displayImage} alt={event.title} className="intl-card__img" />
+        <div className="intl-card__badges">
+          <span className="intl-card__tag">
+            {event.category?.name || "Global Event"}
           </span>
-          <span className="event-card__emoji">{event.emoji || "📅"}</span>
+          {event.capacity && (
+            <span className="intl-card__status-tag">
+              Tickets Available
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* 2. Main Content Body */}
+      <div className="intl-card__body">
+        <h3 className="intl-card__title" title={event.title}>
+          {event.title}
+        </h3>
+
+        {/* 3. Localized Time & Place Grid */}
+        <div className="intl-card__grid">
+          <div className="intl-card__grid-item">
+            <span className="intl-card__icon">📅</span>
+            <span>{formatDate(event.date)} | {timezone}</span>
+          </div>
+          <div className="intl-card__grid-item">
+            <span className="intl-card__icon">📍</span>
+            <span className="intl-card__truncate">{event.location || "Global/Hybrid"}</span>
+          </div>
         </div>
 
-        <h3 className="event-card__title" title={event.title}>{event.title}</h3>
+        <p className="intl-card__description">
+          {event.description || "No description provided for this global session."}
+        </p>
 
-        <div className="event-card__meta">
-          <span>📅 {formatDate(event.date)}</span>
-          <span>📍 {event.location || "Online"}</span>
-          <span>👥 {event.attendees || 0} attending</span>
+        {/* 4. Custom International Specifics Section */}
+        <div className="intl-card__specifics">
+          <h4 className="intl-card__specifics-heading">International Specifics</h4>
+          <div className="intl-card__specifics-row">
+            <span className="intl-card__icon">🌐</span>
+            <p>{languages}</p>
+          </div>
+          <div className="intl-card__specifics-row">
+            <span className="intl-card__icon">🛡️</span>
+            <p>Visa Support &amp; Venue info available upon setup</p>
+          </div>
         </div>
 
-        <div className="event-card__footer">
-          <span className="event-card__price">
-            {event.price === 0 || event.price === "Free" ? "Free" : `$${event.price}`}
-          </span>
+        {/* 5. Pricing and CTA Action Footer */}
+        <div className="intl-card__footer">
+          <div className="intl-card__price-wrapper">
+            <span className="intl-card__price-label">Registration Fee</span>
+            <span className="intl-card__price-value">{isFree ? "Free" : `$${event.price}`}</span>
+          </div>
+          
           <Link
             to={ROUTES.EVENT_DETAIL.replace(":id", event.id)}
-            className="event-card__btn"
+            className="intl-card__btn"
           >
-            View Details →
+            Register Now
           </Link>
         </div>
       </div>

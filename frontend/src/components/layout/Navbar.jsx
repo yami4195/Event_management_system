@@ -49,8 +49,8 @@ const Navbar = () => {
       <div className="navbar__container">
         {/* Logo */}
         <Link to="/" className="navbar__logo">
-          <span className="navbar__logo-icon">⚡</span>
-          <span className="navbar__logo-text">EventFlow</span>
+          
+          <span className="navbar__logo-text">MeetSphere</span>
         </Link>
 
         {/* Desktop Links */}

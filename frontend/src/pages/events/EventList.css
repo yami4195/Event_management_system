@@ -151,3 +151,18 @@
     align-self: flex-start;
   }
 }
+
+.events-grid-container {
+  display: grid;
+  /* Automatically columns based on viewport size (min 280px wide per card) */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  
+  /* The layout space gap between the cards */
+  gap: 1.75rem; 
+  
+  /* Horizontal padding and center layout boundaries */
+  padding: 2rem 0;
+  width: 100%;
+  max-width: 1280px; /* Prevents rows from stretching infinitely on wide displays */
+  margin: 0 auto;
+}

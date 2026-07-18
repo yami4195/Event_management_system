@@ -4,17 +4,48 @@ import "./Footer.css";
 const Footer = () => {
   return (
     <footer className="footer">
-      <div className="container footer__inner">
+      <div className="footer__container">
+
         <div className="footer__brand">
-          <Link to="/" className="footer__logo">⚡ EventFlow</Link>
-          <p>The platform for extraordinary events.</p>
+          <Link to="/" className="footer__logo">
+             MeetSphere
+          </Link>
+
+          <p>
+            Discover, create, and experience extraordinary events worldwide.
+          </p>
         </div>
+
+
         <div className="footer__links">
-          <Link to="/events">Browse Events</Link>
-          <Link to="/register">Host an Event</Link>
-          <Link to="/login">Sign In</Link>
+
+          <div>
+            <h4>Explore</h4>
+            <Link to="/events">Events</Link>
+            <Link to="/categories">Categories</Link>
+          </div>
+
+
+          <div>
+            <h4>Organizer</h4>
+            <Link to="/register">Create Event</Link>
+            <Link to="/login">Sign In</Link>
+          </div>
+
+
+          <div>
+            <h4>Company</h4>
+            <Link to="/about">About</Link>
+            <Link to="/contact">Contact</Link>
+          </div>
+
         </div>
-        <p className="footer__copy">© {new Date().getFullYear()} EventFlow. All rights reserved.</p>
+
+
+        <div className="footer__bottom">
+          © {new Date().getFullYear()} EventFlow. All rights reserved.
+        </div>
+
       </div>
     </footer>
   );
