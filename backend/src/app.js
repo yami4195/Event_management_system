@@ -11,6 +11,7 @@ import notificationRouter from "./routes/notification.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
 import registrationRouter from "./routes/registration.routes.js";
+import dashboardRouter from "./routes/dashboard.routes.js";
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
@@ -262,6 +263,7 @@ app.use("/api/notifications", notificationRouter);
 app.use("/api/feedback", feedbackRouter);
 app.use("/api/payments", paymentRouter);
 app.use("/api/registrations", registrationRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 
 

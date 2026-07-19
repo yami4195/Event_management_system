@@ -1,6 +1,20 @@
 import { Router } from "express";
 import { authenticate } from "../app.js";
 import upload from "../middlewares/upload.js";
+
+function handleUpload(fieldName) {
+  return (req, res, next) => {
+    upload.single(fieldName)(req, res, (err) => {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          message: err.message || "Invalid image upload.",
+        });
+      }
+      next();
+    });
+  };
+}
 import {
     listEvents,
     getEventById,
@@ -30,10 +44,10 @@ router.get('/:id', getEventById);
 
 // Authenticated routes
 router.get('/:id/registrations', authenticate, getEventRegistrations);
-router.post('/', authenticate, upload.single('image'), createEvent);
-router.post('/:id/images', authenticate, upload.single('image'), addEventImage);
-router.put('/:id', authenticate, upload.single('image'), updateEvent);
-router.put('/:id/images/:imageId', authenticate, upload.single('image'), updateEventImage);
+router.post('/', authenticate, handleUpload('image'), createEvent);
+router.post('/:id/images', authenticate, handleUpload('image'), addEventImage);
+router.put('/:id', authenticate, handleUpload('image'), updateEvent);
+router.put('/:id/images/:imageId', authenticate, handleUpload('image'), updateEventImage);
 router.delete('/:id', authenticate, deleteEvent);
 router.delete('/:id/images/:imageId', authenticate, deleteEventImage);
 router.patch('/:id/status', authenticate, updateEventStatus);

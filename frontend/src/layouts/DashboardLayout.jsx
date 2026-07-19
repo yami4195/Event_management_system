@@ -1,12 +1,16 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import useAuth from "../hooks/useAuth";
 import "./DashboardLayout.css";
-import { Link } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
+import { ORGANIZER_ROLES } from "../constants/roles";
 
 const DashboardLayout = () => {
   const { user, logout } = useAuth();
+  const location = useLocation();
+  const isOrganizer = ORGANIZER_ROLES.includes(user?.role);
+
+  const isActive = (path) => location.pathname === path;
 
   const handleLogout = async () => {
     await logout();
@@ -16,7 +20,6 @@ const DashboardLayout = () => {
     <div className="layout-dashboard">
       <Navbar />
       <div className="layout-dashboard__container">
-        {/* Sidebar */}
         <aside className="layout-dashboard__sidebar">
           <div className="sidebar__user">
             <div className="sidebar__avatar">
@@ -30,26 +33,48 @@ const DashboardLayout = () => {
           </div>
 
           <nav className="sidebar__nav">
-            <Link to={ROUTES.DASHBOARD} className="sidebar__link">
+            <Link
+              to={isOrganizer ? ROUTES.ORGANIZER_DASHBOARD : ROUTES.CUSTOMER_DASHBOARD}
+              className={`sidebar__link ${isActive(isOrganizer ? ROUTES.ORGANIZER_DASHBOARD : ROUTES.CUSTOMER_DASHBOARD) ? "sidebar__link--active" : ""}`}
+            >
               Dashboard
             </Link>
-            {user?.role === "ORGANIZER" && (
+
+            {isOrganizer ? (
               <>
-                <Link to={ROUTES.CREATE_EVENT} className="sidebar__link">
+                <Link to={ROUTES.MANAGE_EVENTS} className={`sidebar__link ${isActive(ROUTES.MANAGE_EVENTS) ? "sidebar__link--active" : ""}`}>
+                  My Events
+                </Link>
+                <Link to={ROUTES.CREATE_EVENT} className={`sidebar__link ${isActive(ROUTES.CREATE_EVENT) ? "sidebar__link--active" : ""}`}>
                   Create Event
                 </Link>
-                <Link to={ROUTES.MANAGE_EVENTS} className="sidebar__link">
-                  My Events
+                <Link to={ROUTES.PROFILE} className={`sidebar__link ${isActive(ROUTES.PROFILE) ? "sidebar__link--active" : ""}`}>
+                  Profile
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to={ROUTES.EVENTS} className="sidebar__link">
+                  Browse Events
+                </Link>
+                <Link to={ROUTES.REGISTERED_EVENTS} className={`sidebar__link ${isActive(ROUTES.REGISTERED_EVENTS) ? "sidebar__link--active" : ""}`}>
+                  Registered Events
+                </Link>
+                <Link to={ROUTES.NOTIFICATIONS} className={`sidebar__link ${isActive(ROUTES.NOTIFICATIONS) ? "sidebar__link--active" : ""}`}>
+                  Notifications
+                </Link>
+                <Link to={ROUTES.PROFILE} className={`sidebar__link ${isActive(ROUTES.PROFILE) ? "sidebar__link--active" : ""}`}>
+                  Profile
                 </Link>
               </>
             )}
+
             <button className="sidebar__link sidebar__link--logout" onClick={handleLogout}>
               Logout
             </button>
           </nav>
         </aside>
 
-        {/* Main Content Area */}
         <main className="layout-dashboard__content">
           <Outlet />
         </main>

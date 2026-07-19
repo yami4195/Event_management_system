@@ -13,5 +13,4 @@ export const eventsService = {
       headers: { "Content-Type": "multipart/form-data" },
     }),
   delete: (id) => axiosInstance.delete(`/events/${id}`),
-  register: (id) => axiosInstance.post(`/events/${id}/register`),
 };

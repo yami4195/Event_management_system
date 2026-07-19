@@ -1,13 +1,14 @@
 import { Navigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import LoadingSpinner from "../ui/LoadingSpinner";
+import { getRoleDashboard } from "./ProtectedRoute";
 
 /**
  * Wraps guest-only routes (login, register).
- * Redirects to /dashboard if already authenticated.
+ * Redirects to role dashboard if already authenticated.
  */
 const GuestRoute = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -18,7 +19,7 @@ const GuestRoute = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getRoleDashboard(user?.role)} replace />;
   }
 
   return children;

@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { FiCalendar, FiMapPin, FiClock, FiUser, FiShare2, FiArrowLeft, FiTag } from "react-icons/fi";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { FiCalendar, FiMapPin, FiUser, FiShare2, FiArrowLeft, FiTag } from "react-icons/fi";
 import useAuth from "../../hooks/useAuth";
 import { eventsService } from "../../services";
+import { registrationsService } from "../../services/registrations.service";
 import { formatDate } from "../../utils/helpers";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import { ORGANIZER_ROLES } from "../../constants/roles";
 import "./EventDetails.css";
 
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  
+  const location = useLocation();
+  const { isAuthenticated, user } = useAuth();
+  const canRegister = isAuthenticated && !ORGANIZER_ROLES.includes(user?.role);
+
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,10 +52,11 @@ const EventDetails = () => {
     }
 
     setIsRegistering(true);
+    setError("");
     try {
-      await eventsService.register(id);
+      await registrationsService.register(id);
       setRegisterSuccess(true);
-      setEvent(prev => ({ ...prev, attendees: (prev.attendees || 0) + 1 }));
+      setEvent((prev) => ({ ...prev, attendees: (prev.attendees || 0) + 1 }));
     } catch (err) {
       console.error("Registration failed:", err);
       setError(err.response?.data?.message || "Failed to register for this event.");
@@ -84,7 +89,7 @@ const EventDetails = () => {
     );
   }
 
-  if (error || !event) {
+  if (!event) {
     return (
       <div className="container" style={{ padding: "4rem 2rem", textAlign: "center" }}>
         <h2>{error || "Event not found"}</h2>
@@ -95,18 +100,17 @@ const EventDetails = () => {
     );
   }
 
-  const remainingSeats = event.capacity ? event.capacity - (event.attendees || 0) : null;
+  const remainingSeats = event.capacity != null ? event.capacity - (event.attendees || 0) : null;
   const isSoldOut = remainingSeats !== null && remainingSeats <= 0;
   const isFree = event.price === 0 || event.price === "Free" || !event.price;
 
   return (
     <div className="event-details-page">
-      {/* Hero Banner */}
-      <div 
+      <div
         className="event-details__hero"
-        style={{ 
-          backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : 'none',
-          background: !event.imageUrl ? 'linear-gradient(135deg, rgba(108, 99, 255, 0.3), rgba(192, 132, 252, 0.3))' : undefined
+        style={{
+          backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : "none",
+          background: !event.imageUrl ? "linear-gradient(135deg, rgba(108, 99, 255, 0.3), rgba(192, 132, 252, 0.3))" : undefined,
         }}
       >
         <div className="event-details__hero-overlay" />
@@ -129,13 +133,18 @@ const EventDetails = () => {
       </div>
 
       <div className="container event-details__main">
-        {/* Left Column: Details */}
         <div className="event-details__content">
+          {error && (
+            <div style={{ padding: "1rem", background: "rgba(255, 101, 132, 0.1)", color: "#ff6584", borderRadius: "8px", marginBottom: "1.5rem" }}>
+              {error}
+            </div>
+          )}
+
           <section className="detail-section">
             <h2>About this event</h2>
             <div className="detail-section__text">
               {event.description ? (
-                event.description.split('\n').map((paragraph, idx) => (
+                event.description.split("\n").map((paragraph, idx) => (
                   <p key={idx}>{paragraph}</p>
                 ))
               ) : (
@@ -158,13 +167,12 @@ const EventDetails = () => {
           </section>
         </div>
 
-        {/* Right Column: Sticky Card */}
         <div className="event-details__sidebar">
           <div className="booking-card">
             <div className="booking-card__header">
               <h3>Date & Time</h3>
             </div>
-            
+
             <ul className="booking-card__list">
               <li>
                 <FiCalendar className="booking-card__icon" />
@@ -185,7 +193,7 @@ const EventDetails = () => {
             <div className="booking-card__stats">
               {remainingSeats !== null && (
                 <div className="stat">
-                  <span className="stat__value">{remainingSeats}</span>
+                  <span className="stat__value">{Math.max(remainingSeats, 0)}</span>
                   <span className="stat__label">Seats left</span>
                 </div>
               )}
@@ -193,32 +201,46 @@ const EventDetails = () => {
                 <span className="stat__value">{event.attendees || 0}</span>
                 <span className="stat__label">Attending</span>
               </div>
+              {event.capacity != null && (
+                <div className="stat">
+                  <span className="stat__value">{event.capacity}</span>
+                  <span className="stat__label">Capacity</span>
+                </div>
+              )}
             </div>
 
             <div className="booking-card__actions">
-              {registerSuccess ? (
-                <div className="booking-card__success">
-                  ✅ You're registered!
-                </div>
-              ) : (
-                <button 
-                  className="btn btn--primary btn--lg" 
-                  style={{ width: "100%", justifyContent: "center" }}
-                  onClick={handleRegister}
-                  disabled={isRegistering || isSoldOut}
-                >
-                  {isRegistering ? (
-                    <><span className="spinner-border" /> Processing...</>
-                  ) : isSoldOut ? (
-                    "Sold Out"
-                  ) : (
-                    "Register Now"
-                  )}
-                </button>
+              {canRegister && (
+                registerSuccess ? (
+                  <div className="booking-card__success">
+                    ✅ You're registered!
+                  </div>
+                ) : (
+                  <button
+                    className="btn btn--primary btn--lg"
+                    style={{ width: "100%", justifyContent: "center" }}
+                    onClick={handleRegister}
+                    disabled={isRegistering || isSoldOut}
+                  >
+                    {isRegistering ? (
+                      <>Processing...</>
+                    ) : isSoldOut ? (
+                      "Sold Out"
+                    ) : (
+                      "Register Now"
+                    )}
+                  </button>
+                )
               )}
-              
-              <button 
-                className="btn btn--ghost" 
+
+              {!isAuthenticated && (
+                <Link to="/login" state={{ from: location }} className="btn btn--primary btn--lg" style={{ width: "100%", justifyContent: "center" }}>
+                  Login to Register
+                </Link>
+              )}
+
+              <button
+                className="btn btn--ghost"
                 style={{ width: "100%", justifyContent: "center" }}
                 onClick={handleShare}
               >

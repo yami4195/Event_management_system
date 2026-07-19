@@ -3,9 +3,14 @@ import { useNavigate, Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import EventForm from "../../components/events/EventForm";
 import { eventsService } from "../../services";
+import { getRoleDashboard } from "../../components/auth/ProtectedRoute";
+import useAuth from "../../hooks/useAuth";
+import { ROUTES } from "../../constants/routes";
 
 const CreateEvent = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dashboardPath = getRoleDashboard(user?.role);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,9 +37,9 @@ const CreateEvent = () => {
       const newEventId = res.data?.data?.event?.event_id || res.data?.data?.id || res.data?.id;
 
       if (newEventId) {
-        navigate(`/events/${newEventId}`);
+        navigate(ROUTES.EVENT_DETAIL.replace(":id", newEventId));
       } else {
-        navigate("/dashboard");
+        navigate(dashboardPath);
       }
     } catch (err) {
       console.error("Create event error:", err);
@@ -46,10 +51,10 @@ const CreateEvent = () => {
 
   return (
     <div className="dashboard-page">
-      <Link to="/dashboard" className="back-link" style={{ marginBottom: "1rem" }}>
+      <Link to={dashboardPath} className="back-link" style={{ marginBottom: "1rem" }}>
         <FiArrowLeft /> Back to Dashboard
       </Link>
-      
+
       <div className="dashboard-header">
         <h1 className="dashboard-title">Create New Event</h1>
         <p className="dashboard-subtitle">Fill out the details below to publish your event.</p>

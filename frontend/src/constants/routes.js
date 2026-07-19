@@ -4,6 +4,7 @@ export const ROUTES = {
   HOME: "/",
   EVENTS: "/events",
   EVENT_DETAIL: "/events/:id",
+  EDIT_EVENT: "/events/:id/edit",
 
   // Auth
   LOGIN: "/login",
@@ -12,11 +13,14 @@ export const ROUTES = {
 
   // User
   DASHBOARD: "/dashboard",
+  CUSTOMER_DASHBOARD: "/dashboard/customer",
   PROFILE: "/profile",
   MY_TICKETS: "/my-tickets",
+  REGISTERED_EVENTS: "/dashboard/customer/registrations",
+  NOTIFICATIONS: "/dashboard/customer/notifications",
 
   // Organizer
-  ORGANIZER_DASHBOARD: "/organizer/dashboard",
+  ORGANIZER_DASHBOARD: "/dashboard/organizer",
   CREATE_EVENT: "/organizer/events/create",
   MANAGE_EVENTS: "/organizer/events",
 

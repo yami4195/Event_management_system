@@ -10,13 +10,12 @@ import {
 
 const router = Router();
 
-// Protect all category endpoints
-router.use(authenticate);
-
+// Public read access for event browsing and forms
 router.get("/", listCategories);
-router.post("/", createCategory);
 router.get("/:id", getCategoryById);
-router.put("/:id", updateCategory);
-router.delete("/:id", deleteCategory);
+
+router.post("/", authenticate, createCategory);
+router.put("/:id", authenticate, updateCategory);
+router.delete("/:id", authenticate, deleteCategory);
 
 export default router;

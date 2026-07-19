@@ -4,10 +4,15 @@ import { FiArrowLeft } from "react-icons/fi";
 import EventForm from "../../components/events/EventForm";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import { eventsService } from "../../services";
+import { getRoleDashboard } from "../../components/auth/ProtectedRoute";
+import useAuth from "../../hooks/useAuth";
+import { ROUTES } from "../../constants/routes";
 
 const EditEvent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dashboardPath = getRoleDashboard(user?.role);
   const [initialData, setInitialData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +54,7 @@ const EditEvent = () => {
       }
 
       await eventsService.update(id, payload);
-      navigate(`/events/${id}`);
+      navigate(ROUTES.EVENT_DETAIL.replace(":id", id));
     } catch (err) {
       console.error("Update event error:", err);
       setError(err.response?.data?.message || "Failed to update event. Please try again.");
@@ -66,17 +71,17 @@ const EditEvent = () => {
     return (
       <div className="dashboard-page">
         <h2>{error}</h2>
-        <Link to="/dashboard" className="btn btn--outline">Back to Dashboard</Link>
+        <Link to={dashboardPath} className="btn btn--outline">Back to Dashboard</Link>
       </div>
     );
   }
 
   return (
     <div className="dashboard-page">
-      <Link to="/dashboard" className="back-link" style={{ marginBottom: "1rem" }}>
+      <Link to={dashboardPath} className="back-link" style={{ marginBottom: "1rem" }}>
         <FiArrowLeft /> Back to Dashboard
       </Link>
-      
+
       <div className="dashboard-header">
         <h1 className="dashboard-title">Edit Event</h1>
         <p className="dashboard-subtitle">Update the details for "{initialData?.title}".</p>
@@ -89,10 +94,10 @@ const EditEvent = () => {
       )}
 
       <div style={{ maxWidth: "800px" }}>
-        <EventForm 
-          initialData={initialData} 
-          onSubmit={handleSubmit} 
-          isSubmitting={isSubmitting} 
+        <EventForm
+          initialData={initialData}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
         />
       </div>
     </div>

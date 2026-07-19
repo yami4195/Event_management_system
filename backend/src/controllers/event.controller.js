@@ -7,13 +7,34 @@ const isValidId = (id) => typeof id === "string" && isUuid(id);
 const EVENT_STATUSES = ["upcoming", "ongoing", "completed", "cancelled"];
 const normalizeEventStatus = (status) => String(status).trim().toLowerCase();
 
+const EVENT_SELECT_FIELDS = `
+  e.event_id, e.title, e.description, e.date, e.time, e.location, e.capacity, e.status,
+  e.organizer_id, e.category_id, e.created_at,
+  COALESCE(e.price, 0) AS price,
+  c.name AS category_name,
+  CONCAT(u.firstname, ' ', u.lastname) AS organizer_name,
+  (
+    SELECT COUNT(*)::int
+    FROM registrations r
+    WHERE r.event_id = e.event_id AND r.status != 'cancelled'
+  ) AS attendees,
+  (
+    SELECT ei.image_url
+    FROM event_images ei
+    WHERE ei.event_id = e.event_id
+    ORDER BY ei.uploaded_at ASC, ei.image_id ASC
+    LIMIT 1
+  ) AS "imageUrl"
+`;
+
 /**
  * GET /api/events
  * Public endpoint to list events (supports filtering & searching)
  */
 export async function listEvents(req, res) {
   try {
-    const { category_id, status, date, search, page = 1, limit = 10 } = req.query;
+    const { category_id, status, date, search, page = 1, limit = 10, organizer_id, organizerId } = req.query;
+    const organizerFilter = organizer_id || organizerId;
 
     const pageNum = Number.isNaN(parseInt(page)) ? 1 : Math.max(parseInt(page), 1);
     const limitNum = Number.isNaN(parseInt(limit)) ? 10 : Math.min(Math.max(parseInt(limit), 1), 100);
@@ -32,7 +53,7 @@ export async function listEvents(req, res) {
         });
       }
       values.push(category_id);
-      conditions.push(`category_id = $${values.length}`);
+      conditions.push(`e.category_id = $${values.length}`);
     }
 
     if (status) {
@@ -44,7 +65,7 @@ export async function listEvents(req, res) {
         });
       }
       values.push(normalizedStatus);
-      conditions.push(`status = $${values.length}`);
+      conditions.push(`e.status = $${values.length}`);
     }
 
     if (date) {
@@ -56,33 +77,39 @@ export async function listEvents(req, res) {
         });
       }
       values.push(date);
-      conditions.push(`date = $${values.length}`);
+      conditions.push(`e.date = $${values.length}`);
     }
 
     if (search?.trim()) {
       values.push(`%${search.trim()}%`);
-      conditions.push(`title ILIKE $${values.length}`);
+      conditions.push(`e.title ILIKE $${values.length}`);
+    }
+
+    if (organizerFilter) {
+      if (!isValidId(String(organizerFilter))) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid organizer_id format.",
+        });
+      }
+      values.push(organizerFilter);
+      conditions.push(`e.organizer_id = $${values.length}`);
     }
 
     const whereClause = conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : "";
-    // --- Count query (uses filters only, no limit/offset) ---
-    const countQuery = `SELECT COUNT(*) FROM events${whereClause}`;
+    const countQuery = `SELECT COUNT(*) FROM events e${whereClause}`;
     const countResult = await pool.query(countQuery, values);
     const totalItems = parseInt(countResult.rows[0].count);
 
 
 
     let queryText = `
-      SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at,
-             (
-               SELECT ei.image_url
-               FROM event_images ei
-               WHERE ei.event_id = events.event_id
-               ORDER BY ei.uploaded_at ASC, ei.image_id ASC
-               LIMIT 1
-             ) AS "imageUrl"
-      FROM events ${whereClause}
-      ORDER BY date ASC, time ASC
+      SELECT ${EVENT_SELECT_FIELDS}
+      FROM events e
+      LEFT JOIN categories c ON c.category_id = e.category_id
+      LEFT JOIN users u ON u.user_id = e.organizer_id
+      ${whereClause}
+      ORDER BY e.date ASC, e.time ASC
     `;
 
     values.push(limitNum, offset);
@@ -126,16 +153,11 @@ export async function getEventById(req, res) {
     }
 
     const result = await pool.query(
-      `SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at,
-              (
-                SELECT ei.image_url
-                FROM event_images ei
-                WHERE ei.event_id = events.event_id
-                ORDER BY ei.uploaded_at ASC, ei.image_id ASC
-                LIMIT 1
-              ) AS "imageUrl"
-       FROM events 
-       WHERE event_id = $1`,
+      `SELECT ${EVENT_SELECT_FIELDS}
+       FROM events e
+       LEFT JOIN categories c ON c.category_id = e.category_id
+       LEFT JOIN users u ON u.user_id = e.organizer_id
+       WHERE e.event_id = $1`,
       [id]
     );
 
@@ -255,9 +277,9 @@ export async function createEvent(req, res) {
 
     // Execute INSERT
     const result = await pool.query(
-      `INSERT INTO events (title, description, date, time, location, capacity, status, organizer_id, category_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at`,
+      `INSERT INTO events (title, description, date, time, location, capacity, status, organizer_id, category_id, price)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at, price`,
       [
         title.trim(),
         description ? description.trim() : null,
@@ -268,10 +290,12 @@ export async function createEvent(req, res) {
         normalizedStatus,
         finalOrganizerId,
         category_id,
+        price !== undefined ? Number(price) : 0,
       ]
     );
 
     const newEvent = result.rows[0];
+    let imageUploadFailed = false;
 
     // If an image file was uploaded, upload to Cloudinary and save to event_images
     if (req.file) {
@@ -287,15 +311,16 @@ export async function createEvent(req, res) {
         newEvent.imageUrl = cloudinaryResult.url;
       } catch (uploadError) {
         console.error("Cloudinary upload error during event creation:", uploadError.message);
-        // Event was created successfully, but image upload failed
-        // Don't fail the whole request
+        imageUploadFailed = true;
       }
     }
 
     return res.status(201).json({
       success: true,
-      message: "Event created successfully.",
-      data: { event: newEvent },
+      message: imageUploadFailed
+        ? "Event created successfully, but the image upload failed."
+        : "Event created successfully.",
+      data: { event: newEvent, imageUploadFailed },
     });
   } catch (error) {
     console.error("Create event error:", error.message);
@@ -324,7 +349,7 @@ export async function updateEvent(req, res) {
 
     // Retrieve existing event
     const eventResult = await pool.query(
-      `SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id 
+      `SELECT event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, price
        FROM events 
        WHERE event_id = $1`,
       [id]
@@ -413,9 +438,9 @@ export async function updateEvent(req, res) {
     // Run UPDATE
     const updateResult = await pool.query(
       `UPDATE events
-       SET title = $1, description = $2, date = $3, time = $4, location = $5, capacity = $6, status = $7, category_id = $8
-       WHERE event_id = $9
-       RETURNING event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at`,
+       SET title = $1, description = $2, date = $3, time = $4, location = $5, capacity = $6, status = $7, category_id = $8, price = $9
+       WHERE event_id = $10
+       RETURNING event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at, price`,
       [
         finalTitle,
         finalDesc,
@@ -425,48 +450,62 @@ export async function updateEvent(req, res) {
         finalCapacity,
         finalStatus,
         finalCategoryId,
+        price !== undefined ? Number(price) : event.price ?? 0,
         id,
       ]
     );
 
     const updatedEvent = updateResult.rows[0];
+    let imageUploadFailed = false;
 
     // Handle image update: if a new file was uploaded
     if (req.file) {
       try {
-        // Delete old images from Cloudinary
-        const oldImages = await pool.query(
-          `SELECT cloudinary_public_id FROM event_images WHERE event_id = $1`,
+        const existingImage = await pool.query(
+          `SELECT image_id, cloudinary_public_id
+           FROM event_images
+           WHERE event_id = $1
+           ORDER BY uploaded_at ASC, image_id ASC
+           LIMIT 1`,
           [id]
         );
-        for (const row of oldImages.rows) {
-          if (row.cloudinary_public_id) {
-            await deleteFromCloudinary(row.cloudinary_public_id);
-          }
-        }
 
-        // Remove old image records
-        await pool.query(`DELETE FROM event_images WHERE event_id = $1`, [id]);
-
-        // Upload new image to Cloudinary
         const folder = `event_management/events/${id}`;
         const cloudinaryResult = await uploadToCloudinary(req.file.buffer, folder);
 
-        await pool.query(
-          `INSERT INTO event_images (event_id, image_url, cloudinary_public_id, caption) VALUES ($1, $2, $3, $4)`,
-          [id, cloudinaryResult.url, cloudinaryResult.public_id, null]
-        );
+        if (existingImage.rows.length > 0) {
+          const oldImage = existingImage.rows[0];
+          if (oldImage.cloudinary_public_id) {
+            await deleteFromCloudinary(oldImage.cloudinary_public_id);
+          }
+
+          await pool.query(
+            `UPDATE event_images
+             SET image_url = $1, cloudinary_public_id = $2
+             WHERE image_id = $3`,
+            [cloudinaryResult.url, cloudinaryResult.public_id, oldImage.image_id]
+          );
+        } else {
+          await pool.query(
+            `INSERT INTO event_images (event_id, image_url, cloudinary_public_id, caption)
+             VALUES ($1, $2, $3, $4)`,
+            [id, cloudinaryResult.url, cloudinaryResult.public_id, null]
+          );
+        }
 
         updatedEvent.imageUrl = cloudinaryResult.url;
       } catch (uploadError) {
         console.error("Cloudinary upload error during event update:", uploadError.message);
+        imageUploadFailed = true;
       }
     }
 
     return res.json({
       success: true,
-      message: "Event updated successfully.",
-      data: { event: updatedEvent },
+      message: imageUploadFailed
+        ? "Event updated successfully, but the image upload failed."
+        : "Event updated successfully.",
+      data: { event: updatedEvent, imageUploadFailed },
     });
   } catch (error) {
     console.error("Update event error:", error.message);

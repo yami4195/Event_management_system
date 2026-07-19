@@ -43,11 +43,12 @@ const EventList = () => {
         if (selectedCategory) params.category_id = selectedCategory;
 
         const res  = await eventsService.getAll(params);
-        const data = res.data?.data ?? res.data ?? {};
+        const payload = res.data ?? {};
+        const data = payload.data ?? payload;
         const items = Array.isArray(data) ? data : (data.events ?? []);
 
         setEvents(items);
-        setTotalPages(data.totalPages ?? Math.ceil(items.length / LIMIT) ?? 1);
+        setTotalPages(payload.pagination?.totalPages ?? data.totalPages ?? 1);
       } catch (err) {
         setError("Failed to load events. Please try again later.");
         setEvents([]);
@@ -140,7 +141,7 @@ const EventList = () => {
           <>
             <div className="events-grid-container">
               {events.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard key={event.event_id || event.id} event={event} />
               ))}
             </div>
             <Pagination
