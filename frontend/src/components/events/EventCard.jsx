@@ -5,21 +5,28 @@ import "./EventCard.css";
 
 const EventCard = ({ event }) => {
   // Safe defaults for image fallback and capacity calculations
-  const displayImage = event.imageUrl ;
-  const isFree = event.price === 0 || event.price === "Free";
+  const displayImage = event.imageUrl;
+  const isFree = event.price === 0 || event.price === "Free" || !event.price;
   
-  // Custom international specific variables (fallback if fields are added to DB later)
+  // Identify correct ID (postgres backend returns event_id)
+  const eventId = event.event_id || event.id;
+  
+  // Custom international specific variables
   const languages = event.languages || "English (Interpretation Available)";
   const timezone = event.time ? `${event.time} UTC` : "TBD";
-console.log("event_list",displayImage);
+
   return (
     <div className="intl-card">
       {/* 1. Header Media Region */}
       <div className="intl-card__media">
-        <img src={displayImage} alt={event.title} className="intl-card__img" />
+        {displayImage ? (
+          <img src={displayImage} alt={event.title} className="intl-card__img" />
+        ) : (
+          <div className="intl-card__img" style={{ background: 'linear-gradient(135deg, rgba(108, 99, 255, 0.3), rgba(192, 132, 252, 0.3))', height: '100%', width: '100%' }} />
+        )}
         <div className="intl-card__badges">
           <span className="intl-card__tag">
-            {event.category?.name || "Global Event"}
+            {event.category_name || event.category?.name || "Global Event"}
           </span>
           {event.capacity && (
             <span className="intl-card__status-tag">
@@ -72,7 +79,7 @@ console.log("event_list",displayImage);
           </div>
           
           <Link
-            to={ROUTES.EVENT_DETAIL.replace(":id", event.id)}
+            to={ROUTES.EVENT_DETAIL.replace(":id", eventId)}
             className="intl-card__btn"
           >
             Register Now

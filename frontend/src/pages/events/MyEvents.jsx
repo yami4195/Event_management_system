@@ -20,22 +20,11 @@ const MyEvents = () => {
         const res = await eventsService.getAll({ organizerId: user?.id });
         const data = res.data?.data || res.data || [];
         const items = Array.isArray(data) ? data : (data.events || []);
-
-        if (items.length > 0) {
-          setEvents(items);
-        } else {
-          // mock fallback
-          setEvents([
-            { id: 1, title: "Mock Event 1", date: new Date().toISOString(), attendees: 120, status: "Published" },
-            { id: 2, title: "Mock Event 2", date: new Date(Date.now() + 86400000).toISOString(), attendees: 45, status: "Draft" }
-          ]);
-        }
+        
+        setEvents(items);
       } catch (err) {
-        console.warn("Failed to fetch my events, using mock", err);
-        setEvents([
-          { id: 1, title: "Mock Event 1", date: new Date().toISOString(), attendees: 120, status: "Published" },
-          { id: 2, title: "Mock Event 2", date: new Date(Date.now() + 86400000).toISOString(), attendees: 45, status: "Draft" }
-        ]);
+        console.error("Failed to fetch my events", err);
+        setError("Failed to load your events. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -52,13 +41,12 @@ const MyEvents = () => {
     setDeletingId(id);
     try {
       await eventsService.delete(id);
-      setEvents(prev => prev.filter(e => e.id !== id));
+      setEvents(prev => prev.filter(e => (e.event_id || e.id) !== id));
     } catch (err) {
-      console.warn("Delete failed via API, deleting locally", err);
-      setTimeout(() => {
-        setEvents(prev => prev.filter(e => e.id !== id));
-        setDeletingId(null);
-      }, 500);
+      console.error("Delete failed via API", err);
+      alert("Failed to delete event. Please try again.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -102,39 +90,42 @@ const MyEvents = () => {
               </tr>
             </thead>
             <tbody>
-              {events.map(event => (
-                <tr key={event.id}>
-                  <td>
-                    <div className="my-events__title">{event.title}</div>
-                  </td>
-                  <td>{formatDate(event.date)}</td>
-                  <td>
-                    <span className="my-events__badge">{event.attendees || 0}</span>
-                  </td>
-                  <td>
-                    <span className={`status-dot ${event.status === 'Draft' ? 'status-dot--draft' : 'status-dot--active'}`} />
-                    {event.status || 'Published'}
-                  </td>
-                  <td>
-                    <div className="my-events__actions text-right">
-                      <Link to={`/events/${event.id}`} className="action-btn" title="View Public Page">
-                        <FiExternalLink />
-                      </Link>
-                      <Link to={`/events/${event.id}/edit`} className="action-btn" title="Edit Event">
-                        <FiEdit2 />
-                      </Link>
-                      <button
-                        className="action-btn action-btn--danger"
-                        title="Delete Event"
-                        onClick={() => handleDelete(event.id)}
-                        disabled={deletingId === event.id}
-                      >
-                        {deletingId === event.id ? <span className="spinner-border spinner-border-sm" style={{ width: '14px', height: '14px', borderWidth: '2px' }} /> : <FiTrash2 />}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {events.map(event => {
+                const eventId = event.event_id || event.id;
+                return (
+                  <tr key={eventId}>
+                    <td>
+                      <div className="my-events__title">{event.title}</div>
+                    </td>
+                    <td>{formatDate(event.date)}</td>
+                    <td>
+                      <span className="my-events__badge">{event.attendees || 0}</span>
+                    </td>
+                    <td>
+                      <span className={`status-dot ${event.status === 'Draft' ? 'status-dot--draft' : 'status-dot--active'}`} />
+                      {event.status || 'Published'}
+                    </td>
+                    <td>
+                      <div className="my-events__actions text-right">
+                        <Link to={`/events/${eventId}`} className="action-btn" title="View Public Page">
+                          <FiExternalLink />
+                        </Link>
+                        <Link to={`/events/${eventId}/edit`} className="action-btn" title="Edit Event">
+                          <FiEdit2 />
+                        </Link>
+                        <button
+                          className="action-btn action-btn--danger"
+                          title="Delete Event"
+                          onClick={() => handleDelete(eventId)}
+                          disabled={deletingId === eventId}
+                        >
+                          {deletingId === eventId ? <span className="spinner-border spinner-border-sm" style={{ width: '14px', height: '14px', borderWidth: '2px' }} /> : <FiTrash2 />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

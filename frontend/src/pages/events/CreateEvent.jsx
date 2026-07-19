@@ -9,30 +9,36 @@ const CreateEvent = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData, imageFile) => {
     setIsSubmitting(true);
     setError("");
 
     try {
-      // Backend expects 'category' instead of 'categoryId'
-      const payload = { ...formData, category: formData.categoryId };
-      delete payload.categoryId;
-      
+      const payload = new FormData();
+      payload.append("title", formData.title);
+      payload.append("description", formData.description || "");
+      payload.append("category_id", formData.categoryId);
+      payload.append("date", formData.date);
+      payload.append("time", formData.time);
+      payload.append("location", formData.location);
+      payload.append("capacity", formData.capacity || 0);
+      payload.append("price", formData.price || 0);
+
+      if (imageFile) {
+        payload.append("image", imageFile);
+      }
+
       const res = await eventsService.create(payload);
-      const newEventId = res.data?.data?.id || res.data?.id;
-      
+      const newEventId = res.data?.data?.event?.event_id || res.data?.data?.id || res.data?.id;
+
       if (newEventId) {
         navigate(`/events/${newEventId}`);
       } else {
         navigate("/dashboard");
       }
     } catch (err) {
-      console.warn("API Create Event failed, using mock success.", err);
-      // Mock success if backend fails
-      setTimeout(() => {
-         navigate("/dashboard");
-      }, 500);
-      // setError(err.response?.data?.message || "Failed to create event. Please try again.");
+      console.error("Create event error:", err);
+      setError(err.response?.data?.message || "Failed to create event. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

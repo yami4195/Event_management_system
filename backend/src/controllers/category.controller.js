@@ -13,7 +13,7 @@ export async function listCategories(req, res) {
     const result = await pool.query(
       "SELECT category_id, name, description, created_at FROM categories ORDER BY name ASC"
     );
-console.log("List categories result:", result.rows);
+    console.log("List categories result:", result.rows);
     return res.json({
       success: true,
       message: "Categories retrieved successfully.",
@@ -73,6 +73,7 @@ export async function getCategoryById(req, res) {
  * POST /api/categories
  * Create a new category (Admin only)
  */
+
 export async function createCategory(req, res) {
   try {
     if (req.user.role !== "ADMIN") {

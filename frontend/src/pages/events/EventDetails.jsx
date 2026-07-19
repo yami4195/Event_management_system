@@ -21,37 +21,21 @@ const EventDetails = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       setIsLoading(true);
+      setError("");
       try {
         const res = await eventsService.getById(id);
         const data = res.data?.data?.event || res.data?.data || res.data;
         if (data) {
           setEvent(data);
-          setIsLoading(false);
-          return;
+        } else {
+          setError("Event not found.");
         }
       } catch (err) {
-        console.warn("API failed to fetch event, using mock data", err);
-      }
-
-      // Mock fallback
-      setTimeout(() => {
-        setEvent({
-          id: id,
-          title: "Global Dev Summit 2025",
-          description: "Join thousands of developers from around the world for the ultimate tech conference. Featuring keynotes from industry leaders, hands-on workshops, and unparalleled networking opportunities. \n\nThis year we are focusing on AI, Web3, and the future of front-end development.",
-          date: "2025-08-12T09:00:00Z",
-          time: "09:00 AM - 05:00 PM",
-          location: "Moscone Center, San Francisco, CA",
-          price: "Free",
-          capacity: 2000,
-          attendees: 1240,
-          category: { name: "Technology", color: "#6c63ff" },
-          organizer: { name: "Tech Events Inc.", id: "org1" },
-          imageUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
-          gradient: "linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(192, 132, 252, 0.2))",
-        });
+        console.error("Failed to fetch event:", err);
+        setError("Failed to load event details. Please try again later.");
+      } finally {
         setIsLoading(false);
-      }, 500);
+      }
     };
 
     fetchEvent();
@@ -69,12 +53,8 @@ const EventDetails = () => {
       setRegisterSuccess(true);
       setEvent(prev => ({ ...prev, attendees: (prev.attendees || 0) + 1 }));
     } catch (err) {
-      // Mock success if API fails
-      console.warn("API registration failed, mocking success", err);
-      setTimeout(() => {
-        setRegisterSuccess(true);
-        setEvent(prev => ({ ...prev, attendees: (prev.attendees || 0) + 1 }));
-      }, 800);
+      console.error("Registration failed:", err);
+      setError(err.response?.data?.message || "Failed to register for this event.");
     } finally {
       setIsRegistering(false);
     }
@@ -107,7 +87,7 @@ const EventDetails = () => {
   if (error || !event) {
     return (
       <div className="container" style={{ padding: "4rem 2rem", textAlign: "center" }}>
-        <h2>Event not found</h2>
+        <h2>{error || "Event not found"}</h2>
         <Link to="/events" className="btn btn--outline" style={{ marginTop: "1rem" }}>
           Back to Events
         </Link>
@@ -117,6 +97,7 @@ const EventDetails = () => {
 
   const remainingSeats = event.capacity ? event.capacity - (event.attendees || 0) : null;
   const isSoldOut = remainingSeats !== null && remainingSeats <= 0;
+  const isFree = event.price === 0 || event.price === "Free" || !event.price;
 
   return (
     <div className="event-details-page">
@@ -125,7 +106,7 @@ const EventDetails = () => {
         className="event-details__hero"
         style={{ 
           backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : 'none',
-          background: !event.imageUrl ? event.gradient : undefined
+          background: !event.imageUrl ? 'linear-gradient(135deg, rgba(108, 99, 255, 0.3), rgba(192, 132, 252, 0.3))' : undefined
         }}
       >
         <div className="event-details__hero-overlay" />
@@ -134,13 +115,13 @@ const EventDetails = () => {
             <FiArrowLeft /> Back to Events
           </Link>
           <div className="event-details__tags">
-            {event.category && (
+            {event.category_name && (
               <span className="event-details__tag">
-                <FiTag /> {event.category.name}
+                <FiTag /> {event.category_name}
               </span>
             )}
             <span className="event-details__price">
-              {event.price === 0 || event.price === "Free" ? "Free" : `$${event.price}`}
+              {isFree ? "Free" : `$${event.price}`}
             </span>
           </div>
           <h1 className="event-details__title">{event.title}</h1>
@@ -153,9 +134,13 @@ const EventDetails = () => {
           <section className="detail-section">
             <h2>About this event</h2>
             <div className="detail-section__text">
-              {event.description?.split('\n').map((paragraph, idx) => (
-                <p key={idx}>{paragraph}</p>
-              ))}
+              {event.description ? (
+                event.description.split('\n').map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))
+              ) : (
+                <p style={{ color: "rgba(255,255,255,0.4)" }}>No description provided.</p>
+              )}
             </div>
           </section>
 
@@ -166,7 +151,7 @@ const EventDetails = () => {
                 <FiUser />
               </div>
               <div className="organizer-card__info">
-                <h3>{event.organizer?.name || "EventFlow Organizer"}</h3>
+                <h3>{event.organizer_name || "Event Organizer"}</h3>
                 <p>Contact the organizer with any questions</p>
               </div>
             </div>

@@ -4,8 +4,14 @@ import axiosInstance from "../config/axios";
 export const eventsService = {
   getAll: (params) => axiosInstance.get("/events", { params }),
   getById: (id) => axiosInstance.get(`/events/${id}`),
-  create: (data) => axiosInstance.post("/events", data),
-  update: (id, data) => axiosInstance.put(`/events/${id}`, data),
+  create: (formData) =>
+    axiosInstance.post("/events", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  update: (id, formData) =>
+    axiosInstance.put(`/events/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
   delete: (id) => axiosInstance.delete(`/events/${id}`),
   register: (id) => axiosInstance.post(`/events/${id}/register`),
 };

@@ -1,5 +1,6 @@
 import pool from "../config/db.js";
 import { validate as isUuid } from "uuid";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/cloudinaryUpload.js";
 
 // Helper to validate UUID-based IDs
 const isValidId = (id) => typeof id === "string" && isUuid(id);
@@ -162,6 +163,7 @@ export async function getEventById(req, res) {
 /**
  * POST /api/events
  * Create a new event (ORGANIZER or ADMIN)
+ * Accepts multipart/form-data with an optional 'image' file field
  */
 export async function createEvent(req, res) {
   try {
@@ -173,7 +175,7 @@ export async function createEvent(req, res) {
       });
     }
 
-    const { title, description, date, time, location, capacity, status = "upcoming", category_id, organizer_id, price, imageUrl } = req.body;
+    const { title, description, date, time, location, capacity, status = "upcoming", category_id, organizer_id, price } = req.body;
 
     // Validation checks
     if (!title?.trim()) {
@@ -271,14 +273,23 @@ export async function createEvent(req, res) {
 
     const newEvent = result.rows[0];
 
-    // If an image URL was provided, insert into event_images table
-    if (imageUrl?.trim()) {
-      await pool.query(
-        `INSERT INTO event_images (event_id, image_url, caption)
-         VALUES ($1, $2, $3)`,
-        [newEvent.event_id, imageUrl.trim(), null]
-      );
-      newEvent.imageUrl = imageUrl.trim();
+    // If an image file was uploaded, upload to Cloudinary and save to event_images
+    if (req.file) {
+      try {
+        const folder = `event_management/events/${newEvent.event_id}`;
+        const cloudinaryResult = await uploadToCloudinary(req.file.buffer, folder);
+
+        await pool.query(
+          `INSERT INTO event_images (event_id, image_url, cloudinary_public_id, caption)
+           VALUES ($1, $2, $3, $4)`,
+          [newEvent.event_id, cloudinaryResult.url, cloudinaryResult.public_id, null]
+        );
+        newEvent.imageUrl = cloudinaryResult.url;
+      } catch (uploadError) {
+        console.error("Cloudinary upload error during event creation:", uploadError.message);
+        // Event was created successfully, but image upload failed
+        // Don't fail the whole request
+      }
     }
 
     return res.status(201).json({
@@ -298,6 +309,7 @@ export async function createEvent(req, res) {
 /**
  * PUT /api/events/:id
  * Update event information (Organizer owner or Admin)
+ * Accepts multipart/form-data with an optional 'image' file field
  */
 export async function updateEvent(req, res) {
   try {
@@ -335,7 +347,7 @@ export async function updateEvent(req, res) {
       });
     }
 
-    const { title, description, date, time, location, capacity, status, category_id, price, imageUrl } = req.body;
+    const { title, description, date, time, location, capacity, status, category_id, price } = req.body;
 
     // Field-level validations if provided
     if (title !== undefined && !title.trim()) {
@@ -419,18 +431,36 @@ export async function updateEvent(req, res) {
 
     const updatedEvent = updateResult.rows[0];
 
-    // Handle imageUrl update in event_images table
-    if (imageUrl !== undefined) {
-      // Remove existing images for this event
-      await pool.query(`DELETE FROM event_images WHERE event_id = $1`, [id]);
-      // Insert the new image if provided
-      if (imageUrl?.trim()) {
-        await pool.query(
-          `INSERT INTO event_images (event_id, image_url, caption) VALUES ($1, $2, $3)`,
-          [id, imageUrl.trim(), null]
+    // Handle image update: if a new file was uploaded
+    if (req.file) {
+      try {
+        // Delete old images from Cloudinary
+        const oldImages = await pool.query(
+          `SELECT cloudinary_public_id FROM event_images WHERE event_id = $1`,
+          [id]
         );
+        for (const row of oldImages.rows) {
+          if (row.cloudinary_public_id) {
+            await deleteFromCloudinary(row.cloudinary_public_id);
+          }
+        }
+
+        // Remove old image records
+        await pool.query(`DELETE FROM event_images WHERE event_id = $1`, [id]);
+
+        // Upload new image to Cloudinary
+        const folder = `event_management/events/${id}`;
+        const cloudinaryResult = await uploadToCloudinary(req.file.buffer, folder);
+
+        await pool.query(
+          `INSERT INTO event_images (event_id, image_url, cloudinary_public_id, caption) VALUES ($1, $2, $3, $4)`,
+          [id, cloudinaryResult.url, cloudinaryResult.public_id, null]
+        );
+
+        updatedEvent.imageUrl = cloudinaryResult.url;
+      } catch (uploadError) {
+        console.error("Cloudinary upload error during event update:", uploadError.message);
       }
-      updatedEvent.imageUrl = imageUrl?.trim() || null;
     }
 
     return res.json({
@@ -485,7 +515,18 @@ export async function deleteEvent(req, res) {
       });
     }
 
-    // Execute delete
+    // Clean up Cloudinary images before deleting the event
+    const eventImages = await pool.query(
+      `SELECT cloudinary_public_id FROM event_images WHERE event_id = $1`,
+      [id]
+    );
+    for (const row of eventImages.rows) {
+      if (row.cloudinary_public_id) {
+        await deleteFromCloudinary(row.cloudinary_public_id);
+      }
+    }
+
+    // Execute delete (cascade should handle event_images rows)
     await pool.query("DELETE FROM events WHERE event_id = $1", [id]);
 
     return res.json({

@@ -23,7 +23,7 @@ const EventList = () => {
     const fetchCategories = async () => {
       try {
         const res = await categoriesService.getAll();
-        const data = res.data?.data ?? [];
+        const data = res.data?.data?.categories ?? [];
         setCategories(Array.isArray(data) ? data : []);
       } catch {
         setCategories([]);
@@ -40,7 +40,7 @@ const EventList = () => {
       try {
         const params = { page: currentPage, limit: LIMIT };
         if (searchTerm)       params.search     = searchTerm;
-        if (selectedCategory) params.categoryId = selectedCategory;
+        if (selectedCategory) params.category_id = selectedCategory;
 
         const res  = await eventsService.getAll(params);
         const data = res.data?.data ?? res.data ?? {};
@@ -100,9 +100,9 @@ const EventList = () => {
             </button>
             {categories.map((cat) => (
               <button
-                key={cat.id}
-                className={`filter-pill ${selectedCategory === cat.id ? "filter-pill--active" : ""}`}
-                onClick={() => handleCategoryClick(cat.id)}
+                key={cat.category_id}
+                className={`filter-pill ${selectedCategory === cat.category_id ? "filter-pill--active" : ""}`}
+                onClick={() => handleCategoryClick(cat.category_id)}
               >
                 {cat.name}
               </button>

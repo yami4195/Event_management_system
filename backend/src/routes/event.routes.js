@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../app.js";
+import upload from "../middlewares/upload.js";
 import {
     listEvents,
     getEventById,
@@ -29,10 +30,10 @@ router.get('/:id', getEventById);
 
 // Authenticated routes
 router.get('/:id/registrations', authenticate, getEventRegistrations);
-router.post('/', authenticate, createEvent);
-router.post('/:id/images', authenticate, addEventImage);
-router.put('/:id', authenticate, updateEvent);
-router.put('/:id/images/:imageId', authenticate, updateEventImage);
+router.post('/', authenticate, upload.single('image'), createEvent);
+router.post('/:id/images', authenticate, upload.single('image'), addEventImage);
+router.put('/:id', authenticate, upload.single('image'), updateEvent);
+router.put('/:id/images/:imageId', authenticate, upload.single('image'), updateEventImage);
 router.delete('/:id', authenticate, deleteEvent);
 router.delete('/:id/images/:imageId', authenticate, deleteEventImage);
 router.patch('/:id/status', authenticate, updateEventStatus);
