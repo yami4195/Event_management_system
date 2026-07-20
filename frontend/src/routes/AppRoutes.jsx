@@ -8,6 +8,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import HomePage from "../pages/public/HomePage";
 import EventList from "../pages/events/EventList";
 import EventDetails from "../pages/events/EventDetails";
+import About from "../pages/about/about";
+import Contact from "../pages/contact/contact";
 
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
@@ -18,6 +20,7 @@ import CreateEvent from "../pages/events/CreateEvent";
 import EditEvent from "../pages/events/EditEvent";
 import MyEvents from "../pages/events/MyEvents";
 import Profile from "../pages/user/Profile";
+import ProfileForm from "../pages/user/ProfileForm";
 import RegisteredEvents from "../pages/user/RegisteredEvents";
 import Notifications from "../pages/user/Notifications";
 
@@ -35,6 +38,8 @@ function AppRoutes() {
           <Route path={ROUTES.HOME} element={<HomePage />} />
           <Route path={ROUTES.EVENTS} element={<EventList />} />
           <Route path={ROUTES.EVENT_DETAIL} element={<EventDetails />} />
+          <Route path={ROUTES.ABOUT} element={<About />} />
+          <Route path={ROUTES.CONTACT} element={<Contact />} />
         </Route>
 
         <Route element={<GuestRoute><MainLayout /></GuestRoute>}>
@@ -62,6 +67,8 @@ function AppRoutes() {
             }
           />
           <Route path={ROUTES.PROFILE} element={<Profile />} />
+          <Route path={ROUTES.CREATE_PROFILE} element={<ProfileForm />} />
+          <Route path={ROUTES.EDIT_PROFILE} element={<ProfileForm />} />
           <Route
             path={ROUTES.REGISTERED_EVENTS}
             element={

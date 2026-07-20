@@ -13,7 +13,7 @@ export async function listCategories(req, res) {
     const result = await pool.query(
       "SELECT category_id, name, description, created_at FROM categories ORDER BY name ASC"
     );
-    console.log("List categories result:", result.rows);
+   
     return res.json({
       success: true,
       message: "Categories retrieved successfully.",

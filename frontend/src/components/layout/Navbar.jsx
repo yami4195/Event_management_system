@@ -35,6 +35,8 @@ const Navbar = () => {
   const publicLinks = [
     { label: "Home", to: "/" },
     { label: "Events", to: "/events" },
+    {label: "About us", to: "/about" },
+    {label: "Contact", to: "/contact" },
   ];
 
   // Protected nav links — only visible when logged in

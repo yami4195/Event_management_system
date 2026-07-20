@@ -94,7 +94,7 @@ export async function getProfileByUserId(req, res) {
 export async function createProfile(req, res) {
   try {
     const userId = req.user.id;
-    const { firstname, lastname, phone, city, subcity, house_number, profile_picture } = req.body;
+    const { firstname, lastname, phone, city, subcity, house_number, housenumber, profile_picture } = req.body;
 
     // Validate name inputs
     if (!firstname?.trim()) {
@@ -129,7 +129,7 @@ export async function createProfile(req, res) {
         phone ? phone.trim() : null,
         city ? city.trim() : null,
         subcity ? subcity.trim() : null,
-        house_number ? house_number.trim() : null,
+        (house_number ?? housenumber ?? "") ? String(house_number ?? housenumber ?? "").trim() : null,
         profile_picture ? profile_picture.trim() : null,
       ]
     );
@@ -155,7 +155,7 @@ export async function createProfile(req, res) {
 export async function updateProfile(req, res) {
   try {
     const { id } = req.params;
-    const { firstname, lastname, phone, city, subcity, house_number, profile_picture } = req.body;
+    const { firstname, lastname, phone, city, subcity, house_number, housenumber, profile_picture } = req.body;
 
     if (!isValidId(id)) {
       return res.status(400).json({
@@ -203,7 +203,9 @@ export async function updateProfile(req, res) {
     const finalPhone = phone !== undefined ? (phone ? phone.trim() : null) : currentProfile.phone;
     const finalCity = city !== undefined ? (city ? city.trim() : null) : currentProfile.city;
     const finalSubcity = subcity !== undefined ? (subcity ? subcity.trim() : null) : currentProfile.subcity;
-    const finalHouseNumber = house_number !== undefined ? (house_number ? house_number.trim() : null) : currentProfile.house_number;
+    const finalHouseNumber = house_number !== undefined || housenumber !== undefined
+      ? ((house_number ?? housenumber ?? "") ? String(house_number ?? housenumber ?? "").trim() : null)
+      : currentProfile.house_number;
     const finalProfilePicture = profile_picture !== undefined ? (profile_picture ? profile_picture.trim() : null) : currentProfile.profile_picture;
 
     // Execute update

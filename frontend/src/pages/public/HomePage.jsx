@@ -16,14 +16,16 @@ const HomePage = () => (
         <span className="hero__title-gradient">Unforgettable Events</span>
       </h1>
 
-      <p className="hero__subtitle">
-        Find, register, and manage events — from intimate workshops to
-        massive festivals. Your next great experience starts here.
-      </p>
+      <div className="hero__subtitle">
+        <h4>
+          Find, register, and manage events — from intimate workshops to
+          massive festivals. Your next great experience starts here.
+        </h4>
+      </div>
 
       <div className="hero__actions">
         <Link to="/events" className="hero__btn hero__btn--primary">
-          Browse Events →
+          Browse Events
         </Link>
         
       </div>

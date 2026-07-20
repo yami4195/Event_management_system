@@ -5,6 +5,8 @@ export const ROUTES = {
   EVENTS: "/events",
   EVENT_DETAIL: "/events/:id",
   EDIT_EVENT: "/events/:id/edit",
+  ABOUT: "/about",
+  CONTACT: "/contact",
 
   // Auth
   LOGIN: "/login",
@@ -28,4 +30,10 @@ export const ROUTES = {
   ADMIN_DASHBOARD: "/admin/dashboard",
   ADMIN_USERS: "/admin/users",
   ADMIN_EVENTS: "/admin/events",
+
+  // Profile
+  CREATE_PROFILE: "/profile/create",
+  EDIT_PROFILE: "/profile/edit",
+  DELETE_PROFILE: "/profile/delete",
+  UPDATE_PROFILE: "/profile/update",
 };
