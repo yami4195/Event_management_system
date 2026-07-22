@@ -2,10 +2,13 @@ import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import { ROUTES } from "../../constants/routes";
-import { ORGANIZER_ROLES } from "../../constants/roles";
+import { ADMIN_ROLES, ORGANIZER_ROLES } from "../../constants/roles";
 
-const getRoleDashboard = (role) =>
-  ORGANIZER_ROLES.includes(role) ? ROUTES.ORGANIZER_DASHBOARD : ROUTES.CUSTOMER_DASHBOARD;
+const getRoleDashboard = (role) => {
+  if (ADMIN_ROLES.includes(role)) return "/admin";
+  if (ORGANIZER_ROLES.includes(role)) return ROUTES.ORGANIZER_DASHBOARD;
+  return ROUTES.CUSTOMER_DASHBOARD;
+};
 
 /**
  * Wraps protected routes — redirects to /login if unauthenticated.

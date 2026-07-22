@@ -4,6 +4,8 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import useAuth from "../../hooks/useAuth";
 import "./AuthForm.css";
 
+<reference types="react" />
+
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -193,6 +195,8 @@ const Login = () => {
               "Sign In"
             )}
           </button>
+
+          
         </form>
 
         <p className="auth-card__footer">

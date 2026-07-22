@@ -7,3 +7,4 @@ export const ROLES = {
 
 export const ORGANIZER_ROLES = [ROLES.ORGANIZER, ROLES.ADMIN];
 export const CUSTOMER_ROLES = [ROLES.CUSTOMER];
+export const ADMIN_ROLES = [ROLES.ADMIN];

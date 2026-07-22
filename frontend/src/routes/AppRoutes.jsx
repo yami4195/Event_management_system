@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
-import { ORGANIZER_ROLES, CUSTOMER_ROLES } from "../constants/roles";
+import { ORGANIZER_ROLES, CUSTOMER_ROLES, ADMIN_ROLES } from "../constants/roles";
 
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -27,8 +27,10 @@ import Notifications from "../pages/user/Notifications";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import DashboardRedirect from "../components/auth/DashboardRedirect";
 import GuestRoute from "../components/auth/GuestRoute";
+import AdminLayout from "../layouts/AdminLayout";
+import Admin_Dashboard from "../pages/admin/Admin_Dashboard";
 
-const ALL_ROLES = [...CUSTOMER_ROLES, ...ORGANIZER_ROLES];
+const ALL_ROLES = [...CUSTOMER_ROLES, ...ORGANIZER_ROLES,...ADMIN_ROLES];
 
 function AppRoutes() {
   return (
@@ -47,6 +49,32 @@ function AppRoutes() {
           <Route path={ROUTES.REGISTER} element={<Register />} />
           <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
         </Route>
+
+
+
+
+
+ {/* Admin routes — PROTECTED */}
+        <Route element={
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
+          <Route path="/admin" element={<Admin_Dashboard />} />
+          <Route path="/admin/users" element={<div>Users Page</div>} />
+          <Route path="/admin/events" element={<div>Events Page</div>} />
+          <Route path="/admin/categories" element={<div>Categories Page</div>} />
+          <Route path="/admin/registrations" element={<div>Registrations Page</div>} />
+          <Route path="/admin/feedback" element={<div>Feedback Page</div>} />
+          <Route path="/admin/notifications" element={<div>Notifications Page</div>} />
+          <Route path="/admin/analytics" element={<div>Analytics Page</div>} />
+          <Route path="/admin/settings" element={<div>Settings Page</div>} />
+          <Route path="/admin/logout" element={<div>Logout Page</div>} />
+        </Route>
+
+
+
+
 
         <Route element={<ProtectedRoute allowedRoles={ALL_ROLES}><DashboardLayout /></ProtectedRoute>}>
           <Route path={ROUTES.DASHBOARD} element={<DashboardRedirect />} />
@@ -81,7 +109,7 @@ function AppRoutes() {
             path={ROUTES.NOTIFICATIONS}
             element={
               <ProtectedRoute allowedRoles={CUSTOMER_ROLES}>
-                <Notifications />
+                <Notifications/>
               </ProtectedRoute>
             }
           />

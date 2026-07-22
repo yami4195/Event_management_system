@@ -1,14 +1,31 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import useAuth from "../../hooks/useAuth";
 import "./Navbar.css";
 
 const Navbar = () => {
+  const MotionLink = motion(Link);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
+
+  const colors = {
+  bg: "#0a0a0f",
+  bgLight: "#12121a",
+  bgCard: "#1a1a28",
+  bgInput: "#151520",
+  primary: "#c9a96e",
+  primaryHover: "#d4b87a",
+  text: "#f0f0f5",
+  textMuted: "#8888a0",
+  border: "#2a2a3a",
+  borderFocus: "#c9a96e",
+  success: "#4ade80",
+  error: "#f87171",
+};
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -43,6 +60,7 @@ const Navbar = () => {
   const authLinks = [
     { label: "Dashboard", to: "/dashboard" },
   ];
+  
 
   const navLinks = isAuthenticated ? [...publicLinks, ...authLinks] : publicLinks;
 
@@ -50,9 +68,9 @@ const Navbar = () => {
     <nav className={`navbar ${scrolled ? "navbar--scrolled" : ""}`}>
       <div className="navbar__container">
         {/* Logo */}
-        <Link to="/" className="navbar__logo">
+        <Link to="/" >
           
-          <span className="navbar__logo-text">MeetSphere</span>
+          <span style={{ color: colors.primary }}>MeetSphere</span>
         </Link>
 
         {/* Desktop Links */}
@@ -80,12 +98,30 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/login" className="navbar__btn navbar__btn--ghost" id="navbar-login-btn">
+              <MotionLink to="/login"  whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.02, y: -2 }}  style={{
+                background: `linear-gradient(135deg, ${colors.primary}, #d4a574)`,
+                border: "none", borderRadius: 14, padding: "10px 24px",
+                color: colors.bg, fontWeight: 700, fontSize: 16, cursor: "pointer",
+                display: "inline-flex", alignItems: "center", gap: 10,
+                boxShadow: "10 8px 24px rgba(201,169,110,0.25)",
+                transition: "box-shadow 0.3s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 12px 32px rgba(201,169,110,0.4)"}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = "0 8px 24px rgba(201,169,110,0.25)"} >
                 Log In
-              </Link>
-              <Link to="/register" className="navbar__btn navbar__btn--primary" id="navbar-register-btn">
+              </MotionLink>
+              <MotionLink to="/register"   whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.02, y: -2 }}  style={{
+                background: `linear-gradient(135deg, ${colors.primary}, #d4a574)`,
+                border: "none", borderRadius: 14, padding: "10px 20px",
+                color: colors.bg, fontWeight: 700, fontSize: 16, cursor: "pointer",
+                display: "inline-flex", alignItems: "center", gap: 10,
+                boxShadow: "10 8px 24px rgba(201,169,110,0.25)",
+                transition: "box-shadow 0.3s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 12px 32px rgba(201,169,110,0.4)"}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = "0 8px 24px rgba(201,169,110,0.25)"}>
                 Get Started
-              </Link>
+              </MotionLink>
             </>
           )}
         </div>
