@@ -29,6 +29,7 @@ import DashboardRedirect from "../components/auth/DashboardRedirect";
 import GuestRoute from "../components/auth/GuestRoute";
 import AdminLayout from "../layouts/AdminLayout";
 import Admin_Dashboard from "../pages/admin/Admin_Dashboard";
+import UsersPage from "../pages/admin/Users";
 
 const ALL_ROLES = [...CUSTOMER_ROLES, ...ORGANIZER_ROLES,...ADMIN_ROLES];
 
@@ -61,7 +62,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }>
           <Route path="/admin" element={<Admin_Dashboard />} />
-          <Route path="/admin/users" element={<div>Users Page</div>} />
+          <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/admin/events" element={<div>Events Page</div>} />
           <Route path="/admin/categories" element={<div>Categories Page</div>} />
           <Route path="/admin/registrations" element={<div>Registrations Page</div>} />
