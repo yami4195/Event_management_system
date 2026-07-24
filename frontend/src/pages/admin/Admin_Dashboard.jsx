@@ -49,8 +49,7 @@ export default function Dashboard() {
 
       {/* Statistics */}
       <section>
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">          <StatCard
             title="Total Users"
             value="245"
             icon={Users}

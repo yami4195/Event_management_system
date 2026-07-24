@@ -5,7 +5,6 @@ import {
   Search,
   RotateCcw,
   Eye,
-  Pencil,
   CheckCircle2,
   XCircle,
   Trash2,
@@ -50,6 +49,8 @@ export default function Events() {
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [actionNotice, setActionNotice] = useState(null);
+  const [searchIconVisible,setSearchIconVisible] = useState(true);
+  const [calendarIconVisible,setCalendarIconVisible] = useState(true);
 
   // Modal State for Create Event
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -195,12 +196,14 @@ export default function Events() {
           <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             {/* Search Input */}
             <div className="relative flex-1 min-w-[240px]">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                {searchIconVisible &&(
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />)}
               <Input
                 type="text"
-                placeholder="Search events by title, organizer, location..."
+                placeholder="       Search events by title, organizer, location..."
                 value={searchQuery}
                 onChange={(e) => {
+                  setSearchIconVisible(e.target.value === "" );
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
@@ -250,12 +253,14 @@ export default function Events() {
 
               {/* Date Filter Input */}
               <div className="relative w-[150px]">
-                <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                {calendarIconVisible && (
+                <Calendar className="absolute left-1 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />)}
                 <Input
                   type="text"
-                  placeholder="Date filter..."
+                  placeholder="     Date filter..."
                   value={dateFilter}
                   onChange={(e) => {
+                    setCalendarIconVisible(e.target.value ==="");
                     setDateFilter(e.target.value);
                     setCurrentPage(1);
                   }}
@@ -311,13 +316,13 @@ export default function Events() {
                     <TableHead className="w-[80px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Banner
                     </TableHead>
-                    <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <TableHead className="w-[80px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Title
                     </TableHead>
                     <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Organizer
                     </TableHead>
-                    <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <TableHead className="w-[800px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Category
                     </TableHead>
                     <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
