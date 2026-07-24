@@ -36,7 +36,7 @@ const recentEvents = [
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen space-y-8 bg-slate-50 p-6 lg:p-8">
+    <div >
       {/* Header */}
       <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>

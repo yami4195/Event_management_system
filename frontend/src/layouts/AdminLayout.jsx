@@ -13,7 +13,7 @@ export default function AdminLayout() {
     <SidebarProvider>
       <Sidebar />
 
-      <SidebarInset className="bg-slate-100">
+      <SidebarInset className="bg-slate-100 text-slate-900">
         <div className="flex items-center border-b border-slate-200 bg-white text-slate-800">
           <SidebarTrigger className="ml-2 " />
           <div className="flex-1">
@@ -21,7 +21,7 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 text-slate-900">
           <Outlet />
         </main>
       </SidebarInset>

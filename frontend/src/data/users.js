@@ -1,3 +1,4 @@
+// This file contains mock user data for the Event application. Each user object includes details such as id, name, email, role, status, joined date, and avatar URL.
 export const users = [
   {
     id: "usr_1",
@@ -90,3 +91,16 @@ export const users = [
     avatar: null,
   },
 ];
+
+export function getUserById(id) {
+  return users.find((u) => u.id === id);
+}
+
+export function updateUser(id, updatedFields) {
+  const index = users.findIndex((u) => u.id === id);
+  if (index !== -1) {
+    users[index] = { ...users[index], ...updatedFields };
+    return users[index];
+  }
+  return null;
+}

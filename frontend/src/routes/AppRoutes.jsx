@@ -30,6 +30,16 @@ import GuestRoute from "../components/auth/GuestRoute";
 import AdminLayout from "../layouts/AdminLayout";
 import Admin_Dashboard from "../pages/admin/Admin_Dashboard";
 import UsersPage from "../pages/admin/Users";
+import Events from "../pages/admin/Events";
+import AdminEventDetails from "../pages/admin/AdminEventDetails";
+import Categories from "../pages/admin/Categories";
+import Registrations from "../pages/admin/Registrations";
+import Feedback from "../pages/admin/Feedback";
+import NotificationsPage from "../pages/admin/Notifications";
+import Analytics from "../pages/admin/Analytics";
+import Settings from "../pages/admin/Settings";
+import UserDetails from "../components/admin/UserDetails";
+import EditUser from "../components/admin/EditUser";
 
 const ALL_ROLES = [...CUSTOMER_ROLES, ...ORGANIZER_ROLES,...ADMIN_ROLES];
 
@@ -63,14 +73,17 @@ function AppRoutes() {
         }>
           <Route path="/admin" element={<Admin_Dashboard />} />
           <Route path="/admin/users" element={<UsersPage />} />
-          <Route path="/admin/events" element={<div>Events Page</div>} />
-          <Route path="/admin/categories" element={<div>Categories Page</div>} />
-          <Route path="/admin/registrations" element={<div>Registrations Page</div>} />
-          <Route path="/admin/feedback" element={<div>Feedback Page</div>} />
-          <Route path="/admin/notifications" element={<div>Notifications Page</div>} />
-          <Route path="/admin/analytics" element={<div>Analytics Page</div>} />
-          <Route path="/admin/settings" element={<div>Settings Page</div>} />
-          <Route path="/admin/logout" element={<div>Logout Page</div>} />
+          <Route path="/admin/users/:userId" element={<UserDetails />} />
+          <Route path="/admin/users/EditUser/:userId" element={<EditUser/>} />
+          <Route path="/admin/events" element={<Events />} />
+          <Route path="/admin/events/:eventId" element={<AdminEventDetails />} />
+          <Route path="/admin/categories" element={<Categories/>} />
+          <Route path="/admin/registrations" element={<Registrations/>} />
+          <Route path="/admin/feedback" element={<Feedback/>} />
+          <Route path="/admin/notifications" element={<NotificationsPage/>} />
+          <Route path="/admin/analytics" element={<Analytics/>} />
+          <Route path="/admin/settings" element={<Settings/>} />
+         
         </Route>
 
 

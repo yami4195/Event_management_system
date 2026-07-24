@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { users, updateUser } from "@/data/users";
 import {
   Plus,
   Search,
@@ -11,7 +13,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import { users as initialUsers } from "@/data/users";
 import UserStats from "@/components/admin/UserStats";
 import RoleBadge from "@/components/common/RoleBadge";
 import StatusBadge from "@/components/common/StatusBadge";
@@ -32,12 +33,19 @@ import {
 const ITEMS_PER_PAGE = 5;
 
 export default function Users() {
-  const [userList, setUserList] = useState(initialUsers);
+  const navigate = useNavigate();
+  const [userList, setUserList] = useState(users);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [actionNotice, setActionNotice] = useState(null);
+
+  // Sync user list whenever component mounts or updates
+  useEffect(() => {
+    setUserList([...users]);
+  }, []);
+  const [searchIconVisible, setSearchIconVisible] = useState(true);
 
   // Filtered Users
   const filteredUsers = useMemo(() => {
@@ -75,6 +83,8 @@ export default function Users() {
 
   const handleToggleSuspend = (userId, currentStatus) => {
     const newStatus = currentStatus === "Suspended" ? "Active" : "Suspended";
+      updateUser(userId, { status: newStatus });
+
     setUserList((prev) =>
       prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u))
     );
@@ -128,12 +138,14 @@ export default function Users() {
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Search Input */}
             <div className="relative flex-1 min-w-[240px]">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              {searchIconVisible &&(
+              <Search className="absolute left-1 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />)}
               <Input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="      Search by name or email..."
                 value={searchQuery}
                 onChange={(e) => {
+                  setSearchIconVisible(e.target.value === "" );
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
@@ -220,12 +232,12 @@ export default function Users() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50/70 hover:bg-slate-50/70 border-b border-slate-200/80">
-                    <TableHead className="w-[60px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                   <TableHead className="w-[100px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Avatar
-                    </TableHead>
-                    <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                   </TableHead>
+                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Name
-                    </TableHead>
+                   </TableHead>
                     <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Email
                     </TableHead>
@@ -287,10 +299,12 @@ export default function Users() {
                             variant="ghost"
                             size="icon"
                             title="View User Details"
+                            onClick={() => navigate(`/admin/users/${user.id}`)}
                             className="h-8 w-8 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
+                       
 
                           {/* Edit Button */}
                           <Button
@@ -298,6 +312,7 @@ export default function Users() {
                             size="icon"
                             title="Edit User"
                             className="h-8 w-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+                            onClick={() => navigate(`/admin/users/EditUser/${user.id}`)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>

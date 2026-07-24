@@ -1,29 +1,28 @@
-import { NavLink } from "react-router-dom";
 import { useContext } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import { ROUTES } from "../../constants/routes";
 import {
   Sidebar,
-  SidebarHeader,
   SidebarContent,
+  SidebarHeader,
   SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
 } from "../ui/sidebar";
-
 import {
-  Settings,
-  LogOut,
-  ShieldCheck,
-  CalendarDays,
-  Users,
   LayoutDashboard,
+  Users,
+  CalendarDays,
   Tag,
   ClipboardList,
   MessageSquare,
   Bell,
   BarChart3,
- 
+  Settings,
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 
 const menuItems = [
@@ -31,16 +30,22 @@ const menuItems = [
   { title: "Users", path: "/admin/users", icon: Users },
   { title: "Events", path: "/admin/events", icon: CalendarDays },
   { title: "Categories", path: "/admin/categories", icon: Tag },
-  { title: "Registrations", path: "/admin/registrations", icon:   ClipboardList }, 
-  { title: "Feedback", path: "/admin/feedback", icon: MessageSquare  },
+  { title: "Registrations", path: "/admin/registrations", icon: ClipboardList },
+  { title: "Feedback", path: "/admin/feedback", icon: MessageSquare },
   { title: "Notifications", path: "/admin/notifications", icon: Bell },
-  { title: "Analytics", path: "/admin/analytics", icon: BarChart3},
-  { title: "Settings", path: "/admin/settings", icon: Settings},
+  { title: "Analytics", path: "/admin/analytics", icon: BarChart3 },
+  { title: "Settings", path: "/admin/settings", icon: Settings },
   { title: "Logout", path: "/admin/logout", icon: LogOut },
 ];
 
 export default function AppSidebar() {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(ROUTES.LOGIN, { replace: false });
+  };
 
   return (
     <Sidebar>
@@ -57,22 +62,32 @@ export default function AppSidebar() {
         <SidebarMenu>
           {menuItems.map(({ title, path, icon: Icon }) => (
             <SidebarMenuItem key={path}>
-              <SidebarMenuButton asChild>
-                <NavLink
-                  to={path}
-                  end={path === "/admin"}
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 ${
-                      isActive
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "text-muted-foreground"
-                    }`
-                  }
+              {path === "/admin/logout" ? (
+                <SidebarMenuButton
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-destructive hover:bg-destructive/10 w-full"
                 >
                   <Icon className="h-4 w-4" />
                   <span>{title}</span>
-                </NavLink>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              ) : (
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to={path}
+                    end={path === "/admin"}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 ${
+                        isActive
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "text-muted-foreground"
+                      }`
+                    }
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{title}</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              )}
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -90,7 +105,7 @@ export default function AppSidebar() {
             </span>
           </div>
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="p-2 rounded hover:bg-destructive/10 text-destructive"
             title="Logout"
           >
