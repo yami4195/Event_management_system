@@ -1,15 +1,4 @@
-import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
-} from "lucide-react";
-
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 export default function StatCard({
   title,
@@ -17,78 +6,102 @@ export default function StatCard({
   icon: Icon,
   description,
   trend,
-  variant = "indigo",
+  variant = "blue",
 }) {
   const colorVariants = {
-    green: {
-      iconContainer: "bg-emerald-50 border-emerald-100 text-emerald-600",
-      trendBadge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    blue: {
+      icon: "bg-blue-50 text-blue-600 border-blue-100",
+      accent: "bg-blue-500",
+      sparkline: ["h-1.5", "h-3", "h-2.5", "h-5", "h-4", "h-5.5"],
     },
     indigo: {
-      iconContainer: "bg-indigo-50 border-indigo-100 text-indigo-600",
-      trendBadge: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      icon: "bg-indigo-50 text-indigo-600 border-indigo-100",
+      accent: "bg-indigo-500",
+      sparkline: ["h-2", "h-4", "h-3", "h-5.5", "h-4.5", "h-6"],
+    },
+    emerald: {
+      icon: "bg-emerald-50 text-emerald-600 border-emerald-100",
+      accent: "bg-emerald-500",
+      sparkline: ["h-1.5", "h-2.5", "h-4", "h-5", "h-5.5", "h-6"],
+    },
+    amber: {
+      icon: "bg-amber-50 text-amber-600 border-amber-100",
+      accent: "bg-amber-500",
+      sparkline: ["h-3", "h-5", "h-4", "h-3", "h-5", "h-4"],
+    },
+    purple: {
+      icon: "bg-purple-50 text-purple-600 border-purple-100",
+      accent: "bg-purple-500",
+      sparkline: ["h-2", "h-3", "h-5", "h-6", "h-4", "h-6"],
     },
     rose: {
-      iconContainer: "bg-rose-50 border-rose-100 text-rose-600",
-      trendBadge: "bg-rose-50 text-rose-700 border-rose-200",
-    },
-    blue: {
-      iconContainer: "bg-blue-50 border-blue-100 text-blue-600",
-      trendBadge: "bg-blue-50 text-blue-700 border-blue-200",
+      icon: "bg-rose-50 text-rose-600 border-rose-100",
+      accent: "bg-rose-500",
+      sparkline: ["h-4", "h-3", "h-2.5", "h-4", "h-3", "h-2.5"],
     },
   };
 
-  const currentVariant = colorVariants[variant] ?? colorVariants.indigo;
+  const currentVariant = colorVariants[variant] || colorVariants.blue;
 
   return (
-    <Card className="flex flex-col justify-between min-h-[220px] rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-      {/* Top Header: Title + Icon */}
-      <CardHeader className="p-0 flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-sm font-semibold tracking-wide text-slate-500">
+    <div className="rounded-lg border border-slate-200/90 bg-white p-4 shadow-2xs flex flex-col justify-between h-full min-h-[125px]">
+      {/* Header: Title and Icon */}
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 leading-none">
           {title}
-        </CardTitle>
-
+        </span>
         {Icon && (
-          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${currentVariant.iconContainer}`}>
-            <Icon className="h-6 w-6" strokeWidth={2.2} />
+          <div
+            className={`p-2 rounded-md border flex items-center justify-center shrink-0 ${currentVariant.icon}`}
+          >
+            <Icon className="h-4 w-4 stroke-[2]" />
           </div>
         )}
-      </CardHeader>
-
-      {/* Middle: Big Value */}
-      <div className="my-4">
-        <p className="text-4xl font-extrabold tracking-tight text-slate-900">
-          {value}
-        </p>
       </div>
 
-      {/* Bottom: Trend Badge & Subtitle */}
-      {(trend || description) && (
-        <CardContent className="p-0 flex items-center justify-between gap-2 flex-wrap">
+      {/* Middle: Compact Value & Micro Sparkline */}
+      <div className="mt-2.5 flex items-baseline justify-between gap-2">
+        <div className="flex items-baseline gap-2">
+          <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-none">
+            {value}
+          </span>
           {trend && (
             <span
-              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold border ${
-                trend.isPositive
-                  ? colorVariants.green.trendBadge
+              className={`inline-flex items-center gap-0.5 text-[10px] font-bold ${
+                trend.isPositive === true
+                  ? "text-emerald-600"
                   : trend.isPositive === false
-                  ? colorVariants.rose.trendBadge
-                  : "bg-slate-50 text-slate-600 border-slate-200"
+                  ? "text-rose-600"
+                  : "text-slate-500"
               }`}
             >
-              {trend.isPositive === true && <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.5} />}
-              {trend.isPositive === false && <TrendingDown className="h-3.5 w-3.5" strokeWidth={2.5} />}
-              {trend.isPositive === undefined && <Minus className="h-3.5 w-3.5" strokeWidth={2.5} />}
+              {trend.isPositive === true && <TrendingUp className="h-3 w-3" />}
+              {trend.isPositive === false && <TrendingDown className="h-3 w-3" />}
+              {trend.isPositive === undefined && <Minus className="h-3 w-3" />}
               {trend.value}
             </span>
           )}
+        </div>
 
-          {description && (
-            <span className="text-xs font-medium text-slate-400">
-              {description}
-            </span>
-          )}
-        </CardContent>
+        {/* ColorLib style micro bar chart indicator */}
+        <div className="flex items-end gap-1 h-6 shrink-0 pb-0.5">
+          {currentVariant.sparkline.map((hClass, idx) => (
+            <span
+              key={idx}
+              className={`w-1 rounded-xs ${currentVariant.accent} opacity-50 ${hClass}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Subtitle */}
+      {description && (
+        <div className="mt-2 pt-2 border-t border-slate-100/80">
+          <span className="text-slate-400 font-medium text-[11px] block truncate">
+            {description}
+          </span>
+        </div>
       )}
-    </Card>
+    </div>
   );
 }
