@@ -30,14 +30,14 @@ export default function ReportsExportPanel() {
   };
 
   return (
-    <Card className="border-slate-200/80 shadow-xs bg-white">
-      <CardHeader className="border-b border-slate-100 pb-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <FileText className="h-4 w-4 text-indigo-600" />
+    <Card className="border-slate-200/80 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+      <CardHeader className="border-b border-slate-100 dark:border-slate-800 pb-3 flex flex-row items-center justify-between">
+        <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           Dashboard Reports & Export
         </CardTitle>
         {downloadNotice && (
-          <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
             <CheckCircle2 className="h-3.5 w-3.5" />
             {downloadNotice}
           </span>
@@ -47,11 +47,11 @@ export default function ReportsExportPanel() {
         {reports.map((rep, idx) => (
           <div
             key={idx}
-            className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 border border-slate-100 gap-2"
+            className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 border border-slate-100 dark:border-slate-800 gap-2"
           >
             <div>
-              <h5 className="text-xs font-bold text-slate-900">{rep.title}</h5>
-              <span className="text-[10px] font-medium text-slate-500">
+              <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100">{rep.title}</h5>
+              <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
                 {rep.type} • {rep.count}
               </span>
             </div>
@@ -61,7 +61,7 @@ export default function ReportsExportPanel() {
                 size="xs"
                 variant="outline"
                 onClick={() => handleExport(rep.title, "CSV")}
-                className="h-7 text-[10px] font-bold border-slate-200 text-slate-700 bg-white gap-1"
+                className="h-7 text-[10px] font-bold border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 gap-1"
               >
                 <Download className="h-3 w-3" />
                 CSV
@@ -71,7 +71,7 @@ export default function ReportsExportPanel() {
                 size="xs"
                 variant="outline"
                 onClick={() => handleExport(rep.title, "Excel")}
-                className="h-7 text-[10px] font-bold border-emerald-200 text-emerald-700 bg-emerald-50/50 gap-1"
+                className="h-7 text-[10px] font-bold border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/40 gap-1"
               >
                 <FileSpreadsheet className="h-3 w-3" />
                 Excel
@@ -81,7 +81,7 @@ export default function ReportsExportPanel() {
                 size="xs"
                 variant="outline"
                 onClick={() => handleExport(rep.title, "PDF")}
-                className="h-7 text-[10px] font-bold border-rose-200 text-rose-700 bg-rose-50/50 gap-1"
+                className="h-7 text-[10px] font-bold border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 bg-rose-50/50 dark:bg-rose-950/40 gap-1"
               >
                 <FileText className="h-3 w-3" />
                 PDF

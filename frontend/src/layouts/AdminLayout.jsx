@@ -13,15 +13,15 @@ export default function AdminLayout() {
     <SidebarProvider>
       <Sidebar />
 
-      <SidebarInset className="bg-slate-100 text-slate-900">
-        <div className="flex items-center border-b border-slate-200 bg-white text-slate-800">
-          <SidebarTrigger className="ml-2 " />
+      <SidebarInset className="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+        <div className="flex items-center gap-5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+          <SidebarTrigger className="ml-2" />
           <div className="flex-1">
             <Topbar />
           </div>
         </div>
 
-        <main className="flex-1 p-6 text-slate-900">
+        <main className="flex-1 px-6 py-25 text-slate-900 dark:text-slate-100 transition-colors duration-200">
           <Outlet />
         </main>
       </SidebarInset>

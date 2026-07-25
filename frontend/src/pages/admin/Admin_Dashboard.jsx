@@ -78,20 +78,18 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="space-y-10 lg:space-y-12 text-slate-900 pb-16">
+    <div className="space-y-24 lg:space-y-32 text-slate-900 dark:text-slate-100 pb-32 transition-colors duration-200">
       {/* Dashboard Sub-Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
+      <div className="flex flex-col gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
-         
           <div className="flex items-center gap-2.5">
-           
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Operational
-            </span>
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+              Dashboard
+            </h1>
+            
           </div>
-          <p className="mt-1 text-xs font-medium text-slate-500">
-            Welcome back! Real-time operations and platform metrics.
+          <p className="mt-1 text-xs font-medium text-slate-900 dark:text-slate-300">
+            Welcome back Admin!
           </p>
         </div>
 
@@ -104,12 +102,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* SECTION 1: Top Key Statistics */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-690">
-          Key Performance Indicators
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* StatCards Grid */}
+      <section className="space-y-5">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+          Overview
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Total Users"
             value="2,500"
@@ -147,26 +145,27 @@ export default function Dashboard() {
           />
         </div>
       </section>
+<p>`</p>
 
-      {/* SECTION 2: Analytics & Trends (Full Width) */}
-      <section className="space-y-3">
-        
+      {/* Performance Analytics Chart */}
+      <section className="pt-4 space-y-24">
         <AnalyticsChart />
-      </section>
-
+      </section> 
+<p>`</p>
       {/* SECTION 3: Live Operations & Activity Feed */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+      <section className="space-y-6">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
           Operations & Recent Activity
         </h2>
-        <div className="grid gap-6 lg:grid-cols-3 items-start">
+        <div className="grid gap-8 lg:grid-cols-3 items-start">
           {/* Left: Latest Event Performance Table & Leaderboard (2 Cols) */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             <AdminTable
               title="Latest Event Performance"
               columns={columns}
               data={filteredEvents}
             />
+            <p>`</p>
             <TopEventsLeaderboard />
           </div>
 
@@ -176,13 +175,13 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
-
+<p>`</p>
       {/* SECTION 4: Admin Tools, Reports & System Health */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+      <section className="space-y-60">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
           Management & Reports
         </h2>
-        <div className="grid gap-6 md:grid-cols-3 items-start">
+        <div className="grid gap-8 md:grid-cols-3 items-start">
           <QuickActionsPanel />
           <ReportsExportPanel />
           <SystemHealthWidget />

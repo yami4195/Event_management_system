@@ -74,20 +74,20 @@ export default function AnalyticsChart() {
   };
 
   return (
-    <Card className="border-slate-200/80 shadow-xs bg-white">
-      <CardHeader className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <Card className="border-slate-200/80 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+      <CardHeader className="border-b border-slate-100 dark:border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-indigo-600" />
+          <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
             Performance & Revenue Analytics
           </CardTitle>
-          <p className="text-[11px] font-medium text-slate-400 mt-0.5">
+          <p className="text-[11px] font-medium text-slate-400 dark:text-slate-400 mt-0.5">
             Real-time trends for revenue, tickets, and event registrations.
           </p>
         </div>
 
         {/* Timeframe selector tabs */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200/60">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200/60 dark:border-slate-700">
           {timeframes.map((tf) => (
             <Button
               key={tf.id}
@@ -96,8 +96,8 @@ export default function AnalyticsChart() {
               onClick={() => setActiveTimeframe(tf.id)}
               className={`text-xs font-bold px-2.5 py-1 rounded-md transition-all ${
                 activeTimeframe === tf.id
-                  ? "bg-white text-slate-900 shadow-xs font-black"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs font-black"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
               }`}
             >
               {tf.label}
@@ -108,15 +108,15 @@ export default function AnalyticsChart() {
 
       <CardContent className="pt-5 space-y-4">
         {/* Metric Selector Buttons */}
-        <div className="flex items-center gap-3 border-b border-slate-100 pb-3 flex-wrap">
+        <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3 flex-wrap">
           <Button
             size="xs"
             variant="outline"
             onClick={() => setActiveMetric("revenue")}
             className={`gap-1.5 border ${
               activeMetric === "revenue"
-                ? "bg-emerald-50 text-emerald-800 border-emerald-300 font-bold"
-                : "border-slate-200 text-slate-600 bg-white"
+                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 font-bold"
+                : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800"
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -129,8 +129,8 @@ export default function AnalyticsChart() {
             onClick={() => setActiveMetric("tickets")}
             className={`gap-1.5 border ${
               activeMetric === "tickets"
-                ? "bg-indigo-50 text-indigo-800 border-indigo-300 font-bold"
-                : "border-slate-200 text-slate-600 bg-white"
+                ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800 font-bold"
+                : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800"
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-indigo-500" />
@@ -143,8 +143,8 @@ export default function AnalyticsChart() {
             onClick={() => setActiveMetric("registrations")}
             className={`gap-1.5 border ${
               activeMetric === "registrations"
-                ? "bg-purple-50 text-purple-800 border-purple-300 font-bold"
-                : "border-slate-200 text-slate-600 bg-white"
+                ? "bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-800 font-bold"
+                : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800"
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-purple-500" />
