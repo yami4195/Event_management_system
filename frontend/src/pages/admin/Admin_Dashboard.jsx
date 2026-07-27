@@ -3,7 +3,6 @@ import {
   Users,
   CalendarDays,
   Clock3,
-  Search,
   DollarSign,
 } from "lucide-react";
 
@@ -13,10 +12,8 @@ import DateRangePicker from "@/components/admin/dashboard/DateRangePicker";
 import AnalyticsChart from "@/components/admin/dashboard/AnalyticsChart";
 import RecentActivities from "@/components/admin/dashboard/RecentActivities";
 import TopEventsLeaderboard from "@/components/admin/dashboard/TopEventsLeaderboard";
-import SystemHealthWidget from "@/components/admin/dashboard/SystemHealthWidget";
 import QuickActionsPanel from "@/components/admin/dashboard/QuickActionsPanel";
 import ReportsExportPanel from "@/components/admin/dashboard/ReportsExportPanel";
-import { Input } from "@/components/ui/input";
 
 const columns = ["Title", "Organizer", "Date", "Location", "Status", "Action"];
 
@@ -68,7 +65,7 @@ export default function Dashboard() {
   const [globalSearch, setGlobalSearch] = useState("");
 
   const filteredEvents = recentEventsData.filter((evt) => {
-    if (!globalSearch) return true;
+    if (!globalSearch) return true; 
     const q = globalSearch.toLowerCase();
     return (
       evt.title.toLowerCase().includes(q) ||
@@ -184,7 +181,6 @@ export default function Dashboard() {
         <div className="grid gap-8 md:grid-cols-3 items-start">
           <QuickActionsPanel />
           <ReportsExportPanel />
-          <SystemHealthWidget />
         </div>
       </section>
     </div>

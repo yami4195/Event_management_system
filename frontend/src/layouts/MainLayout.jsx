@@ -6,7 +6,7 @@ const MainLayout = () => {
   return (
     <div className="layout-main">
       <Navbar />
-      <main className="layout-main__content" style={{ paddingTop: "64px", minHeight: "calc(100vh - 64px)" }}>
+      <main className="layout-main__content" style={{ minHeight: "calc(100vh - 64px)" }}>
         <Outlet />
       </main>
       <Footer />

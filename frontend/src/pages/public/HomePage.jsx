@@ -1,61 +1,59 @@
-import { Link } from "react-router-dom";
-import hero from "../../assets/hero.jpg";
-import "./HomePage.css";
-import { motion } from "framer-motion";
- const MotionLink = motion(Link);
-const colors = {
-  bg: "#0a0a0f",
-  bgLight: "#12121a",
-  bgCard: "#1a1a28",
-  bgInput: "#151520",
-  primary: "#c9a96e",
-  primaryHover: "#d4b87a",
-  text: "#f0f0f5",
-  textMuted: "#8888a0",
-  border: "#2a2a3a",
-  borderFocus: "#c9a96e",
-  success: "#4ade80",
-  error: "#f87171",
-};
+import HeroSection from "@/components/home/HeroSection";
+import GlobalSearchSection from "@/components/home/GlobalSearchSection";
+import CategoriesSection from "@/components/home/CategoriesSection";
+import FeaturedEventsSection from "@/components/home/FeaturedEventsSection";
+import WhyChooseSection from "@/components/home/WhyChooseSection";
+import HowItWorksSection from "@/components/home/HowItWorksSection";
+import StatisticsSection from "@/components/home/StatisticsSection";
+import UpcomingEventsSection from "@/components/home/UpcomingEventsSection";
+import TestimonialsSection from "@/components/home/TestimonialsSection";
+import TrustedOrganizersSection from "@/components/home/TrustedOrganizersSection";
+import GallerySection from "@/components/home/GallerySection";
+import FAQSection from "@/components/home/FAQSection";
+import CTASection from "@/components/home/CTASection";
+import "@/styles/home-layout.css";
 
-const HomePage = () => (
-  <section
-    className="hero"
-    style={{
-      backgroundImage: `linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), url(${hero})`,
-    }}
-  >
-    <div className="hero__content">
-      <h1 className="hero__title">
-        Discover &amp; Host
-        <br />
-        <span className="hero__title-gradient">Unforgettable Events</span>
-      </h1>
+export default function HomePage() {
+  return (
+    <div className="home-page w-full min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 selection:bg-indigo-500 selection:text-white">
+      {/* 1. Hero Section */}
+      <HeroSection />
 
-      <div className="hero__subtitle">
-        <h4>
-          Find, register, and manage events — from intimate workshops to
-          massive festivals. Your next great experience starts here.
-        </h4>
-      </div>
+      {/* 2. Global Search Floating Card */}
+      <GlobalSearchSection />
 
-      <div className="hero__actions">
-        <MotionLink to="/login"  whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.02, y: -2 }}  style={{
-                background: `linear-gradient(135deg, ${colors.primary}, #d4a574)`,
-                border: "none", borderRadius: 14, padding: "10px 24px",
-                color: colors.bg, fontWeight: 700, fontSize: 16, cursor: "pointer",
-                display: "inline-flex", alignItems: "center", gap: 10,
-                boxShadow: "10 8px 24px rgba(201,169,110,0.25)",
-                transition: "box-shadow 0.3s",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 12px 32px rgba(201,169,110,0.4)"}
-              onMouseLeave={(e) => e.currentTarget.style.boxShadow = "0 8px 24px rgba(201,169,110,0.25)"} >
-                Browse Events
-              </MotionLink>
-        
-      </div>
+      {/* 3. Featured Categories */}
+      <CategoriesSection />
+
+      {/* 4. Trending Events Grid */}
+      <FeaturedEventsSection />
+
+      {/* 5. Why Choose EventFlow */}
+      <WhyChooseSection />
+
+      {/* 6. How It Works 4-Step Timeline */}
+      <HowItWorksSection />
+
+      {/* 7. Statistics Section */}
+      <StatisticsSection />
+
+      {/* 8. Upcoming Events & Countdowns */}
+      <UpcomingEventsSection />
+
+      {/* 9. Testimonials Carousel */}
+      <TestimonialsSection />
+
+      {/* 10. Trusted Organizers */}
+      <TrustedOrganizersSection />
+
+      {/* 11. Event Photo Gallery */}
+      <GallerySection />
+
+      {/* 12. Accordion FAQ Section */}
+      <FAQSection />
+
+      {/* 13. Call To Action (CTA) */}
+      <CTASection />
     </div>
-  </section>
-);
-
-export default HomePage;
+  );
+}

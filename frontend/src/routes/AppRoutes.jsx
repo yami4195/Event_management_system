@@ -6,7 +6,7 @@ import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 import HomePage from "../pages/public/HomePage";
-import EventList from "../pages/events/EventList";
+import EventsPage from "../pages/EventsPage";
 import EventDetails from "../pages/events/EventDetails";
 import About from "../pages/about/about";
 import Contact from "../pages/contact/contact";
@@ -49,7 +49,7 @@ function AppRoutes() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path={ROUTES.HOME} element={<HomePage />} />
-          <Route path={ROUTES.EVENTS} element={<EventList />} />
+          <Route path={ROUTES.EVENTS} element={<EventsPage />} />
           <Route path={ROUTES.EVENT_DETAIL} element={<EventDetails />} />
           <Route path={ROUTES.ABOUT} element={<About />} />
           <Route path={ROUTES.CONTACT} element={<Contact />} />

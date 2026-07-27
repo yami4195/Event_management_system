@@ -1,0 +1,188 @@
+export const initialRegistrations = [
+  {
+    id: "REG-10021",
+    userName: "John Smith",
+    userEmail: "john.smith@gmail.com",
+    userPhone: "+1 (555) 234-5678",
+    userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    eventName: "Global Tech Summit 2026",
+    organizer: "Sarah Chen",
+    venue: "Moscone Center, San Francisco, CA",
+    date: "Jul 26, 2026",
+    ticketType: "VIP Pass",
+    numTickets: 2,
+    amount: "$350.00",
+    paymentStatus: "Paid",
+    paymentMethod: "Credit Card (Visa ending in 4242)",
+    transactionId: "TXN-99882103",
+    attendance: "Checked In",
+    checkInTime: "Jul 26, 2026 - 08:45 AM",
+    status: "Confirmed",
+  },
+  {
+    id: "REG-10022",
+    userName: "Emily Davis",
+    userEmail: "emily.davis@designhub.io",
+    userPhone: "+1 (555) 876-5432",
+    userAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+    eventName: "UI/UX Design Masterclass",
+    organizer: "Emily Davis",
+    venue: "Design Center, New York, NY",
+    date: "Jul 25, 2026",
+    ticketType: "General Admission",
+    numTickets: 1,
+    amount: "$120.00",
+    paymentStatus: "Paid",
+    paymentMethod: "PayPal",
+    transactionId: "TXN-99882104",
+    attendance: "Checked In",
+    checkInTime: "Jul 25, 2026 - 09:12 AM",
+    status: "Confirmed",
+  },
+  {
+    id: "REG-10023",
+    userName: "Michael Brown",
+    userEmail: "mbrown@techstart.co",
+    userPhone: "+1 (555) 345-6789",
+    userAvatar: null,
+    eventName: "Summer Music Fest 2026",
+    organizer: "Robert Wilson",
+    venue: "Zilker Park, Austin, TX",
+    date: "Jul 24, 2026",
+    ticketType: "Weekend Pass",
+    numTickets: 3,
+    amount: "$280.00",
+    paymentStatus: "Unpaid",
+    paymentMethod: "Invoice Pending",
+    transactionId: "TXN-PENDING-01",
+    attendance: "Absent",
+    checkInTime: "-",
+    status: "Pending",
+  },
+  {
+    id: "REG-10024",
+    userName: "Sarah Chen",
+    userEmail: "sarah.c@aiwork.org",
+    userPhone: "+1 (555) 456-7890",
+    userAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+    eventName: "AI & Machine Learning Expo",
+    organizer: "Sarah Chen",
+    venue: "Convention Center, Seattle, WA",
+    date: "Jul 23, 2026",
+    ticketType: "Developer Pass",
+    numTickets: 1,
+    amount: "$200.00",
+    paymentStatus: "Paid",
+    paymentMethod: "Stripe",
+    transactionId: "TXN-99882105",
+    attendance: "Checked In",
+    checkInTime: "Jul 23, 2026 - 10:00 AM",
+    status: "Confirmed",
+  },
+  {
+    id: "REG-10025",
+    userName: "Alex Morgan",
+    userEmail: "alex.m@fintechforum.com",
+    userPhone: "+1 (555) 567-8901",
+    userAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+    eventName: "FinTech Innovation Forum",
+    organizer: "Jessica Taylor",
+    venue: "ExCeL, London, UK",
+    date: "Jul 22, 2026",
+    ticketType: "Executive Pass",
+    numTickets: 1,
+    amount: "$450.00",
+    paymentStatus: "Refunded",
+    paymentMethod: "Credit Card (Refunded)",
+    transactionId: "TXN-REFUND-09",
+    attendance: "Absent",
+    checkInTime: "-",
+    status: "Cancelled",
+  },
+  {
+    id: "REG-10026",
+    userName: "Robert Wilson",
+    userEmail: "rwilson@soundstage.net",
+    userPhone: "+1 (555) 678-9012",
+    userAvatar: null,
+    eventName: "Mobile App Development Workshop",
+    organizer: "Sarah Chen",
+    venue: "Tech Hub, Chicago, IL",
+    date: "Jul 21, 2026",
+    ticketType: "Standard Ticket",
+    numTickets: 2,
+    amount: "$180.00",
+    paymentStatus: "Paid",
+    paymentMethod: "Apple Pay",
+    transactionId: "TXN-99882106",
+    attendance: "Checked In",
+    checkInTime: "Jul 21, 2026 - 09:30 AM",
+    status: "Confirmed",
+  },
+  {
+    id: "REG-10027",
+    userName: "Jessica Taylor",
+    userEmail: "jessica.t@healthlife.org",
+    userPhone: "+1 (555) 789-0123",
+    userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    eventName: "Health & Wellness Retreat",
+    organizer: "Jessica Taylor",
+    venue: "Ojai Valley, CA",
+    date: "Jul 20, 2026",
+    ticketType: "All-Inclusive Pass",
+    numTickets: 1,
+    amount: "$500.00",
+    paymentStatus: "Paid",
+    paymentMethod: "Credit Card (Mastercard)",
+    transactionId: "TXN-99882107",
+    attendance: "Checked In",
+    checkInTime: "Jul 20, 2026 - 08:00 AM",
+    status: "Confirmed",
+  },
+  {
+    id: "REG-10028",
+    userName: "James Anderson",
+    userEmail: "j.anderson@startupseed.io",
+    userPhone: "+1 (555) 890-1234",
+    userAvatar: null,
+    eventName: "Startup Founders Expo",
+    organizer: "James Anderson",
+    venue: "Hynes Convention Center, Boston, MA",
+    date: "Jul 19, 2026",
+    ticketType: "Founder Pass",
+    numTickets: 2,
+    amount: "$250.00",
+    paymentStatus: "Unpaid",
+    paymentMethod: "Wire Transfer Pending",
+    transactionId: "TXN-PENDING-02",
+    attendance: "Absent",
+    checkInTime: "-",
+    status: "Pending",
+  },
+];
+
+export let registrations = [...initialRegistrations];
+
+export const getRegistrationById = (id) =>
+  registrations.find((r) => r.id === id);
+
+export const updateRegistration = (id, updatedFields) => {
+  registrations = registrations.map((r) =>
+    r.id === id ? { ...r, ...updatedFields } : r
+  );
+  return getRegistrationById(id);
+};
+
+export const deleteRegistration = (id) => {
+  registrations = registrations.filter((r) => r.id !== id);
+};
+
+export const bulkUpdateRegistrations = (ids, updatedFields) => {
+  registrations = registrations.map((r) =>
+    ids.includes(r.id) ? { ...r, ...updatedFields } : r
+  );
+};
+
+export const bulkDeleteRegistrations = (ids) => {
+  registrations = registrations.filter((r) => !ids.includes(r.id));
+};
