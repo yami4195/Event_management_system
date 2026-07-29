@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2, X, Camera } from "lucide-react";
+import "@/styles/components/Gallery.css";
 
 const galleryImages = [
   { id: 1, title: "Global Tech Summit Keynote", category: "Technology", url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80" },
@@ -14,34 +15,91 @@ const galleryImages = [
 export default function GallerySection() {
   const [activeImage, setActiveImage] = useState(null);
 
+  // Keyboard Escape key handler to close modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setActiveImage(null);
+      }
+    };
+    if (activeImage) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeImage]);
+
   return (
-    <section className="home-section bg-white dark:bg-slate-900">
-      <div className="home-container">
-        <div className="home-section-header--center">
-          <span className="home-eyebrow text-indigo-600 dark:text-indigo-400">Moments & Memories</span>
-          <h2 className="home-title text-slate-900 dark:text-slate-100">EventFlow Photo Gallery</h2>
-          <p className="home-desc text-slate-500 dark:text-slate-400 mx-auto">
-            Highlights from extraordinary events hosted on our platform.
-          </p>
+    <section className="gallery-section" id="gallery-section">
+      <div className="gallery-bg-glow" aria-hidden="true" />
+
+      <div className="gallery-container">
+        {/* Section Header */}
+        <div className="gallery-header">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="gallery-badge"
+          >
+            <Camera className="gallery-badge-icon" />
+            <span>Moments & Memories</span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="gallery-title"
+          >
+            EventFlow <span className="gallery-title-accent">Photo Gallery</span>
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="gallery-subtitle"
+          >
+            Highlights from extraordinary summits, festivals, and workshops hosted on our platform.
+          </motion.p>
         </div>
 
-        <div className="home-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {/* 3-Column Responsive Grid */}
+        <div className="gallery-grid">
           {galleryImages.map((img, idx) => (
             <motion.div
               key={img.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.45, delay: idx * 0.06, ease: "easeOut" }}
+              transition={{ duration: 0.4, delay: idx * 0.06 }}
               onClick={() => setActiveImage(img)}
-              className="relative h-80 rounded-3xl overflow-hidden cursor-pointer group border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl transition-shadow duration-300"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setActiveImage(img);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`View photo: ${img.title}`}
+              className="gallery-card"
             >
-              <img src={img.url} alt={img.title} className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8 text-white">
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2">{img.category}</span>
-                <h4 className="text-lg font-bold">{img.title}</h4>
-                <div className="mt-3 flex items-center gap-2 text-sm text-slate-300">
-                  <Maximize2 className="h-4 w-4" /> Preview Photo
+              <img
+                src={img.url}
+                alt={img.title}
+                className="gallery-image"
+                loading="lazy"
+              />
+              <div className="gallery-overlay">
+                <span className="gallery-category-badge">{img.category}</span>
+                <h3 className="gallery-card-title">{img.title}</h3>
+                <div className="gallery-preview-hint">
+                  <Maximize2 className="gallery-preview-icon" />
+                  <span>Preview Photo</span>
                 </div>
               </div>
             </motion.div>
@@ -49,6 +107,7 @@ export default function GallerySection() {
         </div>
       </div>
 
+      {/* Lightbox Modal */}
       <AnimatePresence>
         {activeImage && (
           <motion.div
@@ -56,22 +115,37 @@ export default function GallerySection() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setActiveImage(null)}
-            className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-8"
+            className="gallery-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Photo lightbox for ${activeImage.title}`}
           >
             <motion.div
-              initial={{ scale: 0.98 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.98 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
               onClick={(e) => e.stopPropagation()}
-              className="relative max-w-4xl w-full rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl"
+              className="gallery-modal-content"
             >
-              <button onClick={() => setActiveImage(null)} className="absolute top-5 right-5 p-2.5 rounded-full bg-slate-950/80 text-white hover:bg-rose-600 transition-colors z-10 cursor-pointer">
-                <X className="h-5 w-5" />
+              <button
+                onClick={() => setActiveImage(null)}
+                className="gallery-modal-close-btn"
+                aria-label="Close photo preview"
+                type="button"
+              >
+                <X className="w-5 h-5" />
               </button>
-              <img src={activeImage.url} alt={activeImage.title} className="w-full max-h-[75vh] object-contain" />
-              <div className="p-8 bg-slate-950 border-t border-slate-800">
-                <h4 className="text-lg font-bold text-white">{activeImage.title}</h4>
-                <span className="text-sm text-indigo-400 font-medium">{activeImage.category}</span>
+
+              <img
+                src={activeImage.url}
+                alt={activeImage.title}
+                className="gallery-modal-image"
+              />
+
+              <div className="gallery-modal-caption">
+                <h3 className="gallery-modal-title">{activeImage.title}</h3>
+                <span className="gallery-modal-tag">{activeImage.category}</span>
               </div>
             </motion.div>
           </motion.div>

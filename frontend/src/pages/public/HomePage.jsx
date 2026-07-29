@@ -1,12 +1,11 @@
 import HeroSection from "@/components/home/HeroSection";
-import GlobalSearchSection from "@/components/home/GlobalSearchSection";
+import EventBuilderSection from "@/components/home/EventBuilderSection";
 import CategoriesSection from "@/components/home/CategoriesSection";
 import FeaturedEventsSection from "@/components/home/FeaturedEventsSection";
 import WhyChooseSection from "@/components/home/WhyChooseSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
 import StatisticsSection from "@/components/home/StatisticsSection";
 import UpcomingEventsSection from "@/components/home/UpcomingEventsSection";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
 import TrustedOrganizersSection from "@/components/home/TrustedOrganizersSection";
 import GallerySection from "@/components/home/GallerySection";
 import FAQSection from "@/components/home/FAQSection";
@@ -19,8 +18,8 @@ export default function HomePage() {
       {/* 1. Hero Section */}
       <HeroSection />
 
-      {/* 2. Global Search Floating Card */}
-      <GlobalSearchSection />
+      {/* 2. Event Website Builder Showcase */}
+      <EventBuilderSection />
 
       {/* 3. Featured Categories */}
       <CategoriesSection />
@@ -39,9 +38,6 @@ export default function HomePage() {
 
       {/* 8. Upcoming Events & Countdowns */}
       <UpcomingEventsSection />
-
-      {/* 9. Testimonials Carousel */}
-      <TestimonialsSection />
 
       {/* 10. Trusted Organizers */}
       <TrustedOrganizersSection />

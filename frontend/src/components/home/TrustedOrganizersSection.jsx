@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { Award } from "lucide-react";
+import "@/styles/components/TrustedOrganizers.css";
 
 const organizers = [
   { name: "TechCorp Labs", logo: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80" },
@@ -10,24 +12,62 @@ const organizers = [
 
 export default function TrustedOrganizersSection() {
   return (
-    <section className="home-section bg-slate-50 dark:bg-slate-950/50 border-y border-slate-200/60 dark:border-slate-800">
-      <div className="home-container">
-        <div className="home-section-header--center" style={{ marginBottom: "48px" }}>
-          <span className="home-eyebrow text-slate-400">Powering Events for Industry Leaders</span>
+    <section className="organizers-section" id="organizers-section">
+      <div className="organizers-bg-glow" aria-hidden="true" />
+
+      <div className="organizers-container">
+        {/* Section Header */}
+        <div className="organizers-header">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="organizers-badge"
+          >
+            <Award className="organizers-badge-icon" />
+            <span>Trusted Industry Leaders</span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="organizers-title"
+          >
+            Powering Events for <span className="organizers-title-accent">Top Organizers</span>
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="organizers-subtitle"
+          >
+            Empowering world-class brands, conferences, and creators to deliver unforgettable experiences.
+          </motion.p>
         </div>
 
-        <div className="home-grid home-footer-columns grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 items-center">
+        {/* 5-Column Responsive Grid */}
+        <div className="organizers-grid">
           {organizers.map((org, idx) => (
             <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 8 }}
+              key={org.name}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: idx * 0.06, ease: "easeOut" }}
-              className="home-card py-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-center gap-4 group"
+              transition={{ duration: 0.35, delay: idx * 0.06 }}
+              className="organizers-card"
             >
-              <img src={org.logo} alt={org.name} className="h-10 w-10 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all duration-300" />
-              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{org.name}</span>
+              <img
+                src={org.logo}
+                alt={`${org.name} logo`}
+                className="organizers-logo"
+                loading="lazy"
+              />
+              <span className="organizers-name">{org.name}</span>
             </motion.div>
           ))}
         </div>

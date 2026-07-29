@@ -1,52 +1,68 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Plus } from "lucide-react";
+import { motion } from "framer-motion";
+import { Sparkles, Plus, ArrowRight, CheckCircle2 } from "lucide-react";
+import "@/styles/components/CTA.css";
 
 export default function CTASection() {
   return (
-    <section className="home-section relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-indigo-50/40 text-slate-900 py-20 lg:py-28 border-t border-slate-100">
-      {/* Background Soft Glow Accents */}
-      <div className="absolute top-0 right-1/3 h-[400px] w-[400px] rounded-full bg-indigo-500/5 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-1/3 h-[400px] w-[400px] rounded-full bg-purple-500/5 blur-3xl pointer-events-none" />
+    <section className="cta-section" id="contact-section">
+      {/* Background Soft Radial Glows */}
+      <div className="cta-bg-glow-1" aria-hidden="true" />
+      <div className="cta-bg-glow-2" aria-hidden="true" />
 
-      <div className="home-container max-w-4xl relative z-10 text-center space-y-8 px-4 mx-auto">
-        {/* Pill Badge */}
-        <div>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold tracking-wide shadow-sm">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
-            <h3>Start Building Unforgettable Experiences</h3>
+      <div className="cta-container">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="cta-card"
+        >
+          {/* Top Pill Badge */}
+          <div className="cta-badge">
+            <Sparkles className="cta-badge-icon" />
+            <span>Start Building Unforgettable Experiences</span>
           </div>
-        </div>
 
-        {/* Heading */}
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
-          Ready to Host Your Next Event?
-        </h2>
+          {/* Heading */}
+          <h2 className="cta-heading">
+            Ready to Host Your Next <span className="cta-heading-accent">Unforgettable Event?</span>
+          </h2>
 
-        {/* Subtitle */}
-        <p className="text-base sm:text-lg text-slate-600 mx-auto max-w-2xl leading-relaxed">
-          Join thousands of event creators using EventFlow to publish events, manage ticket sales, and track real-time attendance effortlessly.
-        </p>
+          {/* Subtitle */}
+          <p className="cta-subtitle">
+            Join thousands of event creators using EventFlow to publish events.
+          </p>
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          {/* Primary Action Button (Bigger) */}
-          <Link
-            to="/register"
-    className="inline-flex items-center justify-center gap-3 px-12 h-14 min-w-[10rem] bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-base shadow-lg shadow-blue-600/20 transition-all duration-200"
-          >
-            <Plus className="h-5 w-5 stroke-[2.5]" />
-            Create Event
-          </Link>
+          {/* Buttons */}
+          <div className="cta-actions">
+            <Link to="/register" className="cta-btn-primary">
+              <Plus className="cta-btn-icon" />
+              <span>Create Event</span>
+            </Link>
 
-          {/* Secondary Action Button (Bigger) */}
-          <Link
-            to="/events"
-    className="inline-flex items-center justify-center gap-3 px-12 h-14 min-w-[10rem] bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-base shadow-lg shadow-blue-600/20 transition-all duration-200"
-          >
-            Explore Events
-            <ArrowRight className="h-5 w-5 stroke-[2.5] text-indigo-600" />
-          </Link>
-        </div>
+            <Link to="/events" className="cta-btn-secondary">
+              <span>Explore Events</span>
+              <ArrowRight className="cta-btn-icon" />
+            </Link>
+          </div>
+
+          {/* Trust Features / Bullets */}
+          <div className="cta-features">
+            <div className="cta-feature-item">
+              <CheckCircle2 className="cta-check-icon" />
+              <span>Instant Event Publishing</span>
+            </div>
+            <div className="cta-feature-item">
+              <CheckCircle2 className="cta-check-icon" />
+              <span>No Credit Card Required</span>
+            </div>
+            <div className="cta-feature-item">
+              <CheckCircle2 className="cta-check-icon" />
+              <span>Free & Paid Tickets</span>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

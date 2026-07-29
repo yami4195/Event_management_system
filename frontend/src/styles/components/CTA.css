@@ -1,0 +1,322 @@
+/* CTA.css - Call To Action Section Styling for Event Management System */
+
+/* Root & Theme Variables for CTA */
+:root {
+  --cta-bg-section: #ffffff;
+  --cta-card-bg-start: #ffffff;
+  --cta-card-bg-end: #f0f7ff;
+  --cta-accent-light: #eff6ff;
+  --cta-accent-subtle: #dbeafe;
+  --cta-accent-border: #bfdbfe;
+  --cta-blue-primary: #2563eb;
+  --cta-blue-hover: #1d4ed8;
+  --cta-blue-focus: #3b82f6;
+  --cta-text-heading: #0f172a;
+  --cta-text-body: #475569;
+  --cta-text-muted: #64748b;
+  --cta-radius-card: 24px;
+  --cta-radius-btn: 12px;
+  --cta-radius-badge: 9999px;
+  --cta-shadow-card: 0 20px 45px -15px rgba(37, 99, 235, 0.12), 0 8px 20px -6px rgba(0, 0, 0, 0.04);
+  --cta-shadow-btn: 0 6px 20px -4px rgba(37, 99, 235, 0.35);
+  --cta-shadow-btn-hover: 0 10px 28px -4px rgba(37, 99, 235, 0.45);
+  --cta-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* CTA Main Section Container */
+.cta-section {
+  position: relative;
+  background-color: var(--cta-bg-section);
+  padding: 6rem 1.5rem;
+  overflow: hidden;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* Background Glow Effects */
+.cta-bg-glow-1 {
+  position: absolute;
+  top: -10%;
+  left: 20%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(50px);
+  z-index: 0;
+}
+
+.cta-bg-glow-2 {
+  position: absolute;
+  bottom: -10%;
+  right: 20%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(50px);
+  z-index: 0;
+}
+
+/* Main Outer Container */
+.cta-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* Glassmorphic Card Banner */
+.cta-card {
+  position: relative;
+  background: linear-gradient(145deg, var(--cta-card-bg-start) 0%, var(--cta-card-bg-end) 100%);
+  border: 1px solid var(--cta-accent-subtle);
+  border-radius: var(--cta-radius-card);
+  box-shadow: var(--cta-shadow-card);
+  padding: 4.5rem 2.5rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Card Subtle Corner Accent Glow */
+.cta-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #60a5fa 0%, #2563eb 50%, #1d4ed8 100%);
+}
+
+/* Pill Badge */
+.cta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1.15rem;
+  border-radius: var(--cta-radius-badge);
+  background-color: #ffffff;
+  border: 1px solid var(--cta-accent-subtle);
+  color: var(--cta-blue-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+}
+
+.cta-badge-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--cta-blue-primary);
+}
+
+/* Heading */
+.cta-heading {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--cta-text-heading);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 0 0 1.25rem 0;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-heading-accent {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Subtitle */
+.cta-subtitle {
+  font-size: 1.125rem;
+  color: var(--cta-text-body);
+  max-width: 640px;
+  margin: 0 auto 2.5rem auto;
+  line-height: 1.65;
+}
+
+/* Action Buttons Wrapper */
+.cta-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+/* Primary Button */
+.cta-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.95rem 2.25rem;
+  border-radius: var(--cta-radius-btn);
+  background-color: var(--cta-blue-primary);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--cta-shadow-btn);
+  transition: background-color var(--cta-transition-normal), 
+              transform var(--cta-transition-normal), 
+              box-shadow var(--cta-transition-normal);
+}
+
+.cta-btn-primary:hover {
+  background-color: var(--cta-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--cta-shadow-btn-hover);
+}
+
+.cta-btn-primary:active {
+  transform: translateY(0);
+}
+
+.cta-btn-primary:focus-visible {
+  outline: 3px solid var(--cta-blue-focus);
+  outline-offset: 2px;
+}
+
+/* Secondary Button */
+.cta-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.95rem 2.25rem;
+  border-radius: var(--cta-radius-btn);
+  background-color: #ffffff;
+  color: var(--cta-text-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--cta-accent-border);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: background-color var(--cta-transition-normal), 
+              border-color var(--cta-transition-normal),
+              color var(--cta-transition-normal),
+              transform var(--cta-transition-normal), 
+              box-shadow var(--cta-transition-normal);
+}
+
+.cta-btn-secondary:hover {
+  background-color: var(--cta-accent-light);
+  border-color: var(--cta-blue-primary);
+  color: var(--cta-blue-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.1);
+}
+
+.cta-btn-secondary:active {
+  transform: translateY(0);
+}
+
+.cta-btn-secondary:focus-visible {
+  outline: 3px solid var(--cta-blue-focus);
+  outline-offset: 2px;
+}
+
+/* Icons */
+.cta-btn-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  transition: transform var(--cta-transition-normal);
+}
+
+.cta-btn-secondary:hover .cta-btn-icon {
+  transform: translateX(3px);
+}
+
+/* Trust / Feature Bullets */
+.cta-features {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(219, 234, 254, 0.7);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.cta-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cta-text-muted);
+}
+
+.cta-check-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--cta-blue-primary);
+  flex-shrink: 0;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .cta-section {
+    padding: 4.5rem 1.25rem;
+  }
+
+  .cta-card {
+    padding: 3rem 1.5rem;
+    border-radius: 20px;
+  }
+
+  .cta-heading {
+    font-size: 2rem;
+  }
+
+  .cta-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .cta-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.875rem;
+  }
+
+  .cta-btn-primary,
+  .cta-btn-secondary {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+  }
+
+  .cta-features {
+    gap: 1rem;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .cta-section {
+    padding: 3.5rem 1rem;
+  }
+
+  .cta-card {
+    padding: 2.25rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .cta-heading {
+    font-size: 1.65rem;
+  }
+}

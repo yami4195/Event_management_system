@@ -22,7 +22,7 @@ export default function FeaturedEventsSection() {
   };
 
   return (
-    <section className="home-section bg-white dark:bg-slate-900">
+    <section id="events-section" className="home-section bg-white dark:bg-slate-900">
       <div className="home-container">
         <div className="home-section-header flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>

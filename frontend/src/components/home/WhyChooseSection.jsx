@@ -11,7 +11,7 @@ const features = [
 
 export default function WhyChooseSection() {
   return (
-    <section className="home-section bg-slate-50 dark:bg-slate-950/50">
+    <section id="about-section" className="home-section bg-slate-50 dark:bg-slate-950/50">
       <div className="home-container">
         <div className="home-section-header--center">
           <span className="home-eyebrow text-indigo-600 dark:text-indigo-400">Why EventFlow</span> 

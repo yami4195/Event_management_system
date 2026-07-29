@@ -91,7 +91,7 @@ const categories = [
 
 export default function CategoriesSection() {
   return (
-    <section className="home-section bg-slate-50 dark:bg-slate-950/50">
+    <section id="categories-section" className="home-section bg-slate-50 dark:bg-slate-950/50">
       <div className="home-container">
         <div className="home-section-header flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>

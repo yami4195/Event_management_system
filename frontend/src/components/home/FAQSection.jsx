@@ -1,75 +1,90 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, MessageCircleQuestion, Sparkles } from "lucide-react";
+import { HelpCircle, Plus, Minus } from "lucide-react";
+import "@/styles/components/FAQ.css";
 
 const faqs = [
   {
-    q: "How do I register for an event on EventFlow?",
-    a: "Simply browse our event catalog, select your desired event, choose your ticket category, and complete checkout. You will receive an instant digital ticket with a unique QR code in your email and mobile dashboard.",
+    q: "How do I register for an event?",
+    a: "Browsing and registering for events is simple! Select your desired event from our catalog, choose your ticket tier, and click 'Register'. Once completed, your ticket with a QR code will be generated instantly.",
   },
   {
-    q: "Can I cancel my registration or request a refund?",
-    a: "Yes! You can manage or cancel your registrations directly from your Customer Dashboard under 'My Registrations'. Refund eligibility depends on the specific organizer's policy for that event.",
+    q: "Can I cancel my registration?",
+    a: "Yes, you can cancel your registration at any time from your account dashboard under 'My Registrations'. Depending on the organizer's refund policy, refunds are processed automatically back to your original payment method.",
   },
   {
-    q: "How do event organizers create and manage events?",
-    a: "Organizers can create an account, navigate to the Admin/Organizer Dashboard, and click 'Create Event'. You can manage ticket tiers, track real-time revenue analytics, and scan attendee QR codes at the gate.",
+    q: "How do I become an organizer?",
+    a: "To host events, simply sign up or navigate to your profile settings and request an Organizer account. Once approved, you can create events, manage ticketing, view real-time analytics, and check in attendees.",
   },
   {
-    q: "Are online payments secure on EventFlow?",
-    a: "Absolutely. All transactions are encrypted via 256-bit SSL technology processed through Stripe and PayPal. EventFlow never stores raw credit card details on our servers.",
+    q: "Are events free or paid?",
+    a: "We support both free and paid events! Event organizers specify ticket prices, and for paid events, transactions are securely processed using industry-standard encrypted payment gateways.",
   },
   {
-    q: "How does QR Code gate check-in work?",
-    a: "When attendees arrive at the venue, organizers use the EventFlow mobile check-in app or dashboard to scan the attendee's QR code. The system instantly verifies validity and marks the attendee as Checked In.",
+    q: "Will I receive a confirmation email?",
+    a: "Yes! Immediately after registering for an event, a confirmation email containing your event details, digital ticket, and QR code check-in pass will be sent directly to your inbox.",
+  },
+  {
+    q: "Can I see my upcoming registrations?",
+    a: "Absolutely. All your active ticket passes, venue maps, and event schedules are organized neatly in your 'My Registrations' dashboard, accessible whenever you log in.",
   },
 ];
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState(0);
 
+  const toggleAccordion = (idx) => {
+    setOpenIndex(openIndex === idx ? null : idx);
+  };
+
   return (
-    <section className="bg-slate-50 dark:bg-slate-950 py-16 sm:py-24">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <div className="text-center mb-14">
+    <section className="faq-section" id="faq-section">
+      {/* Decorative background gradients */}
+      <div className="faq-bg-decoration" aria-hidden="true" />
+      <div className="faq-bg-glow-1" aria-hidden="true" />
+      <div className="faq-bg-glow-2" aria-hidden="true" />
+
+      <div className="faq-container">
+        {/* Centered Section Header */}
+        <div className="faq-header">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold tracking-wide uppercase mb-5"
+            transition={{ duration: 0.4 }}
+            className="faq-badge"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            Frequently Asked Questions
+            <HelpCircle className="faq-badge-icon" />
+            <span>Got Questions?</span>
           </motion.div>
 
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mb-5"
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="faq-title"
           >
-            Got Questions?
-            <span className="text-indigo-600 dark:text-indigo-400"> We Have Answers.</span>
+            Frequently Asked <span className="faq-title-accent">Questions</span>
           </motion.h2>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg text-slate-900 dark:text-slate-400 max-w-lg mx-auto leading-relaxed"
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="faq-subtitle"
           >
-            Everything you need to know about registering, payments, and hosting.
+            Find quick answers to the most common questions about discovering, registering for, and managing events.
           </motion.p>
         </div>
 
-        {/* FAQ Cards */}
-        <div className="space-y-3">
+        {/* FAQ Accordion List */}
+        <div className="faq-list">
           {faqs.map((faq, idx) => {
             const isOpen = openIndex === idx;
+            const buttonId = `faq-button-${idx}`;
+            const panelId = `faq-panel-${idx}`;
 
             return (
               <motion.div
@@ -77,95 +92,69 @@ export default function FAQSection() {
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.08, ease: "easeOut" }}
+                transition={{ duration: 0.35, delay: idx * 0.06 }}
+                className={`faq-card ${isOpen ? "is-open" : ""}`}
               >
-                <div
-                  className={`
-                    rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden
-                    ${isOpen
-                      ? "bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-800 shadow-lg shadow-indigo-100/50 dark:shadow-indigo-900/20 ring-1 ring-indigo-100 dark:ring-indigo-900/50"
-                      : "bg-white/60 dark:bg-slate-900/40 border-slate-200/70 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 hover:bg-white dark:hover:bg-slate-900 hover:shadow-md hover:shadow-slate-100/50 dark:hover:shadow-black/20"
-                    }
-                  `}
+                <button
+                  id={buttonId}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => toggleAccordion(idx)}
+                  className="faq-button"
+                  type="button"
                 >
-                  <button
-                    onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-                    className="w-full px-7 py-6 text-left flex items-center justify-between gap-5 group"
-                  >
-                    <span className="flex items-center gap-4">
-                      <div
-                        className={`
-                          flex items-center justify-center w-10 h-10 rounded-xl shrink-0 transition-all duration-300
-                          ${isOpen
-                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/40"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/50 group-hover:text-indigo-500 dark:group-hover:text-indigo-400"
-                          }
-                        `}
-                      >
-                        <MessageCircleQuestion className="w-5 h-5" />
-                      </div>
-                      <span
-                        className={`
-                          font-semibold text-base sm:text-lg transition-colors duration-300
-                          ${isOpen ? "text-slate-900 dark:text-slate-100" : "text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100"}
-                        `}
-                      >
-                        {faq.q}
-                      </span>
-                    </span>
-
-                    <div
-                      className={`
-                        flex items-center justify-center w-8 h-8 rounded-full shrink-0 transition-all duration-300
-                        ${isOpen
-                          ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rotate-180"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/50 group-hover:text-indigo-500 dark:group-hover:text-indigo-400"
-                        }
-                      `}
-                    >
-                      <ChevronDown className="w-4 h-4" />
+                  <div className="faq-button-left">
+                    <div className="faq-icon-wrapper" aria-hidden="true">
+                      <HelpCircle className="faq-svg-icon" />
                     </div>
-                  </button>
+                    <span className="faq-question">{faq.q}</span>
+                  </div>
 
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-7 pb-7">
-                          <div className="ml-14 pl-1 border-l-2 border-indigo-100 dark:border-indigo-900/60">
-                            <p className="pl-5 text-slate-600 dark:text-slate-400 leading-relaxed text-[15px]">
-                              {faq.a}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
+                  <div className="faq-toggle-icon" aria-hidden="true">
+                    {isOpen ? (
+                      <Minus className="faq-svg-icon" />
+                    ) : (
+                      <Plus className="faq-svg-icon" />
                     )}
-                  </AnimatePresence>
-                </div>
+                  </div>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      id={panelId}
+                      role="region"
+                      aria-labelledby={buttonId}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                      className="faq-answer-wrapper"
+                    >
+                      <div className="faq-answer-inner">
+                        <div className="faq-answer-content">
+                          <p className="faq-answer-text">{faq.a}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             );
           })}
         </div>
 
-        {/* Bottom CTA */}
+        {/* Footer Support Prompt */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-          className="mt-12 text-center"
+          transition={{ delay: 0.5 }}
+          className="faq-footer"
         >
-          <p className="text-slate-400 dark:text-slate-500 text-sm">
+          <p className="faq-footer-text">
             Still have questions?{" "}
-            <a
-              href="#"
-              className="text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline transition-colors"
-            >
+            <a href="#contact" className="faq-footer-link">
               Contact our support team
             </a>
           </p>

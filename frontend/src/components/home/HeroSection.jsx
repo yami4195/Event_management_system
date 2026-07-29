@@ -31,7 +31,7 @@ const fadeUp = (delay = 0) => ({
 
 export default function HeroSection() {
   return (
-    <section className="home-hero relative overflow-hidden bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 transition-colors duration-200">
+    <section id="hero-section" className="home-hero relative overflow-hidden bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 transition-colors duration-200">
       {/* Soft glow blobs */}
       <div className="absolute top-0 left-1/4 h-[480px] w-[480px] rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 h-[480px] w-[480px] rounded-full bg-purple-500/5 dark:bg-purple-500/10 blur-3xl pointer-events-none" />

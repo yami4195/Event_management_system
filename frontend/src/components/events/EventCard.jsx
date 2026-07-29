@@ -141,6 +141,8 @@ export default function EventCard({ event }) {
           </div>
         </div>
 
+        
+
         {/* Price Box */}
         <div className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 rounded-2xl p-3 flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
