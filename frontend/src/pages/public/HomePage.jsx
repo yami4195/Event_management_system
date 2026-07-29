@@ -54,6 +54,8 @@ export default function HomePage() {
 
       {/* 13. Call To Action (CTA) */}
       <CTASection />
+
+    
     </div>
   );
 }

@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 
 const testimonials = [
-  { id: 1, name: "Marcus Vance", role: "VP of Engineering at TechCorp", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80", rating: 5, review: "EventFlow completely transformed how we organize our annual developer summit. From 1-click ticket checkout to instant QR check-ins at the gate, everything worked flawlessly!" },
-  { id: 2, name: "Sophia Rodriguez", role: "Lead Event Coordinator at DesignFest", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80", rating: 5, review: "The real-time analytics dashboard gives us complete visibility into ticket sales velocity and attendee check-in times. Highly recommended for modern event organizers!" },
-  { id: 3, name: "David Kim", role: "Founder & CEO at StartupHub", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80", rating: 5, review: "As an attendee, discovering tech meetups and buying tickets takes seconds. The instant mobile ticket delivery with wallet QR codes is a game changer." },
+  { id: 1, name: "Marcus Vance", role: "VP of Engineering at TechCorp", rating: 5, review: "EventFlow completely transformed how we organize our annual developer summit. From 1-click ticket checkout to instant QR check-ins at the gate, everything worked flawlessly!" },
+  { id: 2, name: "Sophia Rodriguez", role: "Lead Event Coordinator at DesignFest",  rating: 5, review: "The real-time analytics dashboard gives us complete visibility into ticket sales velocity and attendee check-in times. Highly recommended for modern event organizers!" },
+  { id: 3, name: "David Kim", role: "Founder & CEO at StartupHub",  rating: 5, review: "As an attendee, discovering tech meetups and buying tickets takes seconds. The instant mobile ticket delivery with wallet QR codes is a game changer." },
 ];
 
 export default function TestimonialsSection() {
@@ -40,7 +40,6 @@ export default function TestimonialsSection() {
               transition={{ duration: 0.35, ease: "easeOut" }}
               className="flex flex-col sm:flex-row items-center sm:items-start gap-10 relative z-10"
             >
-              <img src={current.photo} alt={current.name} className="h-20 w-20 rounded-full object-cover border-2 border-indigo-500 shrink-0 shadow-md" />
               <div className="space-y-6 text-center sm:text-left flex-1">
                 <div className="flex items-center justify-center sm:justify-start gap-1">
                   {Array.from({ length: current.rating }).map((_, i) => (

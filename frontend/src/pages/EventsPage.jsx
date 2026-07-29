@@ -1,277 +1,440 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
-  Sparkles, X, AlertCircle, SlidersHorizontal, ChevronDown, CalendarDays,
+  Search,
+  MapPin,
+  Calendar,
+  Sparkles,
+  RotateCcw,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  User,
+  Tag,
 } from "lucide-react";
-import EventFilter from "../components/events/EventFilter";
-import EventCategories from "../components/events/EventCategories";
-import EventsList from "../components/events/EventsList";
-import EventCTA from "../components/events/EventCTA";
-import { MOCK_EVENTS, MOCK_CATEGORIES } from "../data/mockEventsData";
-import { eventsService, categoriesService } from "../services";
+import { eventsService } from "../services";
+import { formatDate } from "../utils/helpers";
+import "./events/Events.css";
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 6;
 
-/* ── Helpers ─────────────────────────────────────────────────────────────── */
-function parseDate(value) {
-  if (!value) return null;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function withinDateRange(eventDate, range) {
-  if (!range) return true;
-  const d = parseDate(eventDate);
-  if (!d) return false;
-  const now = new Date();
-  const sod = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  if (range === "today")      return d >= sod && d < new Date(sod.getTime() + 86400000);
-  if (range === "this_week")  return d >= sod && d < new Date(sod.getTime() + 7 * 86400000);
-  if (range === "this_month") return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d >= sod;
-  return true;
-}
-
-function deriveStatus(evt) {
-  if (evt.status === "Sold Out" || evt.status === "Almost Full") return evt.status;
-  const seats = evt.seatsLeft ?? Math.max((evt.capacity || 0) - (evt.attendees || 0), 0);
-  if (seats <= 0) return "Sold Out";
-  if (seats <= 15) return "Almost Full";
-  return "Open";
-}
-
-const DATE_LABELS = { "": "Anytime", today: "Today", this_week: "This Week", this_month: "This Month" };
-
-/* ── Page ────────────────────────────────────────────────────────────────── */
 export default function EventsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
-  const [events,     setEvents]     = useState([]);
-  const [categories, setCategories] = useState(MOCK_CATEGORIES);
-  const [isLoading,  setIsLoading]  = useState(true);
-  const [loadError,  setLoadError]  = useState(null);
+  // Filters State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [category, setCategory] = useState("all");
+  const [location, setLocation] = useState("");
+  const [date, setDate] = useState("");
+  const [status, setStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const [searchTerm,       setSearchTerm]       = useState(searchParams.get("q")        || "");
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
-  const [selectedLocation, setSelectedLocation] = useState(searchParams.get("location") || "");
-  const [selectedDateRange,setSelectedDateRange]= useState(searchParams.get("when")     || "");
-  const [selectedStatus,   setSelectedStatus]   = useState(searchParams.get("status")   || "");
-  const [sortBy,           setSortBy]           = useState(searchParams.get("sort")     || "upcoming");
-  const [visibleCount,     setVisibleCount]     = useState(PAGE_SIZE);
-
-  /* URL sync */
-  useEffect(() => {
-    const p = {};
-    if (searchTerm)        p.q        = searchTerm;
-    if (selectedCategory)  p.category = selectedCategory;
-    if (selectedLocation)  p.location = selectedLocation;
-    if (selectedDateRange) p.when     = selectedDateRange;
-    if (selectedStatus)    p.status   = selectedStatus;
-    if (sortBy !== "upcoming") p.sort = sortBy;
-    setSearchParams(p, { replace: true });
-  }, [searchTerm, selectedCategory, selectedLocation, selectedDateRange, selectedStatus, sortBy, setSearchParams]);
-
-  /* Data load */
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      setIsLoading(true);
-      setLoadError(null);
-      try {
-        const [catRes, evtRes] = await Promise.allSettled([
-          categoriesService?.getAll?.(),
-          eventsService?.getAll?.(),
-        ]);
-        if (!alive) return;
-
-        if (catRes.status === "fulfilled" && catRes.value?.data?.data?.categories?.length) {
-          setCategories(catRes.value.data.data.categories.map((c) => ({
-            id: c.category_id || c.id, name: c.name, slug: c.name, icon: "Grid",
-          })));
-        }
-
-        if (evtRes.status === "fulfilled" && evtRes.value?.data) {
-          const payload = evtRes.value.data;
-          const items = Array.isArray(payload) ? payload : payload.data?.events || payload.events || payload.data || [];
-          setEvents(items.length > 0 ? items : MOCK_EVENTS);
-          if (items.length === 0) setLoadError("Showing sample events — live data temporarily unavailable.");
-        } else {
-          setEvents(MOCK_EVENTS);
-          if (evtRes.status === "rejected") setLoadError("Showing sample events — live data temporarily unavailable.");
-        }
-      } catch {
-        if (alive) { setEvents(MOCK_EVENTS); setLoadError("Showing sample events — live data temporarily unavailable."); }
-      } finally {
-        if (alive) setIsLoading(false);
+  const fetchEventsData = async () => {
+    setIsLoading(true);
+    setLoadError("");
+    try {
+      const res = await eventsService.getAll();
+      const payload = res.data?.data?.events || res.data?.events || res.data?.data || res.data || [];
+      if (Array.isArray(payload)) {
+        setEvents(payload);
+      } else {
+        setEvents([]);
       }
-    })();
-    return () => { alive = false; };
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setLoadError("Failed to fetch events from the server. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEventsData();
   }, []);
 
-  /* Filter + sort */
+  // Filter & Sort Logic
   const filteredEvents = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    const filtered = events.filter((evt) => {
-      if (term) {
-        const hay = [evt.title, evt.description, evt.location, evt.organizer || evt.organizer_name]
-          .filter(Boolean).join(" ").toLowerCase();
-        if (!hay.includes(term)) return false;
-      }
-      if (selectedCategory) {
-        const cat = (evt.category || evt.category_name || "").toLowerCase();
-        if (cat !== selectedCategory.toLowerCase()) return false;
-      }
-      if (selectedLocation && !(evt.location || "").toLowerCase().includes(selectedLocation.toLowerCase())) return false;
-      if (selectedDateRange && !withinDateRange(evt.date, selectedDateRange)) return false;
-      if (selectedStatus && deriveStatus(evt) !== selectedStatus) return false;
-      return true;
-    });
+    return events
+      .filter((evt) => {
+        // Keyword Search
+        if (searchTerm.trim()) {
+          const term = searchTerm.toLowerCase();
+          const hay = [evt.title, evt.description, evt.location, evt.organizer || evt.organizer_name]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          if (!hay.includes(term)) return false;
+        }
 
-    return [...filtered].sort((a, b) => {
-      if (sortBy === "price_low")  return (typeof a.price === "number" ? a.price : 0) - (typeof b.price === "number" ? b.price : 0);
-      if (sortBy === "popular")    return (b.attendees || 0) - (a.attendees || 0);
-      if (sortBy === "newest")     return (parseDate(b.date)?.getTime() || 0) - (parseDate(a.date)?.getTime() || 0);
-      return (parseDate(a.date)?.getTime() || 0) - (parseDate(b.date)?.getTime() || 0);
-    });
-  }, [events, searchTerm, selectedCategory, selectedLocation, selectedDateRange, selectedStatus, sortBy]);
+        // Category Filter
+        if (category !== "all") {
+          const cat = (evt.category || evt.category_name || "").toLowerCase();
+          if (cat !== category.toLowerCase()) return false;
+        }
 
-  /* Active filter chips */
-  const activeFilters = useMemo(() => {
-    const chips = [];
-    if (searchTerm)        chips.push({ key: "q",        label: `"${searchTerm}"`,                            clear: () => setSearchTerm("") });
-    if (selectedCategory)  chips.push({ key: "category", label: `Category: ${selectedCategory}`,              clear: () => setSelectedCategory("") });
-    if (selectedLocation)  chips.push({ key: "location", label: `Location: ${selectedLocation}`,              clear: () => setSelectedLocation("") });
-    if (selectedDateRange) chips.push({ key: "when",     label: `When: ${DATE_LABELS[selectedDateRange] || selectedDateRange}`, clear: () => setSelectedDateRange("") });
-    if (selectedStatus)    chips.push({ key: "status",   label: `Status: ${selectedStatus}`,                  clear: () => setSelectedStatus("") });
-    return chips;
-  }, [searchTerm, selectedCategory, selectedLocation, selectedDateRange, selectedStatus]);
+        // Location Filter
+        if (location.trim()) {
+          const loc = (evt.location || "").toLowerCase();
+          if (!loc.includes(location.toLowerCase().trim())) return false;
+        }
 
-  const handleResetFilters = useCallback(() => {
-    setSearchTerm(""); setSelectedCategory(""); setSelectedLocation("");
-    setSelectedDateRange(""); setSelectedStatus(""); setSortBy("upcoming");
-    setVisibleCount(PAGE_SIZE);
-  }, []);
+        // Date Filter
+        if (date) {
+          const evtDate = evt.date ? new Date(evt.date).toISOString().split("T")[0] : "";
+          if (evtDate !== date) return false;
+        }
 
-  useEffect(() => { setVisibleCount(PAGE_SIZE); },
-    [searchTerm, selectedCategory, selectedLocation, selectedDateRange, selectedStatus, sortBy]);
+        // Status Filter
+        if (status !== "all") {
+          const evtStatus = (evt.status || "Upcoming").toLowerCase();
+          if (evtStatus !== status.toLowerCase()) return false;
+        }
 
-  const visibleEvents = useMemo(() => filteredEvents.slice(0, visibleCount), [filteredEvents, visibleCount]);
-  const hasMore = visibleCount < filteredEvents.length;
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "price_low") {
+          const priceA = typeof a.price === "number" ? a.price : 0;
+          const priceB = typeof b.price === "number" ? b.price : 0;
+          return priceA - priceB;
+        }
+        if (sortBy === "popular") {
+          return (b.attendees || 0) - (a.attendees || 0);
+        }
+        if (sortBy === "date_asc") {
+          return new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime();
+        }
+        // newest (default)
+        return new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
+      });
+  }, [events, searchTerm, category, location, date, status, sortBy]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, category, location, date, status, sortBy]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredEvents.length / PAGE_SIZE) || 1;
+  const paginatedEvents = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredEvents.slice(start, start + PAGE_SIZE);
+  }, [filteredEvents, currentPage]);
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setCategory("all");
+    setLocation("");
+    setDate("");
+    setStatus("all");
+    setSortBy("newest");
+    setCurrentPage(1);
+  };
 
   return (
-    <div className="w-full min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-
-      {/* ── 1. PAGE HEADER ─────────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-950 border-b border-slate-200/80 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-semibold tracking-wide mb-4">
-            <CalendarDays className="h-3.5 w-3.5" /> Event Discovery
+    <div className="events-page">
+      {/* 1. HERO BANNER */}
+      <section className="events-hero">
+        <div className="events-hero-content">
+          <div className="events-hero-badge">
+            <Sparkles size={16} /> Global Event Directory
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight text-slate-900 dark:text-white">
-            Find Your Next <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">Experience</span>
-          </h1>
-          <p className="mt-3 text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-2xl">
-            Browse tech summits, music festivals, workshops, and more — filtered to what matters to you.
+          <h1 className="events-hero-title">Discover Amazing Events</h1>
+          <p className="events-hero-subtitle">
+            Explore upcoming conferences, concerts, workshops, and gatherings happening worldwide.
           </p>
-        </div>
-      </div>
-
-      {/* ── 2. STICKY FILTER BAR ───────────────────────────────────────────── */}
-      <div className="sticky z-30" style={{ top: "64px" }}>
-        <EventFilter
-          categories={categories}
-          searchTerm={searchTerm}             setSearchTerm={setSearchTerm}
-          selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory}
-          selectedLocation={selectedLocation} setSelectedLocation={setSelectedLocation}
-          selectedDateRange={selectedDateRange} setSelectedDateRange={setSelectedDateRange}
-          selectedStatus={selectedStatus}     setSelectedStatus={setSelectedStatus}
-          sortBy={sortBy}                     setSortBy={setSortBy}
-          totalResultsCount={filteredEvents.length}
-          onResetFilters={handleResetFilters}
-        />
-      </div>
-
-      {/* ── 3. CATEGORY PILLS ──────────────────────────────────────────────── */}
-      <EventCategories
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-      />
-
-      {/* ── 4. RESULTS GRID ────────────────────────────────────────────────── */}
-      <section id="events-results" className="py-12 bg-slate-50/60 dark:bg-slate-900/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Results header */}
-          <div className="flex flex-col gap-4 mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-semibold tracking-wide mb-2">
-                  <Sparkles className="h-3.5 w-3.5" /> All Events
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  {isLoading ? "Loading events…" : `${filteredEvents.length} event${filteredEvents.length === 1 ? "" : "s"} found`}
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Conferences, summits, masterclasses, and experiences worldwide.
-                </p>
-              </div>
-            </div>
-
-            {/* Active filter chips */}
-            {activeFilters.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mr-1">
-                  <SlidersHorizontal className="h-3.5 w-3.5" /> Active:
-                </span>
-                {activeFilters.map((chip) => (
-                  <button
-                    key={chip.key}
-                    onClick={chip.clear}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors"
-                  >
-                    {chip.label} <X className="h-3 w-3" />
-                  </button>
-                ))}
-                <button onClick={handleResetFilters} className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline ml-1">
-                  Clear all
-                </button>
-              </div>
-            )}
-
-            {/* API error banner */}
-            {loadError && !isLoading && (
-              <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-sm">
-                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>{loadError}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Cards */}
-          <EventsList events={visibleEvents} isLoading={isLoading} onResetFilters={handleResetFilters} />
-
-          {/* Load more */}
-          {!isLoading && hasMore && (
-            <div className="mt-12 flex flex-col items-center gap-2">
-              <button
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                className="inline-flex items-center gap-2 px-6 h-12 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 font-semibold text-sm shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all"
-              >
-                Load more events <ChevronDown className="h-4 w-4" />
-              </button>
-              <span className="text-xs text-slate-400">Showing {visibleCount} of {filteredEvents.length}</span>
-            </div>
-          )}
-          {!isLoading && !hasMore && filteredEvents.length > 0 && (
-            <p className="mt-12 text-center text-xs text-slate-400">
-              You've reached the end · {filteredEvents.length} event{filteredEvents.length === 1 ? "" : "s"} shown
-            </p>
-          )}
         </div>
       </section>
 
-      {/* ── 5. ORGANIZER CTA ───────────────────────────────────────────────── */}
-      <EventCTA />
+      {/* 2. FLOATING SEARCH & FILTER PANEL */}
+      <div className="events-filter-wrapper">
+        <div className="events-filter-card">
+          <div className="events-filter-grid">
+            {/* Search Input */}
+            <div className="filter-group span-search">
+              <label className="filter-label">Event Name</label>
+              <div className="filter-input-wrap">
+                <Search className="filter-icon" />
+                <input
+                  type="text"
+                  placeholder="Search events by keyword..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="filter-input"
+                />
+              </div>
+            </div>
+
+            {/* Category Select */}
+            <div className="filter-group">
+              <label className="filter-label">Category</label>
+              <div className="filter-input-wrap">
+                <Tag className="filter-icon" />
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Business">Business</option>
+                  <option value="Music">Music & Entertainment</option>
+                  <option value="Design">Design & UX</option>
+                  <option value="Health">Health & Wellness</option>
+                  <option value="Sports">Sports & Fitness</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Location Input */}
+            <div className="filter-group">
+              <label className="filter-label">Location</label>
+              <div className="filter-input-wrap">
+                <MapPin className="filter-icon" />
+                <input
+                  type="text"
+                  placeholder="City or venue..."
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="filter-input"
+                />
+              </div>
+            </div>
+
+            {/* Date Picker */}
+            <div className="filter-group">
+              <label className="filter-label">Date</label>
+              <div className="filter-input-wrap">
+                <Calendar className="filter-icon" />
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="filter-input"
+                />
+              </div>
+            </div>
+
+            {/* Status Filter */}
+            <div className="filter-group">
+              <label className="filter-label">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="filter-select"
+                style={{ paddingLeft: "14px" }}
+              >
+                <option value="all">All Statuses</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="filter-group">
+              <label className="filter-label">Sort By</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="filter-select"
+                style={{ paddingLeft: "14px" }}
+              >
+                <option value="newest">Newest First</option>
+                <option value="date_asc">Date: Ascending</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="popular">Most Popular</option>
+              </select>
+            </div>
+
+            {/* Reset Button */}
+            <div className="filter-group">
+              <button onClick={handleResetFilters} type="button" className="btn-reset-filter">
+                <RotateCcw size={16} /> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. MAIN RESULTS CONTAINER */}
+      <main className="events-main-container">
+        <div className="events-results-header">
+          <h2 className="results-title">Available Events</h2>
+          <span className="results-count-badge">
+            {filteredEvents.length} {filteredEvents.length === 1 ? "Event" : "Events"} Found
+          </span>
+        </div>
+
+        {/* LOADING SKELETON STATE */}
+        {isLoading ? (
+          <div className="events-grid">
+            {[1, 2, 3, 4, 5, 6].map((idx) => (
+              <div key={idx} className="skeleton-card">
+                <div className="skeleton-img" />
+                <div className="skeleton-body">
+                  <div className="skeleton-line w-80" />
+                  <div className="skeleton-line w-60" />
+                  <div className="skeleton-line w-40" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : loadError ? (
+          /* ERROR STATE */
+          <div className="state-box">
+            <div className="state-icon-wrap">
+              <AlertCircle size={32} />
+            </div>
+            <h3 className="state-title">Failed to Load Events</h3>
+            <p className="state-desc">{loadError}</p>
+            <button onClick={fetchEventsData} className="btn-primary-action">
+              Retry Connection
+            </button>
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          /* EMPTY STATE */
+          <div className="state-box">
+            <div className="state-icon-wrap">
+              <Search size={32} />
+            </div>
+            <h3 className="state-title">No events found</h3>
+            <p className="state-desc">
+              We couldn't find any events matching your search criteria. Try adjusting or resetting your filters.
+            </p>
+            <button onClick={handleResetFilters} className="btn-primary-action">
+              Clear All Filters
+            </button>
+          </div>
+        ) : (
+          /* EVENTS GRID */
+          <div className="events-grid">
+            {paginatedEvents.map((evt) => {
+              const eventId = evt.event_id || evt.id;
+              const displayImage =
+                evt.image ||
+                evt.imageUrl ||
+                evt.image_url ||
+                evt.cover_image ||
+                evt.media_url ||
+                "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80";
+
+              const isFree = evt.price === 0 || evt.price === "Free" || !evt.price;
+              const formattedPrice = isFree
+                ? "Free"
+                : typeof evt.price === "number"
+                ? `$${evt.price.toFixed(2)}`
+                : evt.price;
+
+              const totalSeats = evt.capacity || evt.total_seats || 100;
+              const attendeesCount = evt.attendees || evt.registered_count || 0;
+              const remainingSeats =
+                evt.seatsLeft !== undefined
+                  ? evt.seatsLeft
+                  : Math.max(totalSeats - attendeesCount, 0);
+
+              const evtStatus = (evt.status || "Upcoming").toLowerCase();
+              const isSoldOut = remainingSeats <= 0 || evtStatus === "sold out";
+
+              return (
+                <article key={eventId} className="event-card">
+                  <div className="event-card-media">
+                    <img
+                      src={displayImage}
+                      alt={evt.title || "Event cover"}
+                      className="event-card-img"
+                      loading="lazy"
+                    />
+                    {evt.category && (
+                      <span className="badge-category">{evt.category || evt.category_name}</span>
+                    )}
+                    <span
+                      className={`badge-status ${
+                        isSoldOut ? "soldout" : evtStatus
+                      }`}
+                    >
+                      {isSoldOut ? "Sold Out" : evt.status || "Upcoming"}
+                    </span>
+                    <span className="badge-price">{formattedPrice}</span>
+                  </div>
+
+                  <div className="event-card-body">
+                    <h3 className="event-card-title">{evt.title}</h3>
+                    <p className="event-card-desc">
+                      {evt.description ||
+                        "Join us for an unforgettable event filled with learning, networking, and inspiration."}
+                    </p>
+
+                    <div className="event-card-meta">
+                      <div className="meta-row">
+                        <Calendar className="meta-icon" />
+                        <span>
+                          {formatDate(evt.date)} {evt.time ? `· ${evt.time}` : ""}
+                        </span>
+                      </div>
+                      <div className="meta-row">
+                        <MapPin className="meta-icon" />
+                        <span>{evt.location || "Online / Virtual Venue"}</span>
+                      </div>
+                      <div className="meta-row">
+                        <User className="meta-icon" />
+                        <span>{evt.organizer || evt.organizer_name || "Event Host"}</span>
+                      </div>
+                    </div>
+
+                    <div className="event-card-footer">
+                      <span className="seats-info">
+                        {isSoldOut ? "0 Left" : `${remainingSeats} / ${totalSeats} Seats Left`}
+                      </span>
+                      <Link to={`/events/${eventId}`} className="btn-card-details">
+                        View Details <ArrowRight size={14} />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        {/* 4. PAGINATION */}
+        {!isLoading && !loadError && totalPages > 1 && (
+          <div className="pagination-wrap">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="btn-page"
+              aria-label="Previous Page"
+            >
+              <ChevronLeft size={16} /> Prev
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`btn-page ${currentPage === page ? "active" : ""}`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="btn-page"
+              aria-label="Next Page"
+            >
+              Next <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

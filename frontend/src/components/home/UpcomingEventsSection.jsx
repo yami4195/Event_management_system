@@ -1,78 +1,103 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Clock, MapPin, Calendar, ArrowRight } from "lucide-react";
-
-const upcomingEvents = [
-  { id: "evt_7", title: "Global FinTech & Web3 Expo 2026", image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&auto=format&fit=crop&q=80", date: "Aug 05, 2026", location: "Chicago, IL", countdown: "03d : 14h : 22m", seatsLeft: 12, price: "$199.00" },
-  { id: "evt_8", title: "Cybersecurity & Cloud Defense ", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80", date: "Aug 12, 2026", location: "Boston, MA", countdown: "10d : 08h : 45m", seatsLeft: 6, price: "$250.00" },
-  { id: "evt_9", title: "SaaS Growth & Founder Keynote", image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&auto=format&fit=crop&q=80", date: "Aug 18, 2026", location: "Austin, TX", countdown: "16d : 19h : 10m", seatsLeft: 24, price: "Free" },
-];
+import { ArrowRight, Sparkles } from "lucide-react";
+import EventCard from "../events/EventCard";
+import { eventsService } from "../../services";
 
 export default function UpcomingEventsSection() {
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setIsLoading(true);
+      try {
+        const res = await eventsService.getAll({ limit: 6 });
+        const data =
+          res.data?.data?.events ||
+          res.data?.events ||
+          res.data?.data ||
+          res.data ||
+          [];
+
+        if (Array.isArray(data)) {
+          setEvents(data);
+        }
+      } catch (err) {
+        console.error("Failed to load events from DB:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   return (
-    <section className="home-section bg-slate-50 dark:bg-slate-950/50">
-      <div className="home-container">
-        <div className="home-section-header flex flex-col md:flex-row md:items-end justify-between gap-8">
+    <section className="home-section bg-slate-50 dark:bg-slate-950/50 py-16 sm:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <span className="home-eyebrow text-rose-600 dark:text-rose-400">Starting Soon</span>
-            <h2 className="home-title text-slate-900 dark:text-slate-100">Upcoming Events & Countdowns</h2>
-            <p className="home-desc text-slate-500 dark:text-slate-400 max-w-xl">
-              Don&apos;t miss these events launching in the next few weeks.
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/60 border border-rose-200/60 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-semibold tracking-wide mb-3">
+              <Sparkles className="h-3.5 w-3.5" /> Starting Soon
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+              Upcoming & Available Events
+            </h2>
+            <p className="text-base text-slate-600 dark:text-slate-400 max-w-xl mt-2">
+              Browse live events from our database and reserve your seat today.
             </p>
           </div>
-          <Link to="/events" className="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors shrink-0 pb-1">
-            View Calendar
+          <Link
+            to="/events"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors shrink-0 pb-1"
+          >
+            Browse All Events
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="home-grid grid grid-cols-1 md:grid-cols-3">
-          {upcomingEvents.map((evt, idx) => (
-            <motion.div
-              key={evt.id}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.45, delay: idx * 0.08, ease: "easeOut" }}
-              className="rounded-3xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-lg transition-shadow h-full flex flex-col"
+        {/* Loading Skeleton */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className="h-96 rounded-3xl bg-slate-200/60 dark:bg-slate-800/60 animate-pulse border border-slate-200 dark:border-slate-800"
+              />
+            ))}
+          </div>
+        ) : events.length > 0 ? (
+          /* Events Grid using Reusable EventCard */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {events.map((evt, idx) => (
+              <motion.div
+                key={evt.id || evt.event_id || idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, delay: idx * 0.08, ease: "easeOut" }}
+              >
+                <EventCard event={evt} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          /* Empty State */
+          <div className="text-center py-12 px-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-base">
+              No events found in the database.
+            </p>
+            <Link
+              to="/events"
+              className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition-colors"
             >
-              <div className="relative h-56 w-full bg-slate-100 dark:bg-slate-800 shrink-0">
-                <img src={evt.image} alt={evt.title} className="h-full w-full object-cover" />
-                <div className="absolute top-5 left-5 px-4 py-2 rounded-full bg-rose-600 text-white font-mono font-semibold text-xs flex items-center gap-2 shadow-md">
-                  <Clock className="h-3.5 w-3.5" />
-                  {evt.countdown}
-                </div>
-              </div>
-
-              <div className="p-8 flex-1 flex flex-col gap-8">
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 line-clamp-2 leading-snug">{evt.title}</h3>
-                  <div className="flex flex-col gap-2 text-sm text-slate-500 dark:text-slate-400">
-                    <span className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-indigo-500 shrink-0" /> {evt.date}
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-indigo-500 shrink-0" /> {evt.location}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-slate-800 mt-auto">
-                  <span className="text-sm font-semibold text-rose-600 dark:text-rose-400">Only {evt.seatsLeft} seats left</span>
-                  <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{evt.price}</span>
-                </div>
-
-                <Link
-                  to={`/events/${evt.id}`}
-    className="inline-flex items-center justify-center gap-3 px-12 h-14 min-w-[10rem] bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-base shadow-lg shadow-blue-600/20 transition-all duration-200"
-                >
-                  Book Seat
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              Explore Events Page
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

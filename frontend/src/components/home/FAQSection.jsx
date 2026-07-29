@@ -60,7 +60,7 @@ export default function FAQSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed"
+            className="text-lg text-slate-900 dark:text-slate-400 max-w-lg mx-auto leading-relaxed"
           >
             Everything you need to know about registering, payments, and hosting.
           </motion.p>
