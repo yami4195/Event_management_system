@@ -33,6 +33,46 @@ export default function EventsPage() {
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
 
+  //I add this hooks for controlling the search suggesttion animations
+  const [text, setText] = useState("");
+const [wordIndex, setWordIndex] = useState(0);
+const [isDeleting, setIsDeleting] = useState(false);
+
+  const suggestions = useMemo(()=>[
+  "Music",
+  "Technology",
+  "Sports",
+  "Movies",
+  "Photography",
+  "Programming"
+],[]);
+
+
+useEffect(() => {
+  const currentWord = suggestions[wordIndex];
+
+  let speed = isDeleting ? 50 : 100;
+
+  const timeout = setTimeout(() => {
+    if (!isDeleting) {
+      setText(currentWord.substring(0, text.length + 1));
+
+      if (text === currentWord) {
+        setTimeout(() => setIsDeleting(true), 1200);
+      }
+    } else {
+      setText(currentWord.substring(0, text.length - 1));
+
+      if (text === "") {
+        setIsDeleting(false);
+        setWordIndex((prev) => (prev + 1) % suggestions.length);
+      }
+    }
+  }, speed);
+
+  return () => clearTimeout(timeout);
+}, [text, isDeleting, wordIndex,suggestions]);
+
   const fetchEventsData = async () => {
     setIsLoading(true);
     setLoadError("");
@@ -161,7 +201,7 @@ export default function EventsPage() {
                 <Search className="filter-icon" />
                 <input
                   type="text"
-                  placeholder="Search events by keyword..."
+                  placeholder={text}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="filter-input"

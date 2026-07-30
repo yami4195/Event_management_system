@@ -16,9 +16,6 @@ import Register from "../pages/auth/Register";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 
 import Dashboard from "../pages/dashboard/Dashboard";
-import CreateEvent from "../pages/events/CreateEvent";
-import EditEvent from "../pages/events/EditEvent";
-import MyEvents from "../pages/events/MyEvents";
 import Profile from "../pages/user/Profile";
 import ProfileForm from "../pages/user/ProfileForm";
 import RegisteredEvents from "../pages/user/RegisteredEvents";
@@ -33,15 +30,25 @@ import UsersPage from "../pages/admin/Users";
 import Events from "../pages/admin/Events";
 import AdminEventDetails from "../pages/admin/AdminEventDetails";
 import Categories from "../pages/admin/Categories";
-import Registrations from "../pages/admin/Registrations";
+import AdminRegistrations from "../pages/admin/Registrations";
 import Feedback from "../pages/admin/Feedback";
 import NotificationsPage from "../pages/admin/Notifications";
-import Analytics from "../pages/admin/Analytics";
-import Settings from "../pages/admin/Settings";
+import AdminAnalytics from "../pages/admin/Analytics";
+import AdminSettings from "../pages/admin/Settings";
 import UserDetails from "../components/admin/UserDetails";
 import EditUser from "../components/admin/EditUser";
 
-const ALL_ROLES = [...CUSTOMER_ROLES, ...ORGANIZER_ROLES,...ADMIN_ROLES];
+// Organizer Rebuilt Imports
+import OrganizerLayout from "../components/organizer/OrganizerLayout";
+import OrganizerDashboard from "../pages/organizer/OrganizerDashboard";
+import MyEvents from "../pages/organizer/MyEvents";
+import CreateEvent from "../pages/organizer/CreateEvent";
+import EditEvent from "../pages/organizer/EditEvent";
+import Registrations from "../pages/organizer/Registrations";
+import Analytics from "../pages/organizer/Analytics";
+import Settings from "../pages/organizer/Settings";
+
+const ALL_ROLES = [...CUSTOMER_ROLES, ...ORGANIZER_ROLES, ...ADMIN_ROLES];
 
 function AppRoutes() {
   return (
@@ -61,49 +68,58 @@ function AppRoutes() {
           <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
         </Route>
 
-
-
-
-
- {/* Admin routes — PROTECTED */}
-        <Route element={
-          <ProtectedRoute allowedRoles={ADMIN_ROLES}>
-            <AdminLayout />
-          </ProtectedRoute>
-        }>
+        {/* Admin routes — PROTECTED */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={ADMIN_ROLES}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/admin" element={<Admin_Dashboard />} />
           <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/admin/users/:userId" element={<UserDetails />} />
-          <Route path="/admin/users/EditUser/:userId" element={<EditUser/>} />
+          <Route path="/admin/users/EditUser/:userId" element={<EditUser />} />
           <Route path="/admin/events" element={<Events />} />
           <Route path="/admin/events/:eventId" element={<AdminEventDetails />} />
-          <Route path="/admin/categories" element={<Categories/>} />
-          <Route path="/admin/registrations" element={<Registrations/>} />
-          <Route path="/admin/feedback" element={<Feedback/>} />
-          <Route path="/admin/notifications" element={<NotificationsPage/>} />
-          <Route path="/admin/analytics" element={<Analytics/>} />
-          <Route path="/admin/settings" element={<Settings/>} />
-         
+          <Route path="/admin/categories" element={<Categories />} />
+          <Route path="/admin/registrations" element={<AdminRegistrations />} />
+          <Route path="/admin/feedback" element={<Feedback />} />
+          <Route path="/admin/notifications" element={<NotificationsPage />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
 
+        {/* Organizer Dashboard Routes — PROTECTED */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={ORGANIZER_ROLES}>
+              <OrganizerLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path={ROUTES.ORGANIZER_DASHBOARD} element={<OrganizerDashboard />} />
+          <Route path={ROUTES.MANAGE_EVENTS} element={<MyEvents />} />
+          <Route path={ROUTES.CREATE_EVENT} element={<CreateEvent />} />
+          <Route path={ROUTES.EDIT_EVENT_ORGANIZER} element={<EditEvent />} />
+          <Route path={ROUTES.ORGANIZER_REGISTRATIONS} element={<Registrations />} />
+          <Route path={ROUTES.ORGANIZER_ANALYTICS} element={<Analytics />} />
+          <Route path={ROUTES.ORGANIZER_SETTINGS} element={<Settings />} />
+        </Route>
 
-
-
-
-        <Route element={<ProtectedRoute allowedRoles={ALL_ROLES}><DashboardLayout /></ProtectedRoute>}>
+        {/* Customer & General User Dashboard Routes — PROTECTED */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={ALL_ROLES}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path={ROUTES.DASHBOARD} element={<DashboardRedirect />} />
           <Route
             path={ROUTES.CUSTOMER_DASHBOARD}
             element={
               <ProtectedRoute allowedRoles={CUSTOMER_ROLES}>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.ORGANIZER_DASHBOARD}
-            element={
-              <ProtectedRoute allowedRoles={ORGANIZER_ROLES}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -123,31 +139,7 @@ function AppRoutes() {
             path={ROUTES.NOTIFICATIONS}
             element={
               <ProtectedRoute allowedRoles={CUSTOMER_ROLES}>
-                <Notifications/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.CREATE_EVENT}
-            element={
-              <ProtectedRoute allowedRoles={ORGANIZER_ROLES}>
-                <CreateEvent />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.EDIT_EVENT}
-            element={
-              <ProtectedRoute allowedRoles={ORGANIZER_ROLES}>
-                <EditEvent />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.MANAGE_EVENTS}
-            element={
-              <ProtectedRoute allowedRoles={ORGANIZER_ROLES}>
-                <MyEvents />
+                <Notifications />
               </ProtectedRoute>
             }
           />

@@ -25,6 +25,10 @@ export const ROUTES = {
   ORGANIZER_DASHBOARD: "/dashboard/organizer",
   CREATE_EVENT: "/organizer/events/create",
   MANAGE_EVENTS: "/organizer/events",
+  EDIT_EVENT_ORGANIZER: "/organizer/events/:id/edit",
+  ORGANIZER_REGISTRATIONS: "/organizer/registrations",
+  ORGANIZER_ANALYTICS: "/organizer/analytics",
+  ORGANIZER_SETTINGS: "/organizer/settings",
 
   // Admin
   ADMIN_DASHBOARD: "/admin/dashboard",

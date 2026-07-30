@@ -1,160 +1,154 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import {
-  Cpu,
-  Briefcase,
-  Music,
-  Trophy,
-  BookOpen,
-  Palette,
-  Heart,
-  Users,
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import "@/styles/components/Categories.css";
 
 const categories = [
   {
-    id: "tech",
-    name: "Technology & AI",
-    count: "42 Events",
-    description: "Hackathons, product launches, and dev meetups near you.",
-    icon: Cpu,
-    color:
-      "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800",
-    badge: "Popular",
+    id: "music",
+    name: "Music",
+    count: "28 Events",
+    cardClass: "category-card--music",
+    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=80",
+    alt: "Music events and live performances",
   },
   {
     id: "business",
-    name: "Business & Finance",
+    name: "Business",
     count: "30 Events",
-    description: "Investor talks, networking mixers, and startup panels.",
-    icon: Briefcase,
-    color:
-      "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+    cardClass: "category-card--business",
+    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80",
+    alt: "Business conferences and networking",
   },
   {
-    id: "music",
-    name: "Music & Festivals",
-    count: "28 Events",
-    description: "Live shows, open mics, and weekend festivals.",
-    icon: Music,
-    color:
-      "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800",
+    id: "concerts",
+    name: "Concerts",
+    count: "35 Events",
+    cardClass: "category-card--concerts",
+    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80",
+    alt: "Live music concerts",
   },
   {
-    id: "design",
-    name: "Design & UX",
-    count: "24 Events",
-    description: "Portfolio reviews, design sprints, and UX talks.",
-    icon: Palette,
-    color:
-      "bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800",
-  },
-  {
-    id: "sports",
-    name: "Sports & Fitness",
-    count: "19 Events",
-    description: "Local tournaments, group runs, and fitness classes.",
-    icon: Trophy,
-    color:
-      "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800",
-  },
-  {
-    id: "education",
-    name: "Education & STEM",
+    id: "parties",
+    name: "Parties",
     count: "22 Events",
-    description: "Workshops, science fairs, and student competitions.",
-    icon: BookOpen,
-    color:
-      "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+    cardClass: "category-card--parties",
+    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&auto=format&fit=crop&q=80",
+    alt: "Parties and celebration events",
+  },
+  {
+    id: "dance",
+    name: "Dance",
+    count: "18 Events",
+    cardClass: "category-card--dance",
+    image: "https://images.unsplash.com/photo-1547153760-18fc86324498?w=400&auto=format&fit=crop&q=80",
+    alt: "Dance performances and shows",
   },
   {
     id: "health",
     name: "Health & Wellness",
     count: "15 Events",
-    description: "Yoga sessions, mental health talks, and wellness fairs.",
-    icon: Heart,
-    color:
-      "bg-pink-50 dark:bg-pink-950/50 text-pink-600 dark:text-pink-400 border-pink-200 dark:border-pink-800",
+    cardClass: "category-card--health",
+    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&auto=format&fit=crop&q=80",
+    alt: "Health and wellness sessions",
   },
   {
-    id: "conferences",
-    name: "Conferences & Summits",
-    count: "35 Events",
-    description: "Industry summits, keynote talks, and expos.",
-    icon: Users,
-    color:
-      "bg-teal-50 dark:bg-teal-950/50 text-teal-600 dark:text-teal-400 border-teal-200 dark:border-teal-800",
-    badge: "New",
+    id: "sports",
+    name: "Sports",
+    count: "19 Events",
+    cardClass: "category-card--sports",
+    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDJ8fHNwb3J0fGVufDB8fDB8fHww",
+    alt: "Sports tournaments and activities",
+  },
+  {
+    id: "adventure",
+    name: "Adventure",
+    count: "14 Events",
+    cardClass: "category-card--adventure",
+    image: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=400&auto=format&fit=crop&q=80",
+    alt: "Outdoor adventure activities",
+  },
+  {
+    id: "festivals",
+    name: "Festivals",
+    count: "25 Events",
+    cardClass: "category-card--festivals",
+    backdropClass: "backdrop-festivals",
+    image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&auto=format&fit=crop&q=80",
+    alt: "Cultural and music festivals",
   },
 ];
 
 export default function CategoriesSection() {
   return (
-    <section id="categories-section" className="home-section bg-slate-50 dark:bg-slate-950/50">
-      <div className="home-container">
-        <div className="home-section-header flex flex-col md:flex-row md:items-end justify-between gap-8">
-          <div>
-            <span className="home-eyebrow text-indigo-600 dark:text-indigo-400">
-              Explore by Interest
-            </span>
-            <h2 className="home-title text-slate-900 dark:text-slate-100">
-              Featured Event Categories
-            </h2>
-            <p className="home-desc text-slate-500 dark:text-slate-400 max-w-xl">
-              Browse curated categories to find events that match your interests.
-            </p>
+    <section id="categories-section" className="categories-section">
+      <div className="categories-container">
+        <div className="categories-header">
+          <span className="categories-eyebrow">Explore by Your Interest</span>
+          <div className="categories-title-row">
+            <div>
+              <h2 className="categories-title">Most-Loved Categories</h2>
+              <p className="categories-subtitle">
+                Browse curated categories to discover upcoming live shows, summits, and experiences near you.
+              </p>
+            </div>
+            <Link to="/events" className="categories-view-all-link">
+              View All Categories
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
           </div>
-          <Link
-            to="/events"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors shrink-0 pb-1"
-          >
-            View All Categories
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
         </div>
 
-        <div className="home-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {categories.map((cat, idx) => {
-            const Icon = cat.icon;
-            return (
-              <motion.div
-                key={cat.id}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -4 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.45, delay: idx * 0.06, ease: "easeOut" }}
-                className="relative h-full"
+        <div className="categories-grid">
+          {categories.map((cat, idx) => (
+            <motion.div
+              key={cat.id}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.4, delay: idx * 0.05, ease: "easeOut" }}
+            >
+              <Link
+                to={`/events?category=${cat.id}`}
+                className={`category-card ${cat.cardClass}`}
+                aria-label={`Browse ${cat.name} events (${cat.count})`}
               >
-                {cat.badge && (
-                  <span className="absolute -top-2 -right-2 z-10  bg-indigo-600 px-2.5 py-0.5 text-[11px] font-semibold text-white shadow-sm">
-                    {cat.badge}
-                  </span>
-                )}
-                <Link
-                  to={`/events?category=${cat.id}`}
-                  aria-label={`Browse ${cat.name} events, ${cat.count}`}
-                  className="home-card block h-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex items-center justify-between mb-8">
-                    <div className={`p-4 rounded-2xl border ${cat.color}`}>
-                      <Icon className="h-6 w-6" aria-hidden="true" />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-400">
-                      {cat.count}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-3">
-                    {cat.name}
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {cat.description}
-                  </p>
-                </Link>
-              </motion.div>
-            );
-          })}
+                <div className="category-card-content">
+                  <h3 className="category-card-title">{cat.name}</h3>
+                  <span className="category-card-count">{cat.count}</span>
+                </div>
+                <div className="category-card-media">
+                  <div className={`category-backdrop-pill ${cat.backdropClass}`} />
+                  <img
+                    src={cat.image}
+                    alt={cat.alt}
+                    className="category-card-img"
+                    loading="lazy"
+                  />
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+
+          {/* 10th Card: View All Categories */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.4, delay: 9 * 0.05, ease: "easeOut" }}
+          >
+            <Link
+              to="/events"
+              className="category-card category-card--view-all"
+              aria-label="View all event categories"
+            >
+              <span className="view-all-subtitle">View All</span>
+              <h3 className="view-all-title">
+                Categories
+                <ArrowRight className="view-all-icon" aria-hidden="true" />
+              </h3>
+            </Link>
+          </motion.div>
         </div>
       </div>
     </section>

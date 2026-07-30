@@ -1,0 +1,341 @@
+/* =============================================
+   CATEGORIES SECTION STYLES
+   Clean white-and-blue theme with reference-inspired horizontal capsule cards
+   ============================================= */
+
+.categories-section {
+  position: relative;
+  padding-block: 80px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  transition: background-color 0.3s ease;
+  overflow: hidden;
+}
+
+.dark .categories-section {
+  background: linear-gradient(180deg, #0f172a 0%, #090d16 100%);
+}
+
+.categories-container {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+@media (min-width: 768px) {
+  .categories-container {
+    padding-inline: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .categories-container {
+    padding-inline: 48px;
+  }
+}
+
+/* Header styling */
+.categories-header {
+  margin-bottom: 48px;
+}
+
+.categories-eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2563eb;
+  margin-bottom: 12px;
+}
+
+.dark .categories-eyebrow {
+  color: #60a5fa;
+}
+
+.categories-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .categories-title-row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.categories-title {
+  font-size: clamp(1.85rem, 3.2vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0f172a;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.dark .categories-title {
+  color: #f8fafc;
+}
+
+.categories-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  margin-top: 8px;
+  max-width: 600px;
+}
+
+.dark .categories-subtitle {
+  color: #94a3b8;
+}
+
+.categories-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+.categories-view-all-link:hover {
+  color: #1d4ed8;
+  transform: translateX(3px);
+}
+
+.dark .categories-view-all-link {
+  color: #60a5fa;
+}
+
+.dark .categories-view-all-link:hover {
+  color: #93c5fd;
+}
+
+/* 5-Column Responsive Grid */
+.categories-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 520px) {
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 860px) {
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .categories-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Capsule Card Styling */
+.category-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 104px;
+  border-radius: 18px;
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+  text-decoration: none;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease;
+}
+
+.dark .category-card {
+  background-color: #1e293b;
+  border-color: rgba(51, 65, 85, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px -6px rgba(37, 99, 235, 0.15), 0 6px 12px -2px rgba(0, 0, 0, 0.04);
+  border-color: rgba(147, 197, 253, 0.8);
+}
+
+.dark .category-card:hover {
+  box-shadow: 0 14px 28px -6px rgba(37, 99, 235, 0.25), 0 6px 12px -2px rgba(0, 0, 0, 0.3);
+  border-color: rgba(96, 165, 250, 0.5);
+}
+
+/* Specific Card Tinted Backgrounds */
+.category-card--music { background-color: #f4f7ff; }
+.category-card--business { background-color: #f0f7ff; }
+.category-card--concerts { background-color: #f3f4ff; }
+.category-card--parties { background-color: #fffbf0; }
+.category-card--dance { background-color: #fff0f5; }
+.category-card--health { background-color: #f0fdf4; }
+.category-card--sports { background-color: #f2fcf5; }
+.category-card--adventure { background-color: #f5f3ff; }
+.category-card--festivals { background-color: #fdf4ff; }
+
+.dark .category-card--music { background-color: rgba(30, 41, 59, 0.95); }
+.dark .category-card--business { background-color: rgba(30, 41, 59, 0.95); }
+.dark .category-card--concerts { background-color: rgba(30, 41, 59, 0.95); }
+.dark .category-card--parties { background-color: rgba(30, 41, 59, 0.95); }
+.dark .category-card--dance { background-color: rgba(30, 41, 59, 0.95); }
+.dark .category-card--health { background-color: rgba(30, 41, 59, 0.95); }
+.dark .category-card--sports { background-color: rgba(30, 41, 59, 0.95); }
+.dark .category-card--adventure { background-color: rgba(30, 41, 59, 0.95); }
+.dark .category-card--festivals { background-color: rgba(30, 41, 59, 0.95); }
+
+/* Left Content Area */
+.category-card-content {
+  padding-left: 18px;
+  padding-right: 6px;
+  flex: 1;
+  z-index: 2;
+}
+
+.category-card-title {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.dark .category-card-title {
+  color: #f8fafc;
+}
+
+.category-card-count {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.dark .category-card-count {
+  color: #94a3b8;
+}
+
+/* Right Backdrop Pill and Image */
+.category-card-media {
+  width: 100px;
+  height: 100%;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-top-right-radius: 17px;
+  border-bottom-right-radius: 17px;
+}
+
+.category-backdrop-pill {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  right: 6px;
+  left: 10px;
+  border-radius: 14px;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Unique Backdrop Pill Colors */
+.backdrop-music { background: linear-gradient(135deg, #7da2ff 0%, #6366f1 100%); }
+.backdrop-business { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
+.backdrop-concerts { background: linear-gradient(135deg, #818cf8 0%, #4f46e5 100%); }
+.backdrop-parties { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); }
+.backdrop-dance { background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); }
+.backdrop-health { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); }
+.backdrop-sports { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); }
+.backdrop-adventure { background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%); }
+.backdrop-festivals { background: linear-gradient(135deg, #f472b6 0%, #db2777 100%); }
+
+.category-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  mix-blend-mode: multiply;
+  filter: contrast(1.05) brightness(1.02);
+}
+
+.dark .category-card-img {
+  mix-blend-mode: normal;
+}
+
+.category-card:hover .category-card-img {
+  transform: scale(1.08);
+}
+
+/* 10th Card: View All Categories Card */
+.category-card--view-all {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.dark .category-card--view-all {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.view-all-subtitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+
+.dark .view-all-subtitle {
+  color: #93c5fd;
+}
+
+.view-all-title {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: #1e40af;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dark .view-all-title {
+  color: #ffffff;
+}
+
+.view-all-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.25s ease;
+}
+
+.category-card--view-all:hover .view-all-icon {
+  transform: translateX(4px);
+}
