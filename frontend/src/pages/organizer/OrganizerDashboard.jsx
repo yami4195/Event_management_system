@@ -4,7 +4,6 @@ import {
   Calendar,
   Ticket,
   DollarSign,
-  Users,
   PlusCircle,
   BarChart3,
   ArrowRight,
