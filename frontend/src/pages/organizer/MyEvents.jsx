@@ -55,8 +55,9 @@ export default function MyEvents() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-black dark:border-white" />
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3" />
+        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Loading Events...</p>
       </div>
     );
   }

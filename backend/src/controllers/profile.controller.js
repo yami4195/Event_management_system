@@ -1,7 +1,9 @@
 import pool from "../config/db.js";
+import { validate as isUuid } from "uuid";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
-// Helper to validate positive integer IDs (PostgreSQL bigint)
-const isValidId = (id) => /^\d+$/.test(id);
+// Helper to validate UUID user IDs
+const isValidId = (id) => typeof id === "string" && isUuid(id);
 
 /**
  * GET /api/profiles
@@ -198,6 +200,17 @@ export async function updateProfile(req, res) {
     }
 
     // Merge updates
+    let finalProfilePicture = profile_picture !== undefined ? (profile_picture ? profile_picture.trim() : null) : currentProfile.profile_picture;
+
+    if (req.file) {
+      try {
+        const cloudinaryResult = await uploadToCloudinary(req.file.buffer, `event_management/profiles/${id}`);
+        finalProfilePicture = cloudinaryResult.url;
+      } catch (uploadErr) {
+        console.error("Profile picture upload to Cloudinary failed:", uploadErr.message);
+      }
+    }
+
     const finalFirstname = firstname !== undefined ? firstname.trim() : currentProfile.firstname;
     const finalLastname = lastname !== undefined ? lastname.trim() : currentProfile.lastname;
     const finalPhone = phone !== undefined ? (phone ? phone.trim() : null) : currentProfile.phone;
@@ -206,7 +219,6 @@ export async function updateProfile(req, res) {
     const finalHouseNumber = house_number !== undefined || housenumber !== undefined
       ? ((house_number ?? housenumber ?? "") ? String(house_number ?? housenumber ?? "").trim() : null)
       : currentProfile.house_number;
-    const finalProfilePicture = profile_picture !== undefined ? (profile_picture ? profile_picture.trim() : null) : currentProfile.profile_picture;
 
     // Execute update
     const result = await pool.query(

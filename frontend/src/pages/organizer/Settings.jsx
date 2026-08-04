@@ -19,6 +19,8 @@ export default function Settings() {
     payoutAlerts: true,
   });
 
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,16 +28,22 @@ export default function Settings() {
     if (settings) {
       setFormData({
         name: settings.name || "",
+        firstname: settings.firstname || "",
+        lastname: settings.lastname || "",
         email: settings.email || "",
         phone: settings.phone || "",
+        city: settings.city || "",
+        subcity: settings.subcity || "",
+        houseNumber: settings.houseNumber || "",
         bio: settings.bio || "",
-        logoUrl: settings.logoUrl || "",
+        logoUrl: settings.logoUrl || settings.profilePicture || "",
         payoutMethod: settings.payoutMethod || "Telebirr",
         accountNumber: settings.accountNumber || "",
         emailNotifications: settings.emailNotifications ?? true,
         registrationAlerts: settings.registrationAlerts ?? true,
         payoutAlerts: settings.payoutAlerts ?? true,
       });
+      setImagePreview(settings.logoUrl || settings.profilePicture || "");
     }
   }, [settings]);
 
@@ -50,7 +58,13 @@ export default function Settings() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await updateSettings(formData);
+
+    const payload = { ...formData };
+    if (avatarFile) {
+      payload.image = avatarFile;
+    }
+
+    await updateSettings(payload);
     setIsSubmitting(false);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
@@ -58,8 +72,9 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-black dark:border-white" />
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3" />
+        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Loading Organizer Settings...</p>
       </div>
     );
   }
@@ -120,11 +135,36 @@ export default function Settings() {
               <Input name="phone" value={formData.phone} onChange={handleChange} />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Logo Image URL
+                Profile Photo (Upload to Cloudinary)
               </label>
-              <Input name="logoUrl" value={formData.logoUrl} onChange={handleChange} />
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Profile Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <Building className="w-8 h-8 m-4 text-slate-400" />
+                  )}
+                </div>
+                <div className="space-y-1 flex-grow">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setAvatarFile(file);
+                        const reader = new FileReader();
+                        reader.onloadend = () => setImagePreview(reader.result);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-zinc-100 dark:file:bg-zinc-800 file:text-zinc-900 dark:file:text-zinc-100 hover:file:bg-zinc-200 cursor-pointer"
+                  />
+                  <p className="text-[11px] text-slate-400">PNG, JPG, or WEBP up to 5MB</p>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2 md:col-span-2">

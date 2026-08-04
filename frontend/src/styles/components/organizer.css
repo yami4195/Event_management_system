@@ -4,37 +4,37 @@
    ============================================= */
 
 :root {
-  --org-bg-page: #f4f4f5;
+  --org-bg-page: #f8fafc;
   --org-bg-card: #ffffff;
   --org-bg-sidebar: #ffffff;
-  --org-border-color: #e4e4e7;
-  --org-text-primary: #09090b;
-  --org-text-secondary: #52525b;
-  --org-text-muted: #a1a1aa;
-  --org-accent-blue: #09090b;
-  --org-accent-blue-hover: #27272a;
-  --org-accent-blue-light: #f4f4f5;
-  --org-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --org-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
-  --org-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --org-border-color: #e2e8f0;
+  --org-text-primary: #0f172a;
+  --org-text-secondary: #475569;
+  --org-text-muted: #94a3b8;
+  --org-accent-blue: #2563eb;
+  --org-accent-blue-hover: #1d4ed8;
+  --org-accent-blue-light: #eff6ff;
+  --org-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --org-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --org-shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
   --org-radius-card: 16px;
   --org-radius-sm: 10px;
 }
 
 .dark {
-  --org-bg-page: #09090b;
-  --org-bg-card: #18181b;
-  --org-bg-sidebar: #121215;
-  --org-border-color: #27272a;
-  --org-text-primary: #fafafa;
-  --org-text-secondary: #a1a1aa;
-  --org-text-muted: #71717a;
-  --org-accent-blue: #fafafa;
-  --org-accent-blue-hover: #e4e4e7;
-  --org-accent-blue-light: #27272a;
-  --org-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --org-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.6);
-  --org-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.8);
+  --org-bg-page: #f8fafc;
+  --org-bg-card: #ffffff;
+  --org-bg-sidebar: #ffffff;
+  --org-border-color: #e2e8f0;
+  --org-text-primary: #0f172a;
+  --org-text-secondary: #475569;
+  --org-text-muted: #94a3b8;
+  --org-accent-blue: #2563eb;
+  --org-accent-blue-hover: #1d4ed8;
+  --org-accent-blue-light: #eff6ff;
+  --org-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --org-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --org-shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
 }
 
 /* Page Layout Shell */
@@ -99,18 +99,18 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: #09090b;
+  background: #2563eb;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .dark .sidebar-brand-icon {
-  background: #ffffff;
-  color: #09090b;
+  background: #2563eb;
+  color: #ffffff;
 }
 
 .sidebar-nav-container {
@@ -137,26 +137,26 @@
 
 .sidebar-nav-item:hover {
   background-color: var(--org-accent-blue-light);
-  color: var(--org-text-primary);
+  color: var(--org-accent-blue);
 }
 
 .sidebar-nav-item--active {
-  background-color: #09090b;
+  background-color: #2563eb;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 
 .dark .sidebar-nav-item--active {
-  background-color: #ffffff;
-  color: #09090b !important;
+  background-color: #2563eb;
+  color: #ffffff !important;
 }
 
 .sidebar-nav-item--active:hover {
-  background-color: #27272a;
+  background-color: #1d4ed8;
 }
 
 .dark .sidebar-nav-item--active:hover {
-  background-color: #e4e4e7;
+  background-color: #1d4ed8;
 }
 
 .sidebar-footer {
@@ -264,7 +264,7 @@
 
 /* Welcome Banner */
 .organizer-welcome-banner {
-  background: linear-gradient(135deg, #09090b 0%, #18181b 50%, #27272a 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
   color: #ffffff;
   border-radius: 20px;
   padding: 32px 36px;
@@ -275,8 +275,8 @@
   gap: 20px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.3);
-  border: 1px solid #27272a;
+  box-shadow: 0 12px 30px -8px rgba(30, 64, 175, 0.3);
+  border: 1px solid #3b82f6;
 }
 
 @media (min-width: 768px) {

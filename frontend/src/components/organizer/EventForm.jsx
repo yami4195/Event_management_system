@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Calendar, MapPin, DollarSign, Image as ImageIcon, CheckCircle, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Image as ImageIcon, CheckCircle, AlertCircle, Upload } from "lucide-react";
+import { categoriesService } from "../../services/category.service";
 
 export default function EventForm({ initialData = null, onSubmit, isSubmitting = false, onCancel }) {
+  const [categories, setCategories] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+
   const [formData, setFormData] = useState({
     title: "",
+    category_id: "",
     category: "Technology & AI",
+    date: "",
     startDate: "",
     endDate: "",
+    time: "10:00 AM",
     location: "",
     isOnline: false,
     price: 0,
@@ -16,27 +24,47 @@ export default function EventForm({ initialData = null, onSubmit, isSubmitting =
     capacity: 100,
     image: "",
     description: "",
-    status: "Draft",
+    status: "upcoming",
   });
 
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
+    async function loadCategories() {
+      try {
+        const res = await categoriesService.getAll();
+        const cats = res.data?.data?.categories || res.data?.categories || res.data || [];
+        setCategories(cats);
+        if (cats.length > 0 && !formData.category_id) {
+          setFormData((prev) => ({ ...prev, category_id: cats[0].category_id }));
+        }
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
     if (initialData) {
       setFormData({
         title: initialData.title || "",
+        category_id: initialData.category_id || "",
         category: initialData.category || "Technology & AI",
+        date: initialData.date || (initialData.startDate ? initialData.startDate.substring(0, 10) : ""),
         startDate: initialData.startDate ? initialData.startDate.substring(0, 16) : "",
         endDate: initialData.endDate ? initialData.endDate.substring(0, 16) : "",
+        time: initialData.time || "10:00 AM",
         location: initialData.location || "",
         isOnline: initialData.isOnline || false,
         price: initialData.price || 0,
         currency: initialData.currency || "ETB",
         capacity: initialData.capacity || 100,
-        image: initialData.image || "",
+        image: initialData.image || initialData.imageUrl || "",
         description: initialData.description || "",
-        status: initialData.status || "Draft",
+        status: (initialData.status || "upcoming").toLowerCase(),
       });
+      setImagePreview(initialData.image || initialData.imageUrl || "");
     }
   }, [initialData]);
 
@@ -51,10 +79,22 @@ export default function EventForm({ initialData = null, onSubmit, isSubmitting =
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const validate = () => {
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = "Event title is required";
-    if (!formData.startDate) newErrors.startDate = "Start date & time is required";
+    if (!formData.startDate && !formData.date) newErrors.startDate = "Event date is required";
     if (!formData.isOnline && !formData.location.trim()) newErrors.location = "Location venue is required";
     if (formData.capacity <= 0) newErrors.capacity = "Capacity must be greater than 0";
     if (!formData.description.trim()) newErrors.description = "Description is required";
@@ -66,12 +106,32 @@ export default function EventForm({ initialData = null, onSubmit, isSubmitting =
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
-    onSubmit({
-      ...formData,
-      price: Number(formData.price),
+
+    // Determine category ID if missing
+    let finalCatId = formData.category_id;
+    if (!finalCatId && categories.length > 0) {
+      finalCatId = categories[0].category_id;
+    }
+
+    const payload = {
+      title: formData.title.trim(),
+      category_id: finalCatId,
+      date: formData.date || (formData.startDate ? formData.startDate.substring(0, 10) : new Date().toISOString().substring(0, 10)),
+      time: formData.time || "10:00 AM",
+      location: formData.isOnline ? "Online / Web" : formData.location.trim(),
       capacity: Number(formData.capacity),
-      image: formData.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=80",
-    });
+      price: Number(formData.price),
+      status: formData.status.toLowerCase(),
+      description: formData.description.trim(),
+    };
+
+    if (imageFile) {
+      payload.image = imageFile;
+    } else if (formData.image) {
+      payload.image = formData.image;
+    }
+
+    onSubmit(payload);
   };
 
   return (
@@ -231,20 +291,40 @@ export default function EventForm({ initialData = null, onSubmit, isSubmitting =
         </div>
       </div>
 
-      {/* Image URL */}
+      {/* Cover Image Upload (Cloudinary) */}
       <div className="space-y-2">
         <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-          <ImageIcon className="w-4 h-4 text-black dark:text-white" /> Cover Image URL
+          <ImageIcon className="w-4 h-4 text-black dark:text-white" /> Cover Image (Upload to Cloudinary)
         </label>
+
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 transition-colors border border-slate-200 dark:border-slate-700">
+            <Upload className="w-4 h-4" />
+            Upload File to Cloudinary
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
+
+          <span className="text-xs text-slate-400 font-semibold">Or enter image URL below</span>
+        </div>
+
         <Input
           name="image"
           value={formData.image}
           onChange={handleChange}
           placeholder="https://images.unsplash.com/photo-..."
         />
-        {formData.image && (
-          <div className="mt-2 h-32 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
-            <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+
+        {imagePreview && (
+          <div className="mt-2 h-40 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 relative">
+            <img src={imagePreview} alt="Cover Preview" className="w-full h-full object-cover" />
+            <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+              Cover Image Preview
+            </span>
           </div>
         )}
       </div>

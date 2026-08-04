@@ -11,7 +11,7 @@ export default function OrganizerNavbar({
 }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleLogout = async () => {
@@ -97,8 +97,16 @@ export default function OrganizerNavbar({
 
         {/* Profile Pill */}
         <Link to="/organizer/settings" title="Profile Settings">
-          <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
-            <User className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors overflow-hidden">
+            {user?.profile_picture || user?.profilePicture ? (
+              <img
+                src={user.profile_picture || user.profilePicture}
+                alt={user?.firstname || "Organizer"}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-5 h-5" />
+            )}
           </div>
         </Link>
 

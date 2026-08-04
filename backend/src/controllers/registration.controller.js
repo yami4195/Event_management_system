@@ -132,10 +132,10 @@ export async function createRegistration(req, res) {
  */
 export async function listAllRegistrations(req, res) {
   try {
-    if (req.user.role !== "ADMIN") {
+    if (req.user.role !== "ADMIN" && req.user.role !== "ORGANIZER") {
       return res.status(403).json({
         success: false,
-        message: "Access denied. Admin role required.",
+        message: "Access denied. Organizer or Admin role required.",
       });
     }
 
@@ -143,6 +143,11 @@ export async function listAllRegistrations(req, res) {
 
     const conditions = [];
     const values = [];
+
+    if (req.user.role === "ORGANIZER") {
+      values.push(req.user.id);
+      conditions.push(`e.organizer_id = $${values.length}`);
+    }
 
     if (event) {
       if (!isValidId(String(event))) {

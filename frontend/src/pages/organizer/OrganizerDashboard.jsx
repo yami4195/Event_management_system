@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useOrganizer } from "../../hooks/useOrganizer";
+import useAuth from "../../hooks/useAuth";
 import DashboardCard from "../../components/organizer/DashboardCard";
 import EventTable from "../../components/organizer/EventTable";
 import RegistrationTable from "../../components/organizer/RegistrationTable";
@@ -19,15 +20,24 @@ import { formatCurrency } from "../../utils/organizerHelpers";
 import { Button } from "../../components/ui/button";
 
 export default function OrganizerDashboard() {
+  const { user } = useAuth();
   const {
     loading,
+    error,
     summary,
     events,
     registrations,
     notifications,
     deleteEvent,
     toggleCheckIn,
+    settings,
+    refresh,
   } = useOrganizer();
+
+  const organizerDisplayName =
+    settings?.firstname || settings?.name || user?.firstname
+      ? `${user?.firstname || ""} ${user?.lastname || ""}`.trim() || settings?.name
+      : user?.email?.split("@")[0] || "Organizer";
 
   const [selectedDeleteEvent, setSelectedDeleteEvent] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -42,8 +52,24 @@ export default function OrganizerDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-black dark:border-white" />
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3" />
+        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Loading Organizer Control Center...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm text-center space-y-4">
+        <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto text-lg font-bold">
+          !
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Unable to load dashboard data</h2>
+        <p className="text-sm text-slate-500 max-w-md mx-auto">{error}</p>
+        <Button onClick={refresh} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6">
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -56,7 +82,7 @@ export default function OrganizerDashboard() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-xs font-bold mb-3 backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5" /> Organizer Control Center
           </div>
-          <h1 className="welcome-title">Welcome back, TechHub Addis!</h1>
+          <h1 className="welcome-title">Welcome back, {organizerDisplayName}!</h1>
           <p className="welcome-subtitle">
             Manage your live event registrations, monitor ticket sales revenue, and launch new experiences.
           </p>

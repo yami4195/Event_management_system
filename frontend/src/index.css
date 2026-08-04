@@ -19,16 +19,16 @@
   --color-secondary: #ff6584;
   --color-accent: #43e97b;
 
-  --color-bg: #080812;
-  --color-bg-card: rgba(255, 255, 255, 0.03);
-  --color-bg-surface: rgba(255, 255, 255, 0.06);
-  --color-bg-elevated: rgba(255, 255, 255, 0.08);
+  --color-bg: #f8fafc;
+  --color-bg-card: #ffffff;
+  --color-bg-surface: #f1f5f9;
+  --color-bg-elevated: #e2e8f0;
 
-  --color-text: #f0f0f0;
-  --color-text-secondary: rgba(255, 255, 255, 0.55);
-  --color-text-muted: rgba(255, 255, 255, 0.35);
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.15);
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
 
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, #6c63ff, #9c5cff);
@@ -317,8 +317,8 @@ input, select, textarea {
     @apply bg-background text-foreground transition-colors duration-200;
   }
   .dark body {
-    background-color: #0f172a;
-    color: #f8fafc;
+    background-color: #f8fafc;
+    color: #0f172a;
   }
   html {
     @apply font-sans;

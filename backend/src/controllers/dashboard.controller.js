@@ -15,14 +15,23 @@ export async function getDashboardStats(req, res) {
            COUNT(*)::int AS total_events,
            COUNT(*) FILTER (WHERE status IN ('upcoming', 'ongoing'))::int AS published_events,
            COUNT(*) FILTER (WHERE status = 'upcoming')::int AS upcoming_events,
+           COUNT(*) FILTER (WHERE status = 'draft')::int AS draft_events,
            COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled_events,
            COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_events,
+           COALESCE(SUM(capacity), 0)::int AS total_capacity,
+           COALESCE(AVG(capacity), 0)::int AS average_capacity,
            COALESCE((
              SELECT COUNT(*)::int
              FROM registrations r
              JOIN events e ON e.event_id = r.event_id
              WHERE e.organizer_id = $1 AND r.status != 'cancelled'
-           ), 0) AS total_registrations
+           ), 0) AS total_registrations,
+           COALESCE((
+             SELECT SUM(COALESCE(e.price, 0))::int
+             FROM registrations r
+             JOIN events e ON e.event_id = r.event_id
+             WHERE e.organizer_id = $1 AND r.status != 'cancelled'
+           ), 0) AS total_revenue
          FROM events
          WHERE organizer_id = $1`,
         [userId]
@@ -36,11 +45,16 @@ export async function getDashboardStats(req, res) {
           role,
           totalEvents: row.total_events,
           publishedEvents: row.published_events,
-          draftEvents: 0,
+          draftEvents: row.draft_events,
           cancelledEvents: row.cancelled_events,
           completedEvents: row.completed_events,
           upcomingEvents: row.upcoming_events,
           totalRegistrations: row.total_registrations,
+          ticketsSold: row.total_registrations,
+          totalCapacity: row.total_capacity,
+          filledSeats: row.total_registrations,
+          averageCapacity: row.average_capacity,
+          totalRevenue: row.total_revenue,
           registeredEvents: 0,
           unreadNotifications: 0,
         },

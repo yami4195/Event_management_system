@@ -38,6 +38,8 @@ import AdminSettings from "../pages/admin/Settings";
 import UserDetails from "../components/admin/UserDetails";
 import EditUser from "../components/admin/EditUser";
 
+import { OrganizerProvider } from "../context/OrganizerContext";
+
 // Organizer Rebuilt Imports
 import OrganizerLayout from "../components/organizer/OrganizerLayout";
 import OrganizerDashboard from "../pages/organizer/OrganizerDashboard";
@@ -94,7 +96,9 @@ function AppRoutes() {
         <Route
           element={
             <ProtectedRoute allowedRoles={ORGANIZER_ROLES}>
-              <OrganizerLayout />
+              <OrganizerProvider>
+                <OrganizerLayout />
+              </OrganizerProvider>
             </ProtectedRoute>
           }
         >
@@ -107,6 +111,16 @@ function AppRoutes() {
           <Route path={ROUTES.ORGANIZER_SETTINGS} element={<Settings />} />
         </Route>
 
+        {/* Dashboard Entry Point (Role-Based Redirect) */}
+        <Route
+          path={ROUTES.DASHBOARD}
+          element={
+            <ProtectedRoute allowedRoles={ALL_ROLES}>
+              <DashboardRedirect />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Customer & General User Dashboard Routes — PROTECTED */}
         <Route
           element={
@@ -115,7 +129,6 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route path={ROUTES.DASHBOARD} element={<DashboardRedirect />} />
           <Route
             path={ROUTES.CUSTOMER_DASHBOARD}
             element={

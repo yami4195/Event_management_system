@@ -2,20 +2,24 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EventForm from "../../components/organizer/EventForm";
 import { useOrganizer } from "../../hooks/useOrganizer";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
 export default function CreateEvent() {
   const navigate = useNavigate();
   const { createEvent } = useOrganizer();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const handleSubmit = async (eventData) => {
     setIsSubmitting(true);
+    setServerError("");
     const res = await createEvent(eventData);
     setIsSubmitting(false);
     if (res.success) {
       navigate("/organizer/events");
+    } else {
+      setServerError(res.message || "Failed to publish event. Please check inputs.");
     }
   };
 
@@ -39,6 +43,13 @@ export default function CreateEvent() {
           </p>
         </div>
       </div>
+
+      {serverError && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          {serverError}
+        </div>
+      )}
 
       <EventForm
         onSubmit={handleSubmit}

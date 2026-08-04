@@ -4,7 +4,7 @@ import { uploadToCloudinary, deleteFromCloudinary } from "../utils/cloudinaryUpl
 
 // Helper to validate UUID-based IDs
 const isValidId = (id) => typeof id === "string" && isUuid(id);
-const EVENT_STATUSES = ["upcoming", "ongoing", "completed", "cancelled"];
+const EVENT_STATUSES = ["upcoming", "ongoing", "completed", "cancelled", "draft"];
 const normalizeEventStatus = (status) => String(status).trim().toLowerCase();
 
 const EVENT_SELECT_FIELDS = `
