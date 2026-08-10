@@ -2,78 +2,85 @@ import { Link } from "react-router-dom";
 import { Calendar, MapPin, Ticket, Edit, Users, Trash2 } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import { formatDate, formatCurrency, calculatePercentage } from "../../utils/organizerHelpers";
-import { Button } from "../ui/button";
+import "../../styles/components/my-events.css";
 
 export default function EventCard({ event, onDelete }) {
   const percentage = calculatePercentage(event.ticketsSold, event.capacity);
+  const displayImage =
+    event.image ||
+    event.imageUrl ||
+    event.image_url ||
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80";
 
   return (
-    <div className="event-card-item">
-      <div className="event-card-media">
-        <img src={event.image} alt={event.title} loading="lazy" />
-        <div className="absolute top-3 left-3 z-10">
+    <div className="org-event-card">
+      <div className="card-media-banner">
+        <img src={displayImage} alt={event.title} loading="lazy" />
+        <div className="card-badge-status-pos">
           <StatusBadge status={event.status} />
         </div>
-        <div className="absolute top-3 right-3 z-10 bg-slate-900/75 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-bold text-white">
-          {event.price > 0 ? formatCurrency(event.price, event.currency) : "Free"}
+        <div className="card-badge-price-pos">
+          {event.price > 0 ? formatCurrency(event.price, event.currency) : "FREE"}
         </div>
       </div>
 
-      <div className="event-card-body">
+      <div className="card-content-body">
         <div>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1 block">
-            {event.category}
-          </span>
-          <h3 className="event-card-title line-clamp-1">{event.title}</h3>
+          <span className="card-category-label">{event.category}</span>
+          <h3 className="card-event-title">{event.title}</h3>
 
-          <div className="event-card-meta">
-            <div className="meta-row">
-              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span className="line-clamp-1">{formatDate(event.startDate)}</span>
+          <div className="card-meta-list" style={{ marginTop: "14px" }}>
+            <div className="card-meta-item">
+              <div className="card-meta-icon">
+                <Calendar className="w-3.5 h-3.5" />
+              </div>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {formatDate(event.startDate)}
+              </span>
             </div>
-            <div className="meta-row">
-              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span className="line-clamp-1">{event.isOnline ? "Online Event" : event.location}</span>
+            <div className="card-meta-item">
+              <div className="card-meta-icon" style={{ color: "#4f46e5" }}>
+                <MapPin className="w-3.5 h-3.5" />
+              </div>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {event.isOnline ? "Online Event" : event.location || "Venue TBD"}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Ticket Progress */}
-        <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between text-xs font-semibold mb-1">
-            <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
-              <Ticket className="w-3.5 h-3.5" /> Tickets Sold
+        <div className="card-progress-section">
+          <div className="card-progress-header">
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <Ticket className="w-3.5 h-3.5" style={{ color: "#64748b" }} /> Tickets Sold
             </span>
-            <span className="text-slate-900 dark:text-slate-100">
+            <span>
               {event.ticketsSold} / {event.capacity} ({percentage}%)
             </span>
           </div>
-          <div className="progress-bar-wrap">
-            <div className="progress-bar-fill" style={{ width: `${percentage}%` }} />
+          <div className="card-progress-track">
+            <div className="card-progress-bar" style={{ width: `${percentage}%` }} />
           </div>
 
-          <div className="flex items-center justify-between gap-2 mt-4 pt-2">
-            <Link to={`/organizer/events/${event.id}/edit`}>
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 font-semibold">
-                <Edit className="w-3.5 h-3.5" /> Edit
-              </Button>
+          <div className="card-action-toolbar">
+            <Link to={`/organizer/events/${event.id}/edit`} className="btn-card-edit">
+              <Edit className="w-3.5 h-3.5" /> Edit
             </Link>
 
-            <div className="flex items-center gap-1">
-              <Link to={`/organizer/registrations?eventId=${event.id}`}>
-                <Button variant="secondary" size="sm" className="h-8 text-xs gap-1 font-semibold">
-                  <Users className="w-3.5 h-3.5" /> Attendees
-                </Button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Link to={`/organizer/registrations?eventId=${event.id}`} className="btn-card-attendees">
+                <Users className="w-3.5 h-3.5" /> Attendees
               </Link>
               {onDelete && (
-                <Button
-                  variant="ghost"
-                  size="icon"
+                <button
+                  type="button"
                   onClick={() => onDelete(event)}
-                  className="h-8 w-8 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+                  className="btn-card-delete"
+                  title="Delete Event"
                 >
                   <Trash2 className="w-4 h-4" />
-                </Button>
+                </button>
               )}
             </div>
           </div>

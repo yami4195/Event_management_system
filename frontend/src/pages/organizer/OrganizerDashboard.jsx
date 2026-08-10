@@ -36,7 +36,7 @@ export default function OrganizerDashboard() {
 
   const organizerDisplayName =
     settings?.firstname || settings?.name || user?.firstname
-      ? `${user?.firstname || ""} ${user?.lastname || ""}`.trim() || settings?.name
+      ? `${user?.firstname || ""} `.trim() || settings?.name
       : user?.email?.split("@")[0] || "Organizer";
 
   const [selectedDeleteEvent, setSelectedDeleteEvent] = useState(null);

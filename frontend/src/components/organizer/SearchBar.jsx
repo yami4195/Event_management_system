@@ -1,14 +1,21 @@
 import { Search, X } from "lucide-react";
+import "../../styles/components/my-events.css";
 
-export default function SearchBar({ value = "", onChange, placeholder = "Search events...", onClear }) {
+export default function SearchBar({
+  value = "",
+  onChange,
+  placeholder = "Search events by title, category, location...",
+  onClear,
+}) {
   return (
-    <div className="search-input-wrap">
-      <Search className="search-icon" />
+    <div className="search-box-custom">
+      <Search className="search-icon-left" />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        className="search-input-field"
       />
       {value && (
         <button
@@ -17,7 +24,7 @@ export default function SearchBar({ value = "", onChange, placeholder = "Search 
             onChange("");
             if (onClear) onClear();
           }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+          className="search-clear-btn"
           aria-label="Clear search"
         >
           <X className="w-4 h-4" />

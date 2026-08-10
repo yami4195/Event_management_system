@@ -175,16 +175,21 @@ export const organizerService = {
       if (!(eventData instanceof FormData)) {
         const formData = new FormData();
         Object.keys(eventData).forEach((key) => {
-          if (key === "image" && eventData[key] instanceof File) {
-            formData.append("image", eventData[key]);
-          } else if (eventData[key] !== undefined && eventData[key] !== null) {
-            formData.append(key, eventData[key]);
+          const val = eventData[key];
+          if (val !== undefined && val !== null) {
+            if (key === "image" && (val instanceof File || val instanceof Blob || (typeof val === "object" && val.name && val.size))) {
+              formData.append("image", val);
+            } else {
+              formData.append(key, val);
+            }
           }
         });
         bodyData = formData;
       }
 
-      const res = await axiosInstance.post("/events", bodyData);
+      const res = await axiosInstance.post("/events", bodyData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       const createdEvent = res.data?.data?.event;
 
       return {
@@ -211,16 +216,21 @@ export const organizerService = {
       if (!(eventData instanceof FormData)) {
         const formData = new FormData();
         Object.keys(eventData).forEach((key) => {
-          if (key === "image" && eventData[key] instanceof File) {
-            formData.append("image", eventData[key]);
-          } else if (eventData[key] !== undefined && eventData[key] !== null) {
-            formData.append(key, eventData[key]);
+          const val = eventData[key];
+          if (val !== undefined && val !== null) {
+            if (key === "image" && (val instanceof File || val instanceof Blob || (typeof val === "object" && val.name && val.size))) {
+              formData.append("image", val);
+            } else {
+              formData.append(key, val);
+            }
           }
         });
         bodyData = formData;
       }
 
-      const res = await axiosInstance.put(`/events/${id}`, bodyData);
+      const res = await axiosInstance.put(`/events/${id}`, bodyData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       const updatedEvent = res.data?.data?.event;
 
       return {

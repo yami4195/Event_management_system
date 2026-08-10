@@ -1,13 +1,5 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "../ui/dialog";
-import { Button } from "../ui/button";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
+import "../../styles/components/my-events.css";
 
 export default function DeleteModal({
   isOpen,
@@ -17,37 +9,40 @@ export default function DeleteModal({
   description = "Are you sure you want to delete this item? This action cannot be undone.",
   isDeleting = false,
 }) {
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100">
-              {title}
-            </DialogTitle>
-          </div>
-          <DialogDescription className="text-sm text-slate-500 dark:text-slate-400 pt-1">
-            {description}
-          </DialogDescription>
-        </DialogHeader>
+  if (!isOpen) return null;
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-4">
-          <Button variant="outline" onClick={onClose} disabled={isDeleting}>
+  return (
+    <div className="delete-modal-overlay" onClick={onClose}>
+      <div className="delete-modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="delete-modal-icon-badge">
+          <AlertTriangle className="w-8 h-8" />
+        </div>
+
+        <div className="delete-modal-header">
+          <h2 className="delete-modal-title">{title}</h2>
+          <p className="delete-modal-desc">{description}</p>
+        </div>
+
+        <div className="delete-modal-actions">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isDeleting}
+            className="btn-modal-cancel"
+          >
             Cancel
-          </Button>
-          <Button
-            variant="destructive"
+          </button>
+          <button
+            type="button"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="bg-rose-600 hover:bg-rose-700 text-white font-semibold"
+            className="btn-modal-delete"
           >
-            {isDeleting ? "Deleting..." : "Delete Permanently"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <Trash2 className="w-4 h-4" />
+            <span>{isDeleting ? "Deleting..." : "Delete Permanently"}</span>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useOrganizer } from "../../hooks/useOrganizer";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Building, CreditCard, Bell, CheckCircle } from "lucide-react";
+import { Building, CreditCard, Bell, CheckCircle, Save } from "lucide-react";
+import "../../styles/components/settings.css";
 
 export default function Settings() {
   const { loading, settings, updateSettings } = useOrganizer();
@@ -59,95 +58,136 @@ export default function Settings() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const payload = { ...formData };
+    const nameParts = (formData.name || "").trim().split(" ");
+    const firstname = formData.firstname || nameParts[0] || "Organizer";
+    const lastname = formData.lastname || nameParts.slice(1).join(" ") || "";
+
+    const payload = {
+      firstname,
+      lastname,
+      name: (formData.name || "").trim(),
+      phone: (formData.phone || "").trim(),
+      city: (formData.city || "").trim(),
+      subcity: (formData.subcity || "").trim(),
+      house_number: (formData.houseNumber || "").trim(),
+      bio: (formData.bio || "").trim(),
+      payout_method: formData.payoutMethod,
+      account_number: formData.accountNumber,
+      emailNotifications: formData.emailNotifications,
+      registrationAlerts: formData.registrationAlerts,
+      payoutAlerts: formData.payoutAlerts,
+    };
+
     if (avatarFile) {
       payload.image = avatarFile;
+    } else if (imagePreview) {
+      payload.image = imagePreview;
+      payload.profile_picture = imagePreview;
     }
 
     await updateSettings(payload);
     setIsSubmitting(false);
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    setTimeout(() => setSavedSuccess(false), 3500);
   };
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+      <div className="settings-wrapper" style={{ alignItems: "center", justifyContent: "center", minHeight: "400px" }}>
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3" />
-        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Loading Organizer Settings...</p>
+        <p style={{ fontSize: "14px", fontWeight: "600", color: "#64748b" }}>Loading Account Settings...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
-          Organizer Account Settings
-        </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Manage your organizer profile brand, payout details, and alert preferences.
-        </p>
+    <div className="settings-wrapper">
+      {/* Header Banner Card */}
+      <div className="settings-header-card">
+        <div className="settings-title-area">
+          <h1>Organizer Account Settings</h1>
+          <p>Manage your organization branding, profile info, bank payout details, and alert preferences.</p>
+        </div>
+
+        <button
+          type="submit"
+          form="settings-form"
+          disabled={isSubmitting}
+          className="btn-save-settings"
+        >
+          <Save className="w-5 h-5" />
+          <span>{isSubmitting ? "Saving..." : "Save Settings"}</span>
+        </button>
       </div>
 
       {savedSuccess && (
-        <div className="p-4 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-black border border-zinc-700 flex items-center gap-2 font-semibold text-sm">
-          <CheckCircle className="w-5 h-5 text-emerald-400 dark:text-emerald-600" />
-          Settings updated successfully!
+        <div className="settings-toast-success">
+          <CheckCircle className="w-5 h-5" />
+          <span>Settings updated successfully! Your organizer profile details are updated.</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form id="settings-form" onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
         {/* Profile Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div className="p-2.5 rounded-xl bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700">
-              <Building className="w-5 h-5" />
+        <div className="settings-section-card">
+          <div className="settings-section-header">
+            <div className="settings-icon-badge">
+              <Building className="w-6 h-6" />
             </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Organizer Profile & Branding
-              </h2>
-              <p className="text-xs text-slate-500">Public details shown on your event listings</p>
+            <div className="settings-section-title-group">
+              <h2>Organizer Profile & Branding</h2>
+              <p>Public details shown on your event listings</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Organizer / Company Name
-              </label>
-              <Input name="name" value={formData.name} onChange={handleChange} />
+          <div className="settings-grid-2col">
+            <div className="settings-field-group">
+              <label className="settings-label">Organizer / Company Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="settings-input-control"
+                placeholder="e.g. Acme Events Ethiopia"
+              />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Contact Email
-              </label>
-              <Input name="email" value={formData.email} onChange={handleChange} type="email" />
+            <div className="settings-field-group">
+              <label className="settings-label">Contact Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="settings-input-control"
+                placeholder="organizer@domain.com"
+              />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Phone Number
-              </label>
-              <Input name="phone" value={formData.phone} onChange={handleChange} />
+            <div className="settings-field-group">
+              <label className="settings-label">Phone Number</label>
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="settings-input-control"
+                placeholder="+251 91 234 5678"
+              />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Profile Photo (Upload to Cloudinary)
-              </label>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-shrink-0">
-                  {imagePreview ? (
-                    <img src={imagePreview} alt="Profile Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <Building className="w-8 h-8 m-4 text-slate-400" />
-                  )}
-                </div>
-                <div className="space-y-1 flex-grow">
+            <div className="settings-field-group settings-full-width">
+              <label className="settings-label">Organizer Profile Logo</label>
+              <div className="avatar-upload-row">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Profile Avatar" className="avatar-preview-img" />
+                ) : (
+                  <div className="avatar-preview-img" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#e2e8f0" }}>
+                    <Building className="w-8 h-8" style={{ color: "#64748b" }} />
+                  </div>
+                )}
+                <div className="avatar-upload-info">
                   <input
                     type="file"
                     accept="image/*"
@@ -160,52 +200,47 @@ export default function Settings() {
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-zinc-100 dark:file:bg-zinc-800 file:text-zinc-900 dark:file:text-zinc-100 hover:file:bg-zinc-200 cursor-pointer"
+                    className="avatar-file-input"
                   />
-                  <p className="text-[11px] text-slate-400">PNG, JPG, or WEBP up to 5MB</p>
+                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>Upload PNG, JPG, or WEBP (Max 5MB)</span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Organizer Bio
-              </label>
+            <div className="settings-field-group settings-full-width">
+              <label className="settings-label">Organizer Bio</label>
               <textarea
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
                 rows={3}
-                className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm font-medium text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-black/20"
+                className="settings-textarea-control"
+                placeholder="Tell attendees about your events, vision, and upcoming gatherings..."
               />
             </div>
           </div>
         </div>
 
         {/* Payout Information */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div className="p-2.5 rounded-xl bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700">
-              <CreditCard className="w-5 h-5" />
+        <div className="settings-section-card">
+          <div className="settings-section-header">
+            <div className="settings-icon-badge" style={{ background: "#f0fdf4", borderColor: "#bbf7d0", color: "#16a34a" }}>
+              <CreditCard className="w-6 h-6" />
             </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Payout & Bank Details
-              </h2>
-              <p className="text-xs text-slate-500">Destination for ticket sales payouts</p>
+            <div className="settings-section-title-group">
+              <h2>Payout & Bank Details</h2>
+              <p>Destination account for ticket sales payouts</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Payout Method
-              </label>
+          <div className="settings-grid-2col">
+            <div className="settings-field-group">
+              <label className="settings-label">Payout Method</label>
               <select
                 name="payoutMethod"
                 value={formData.payoutMethod}
                 onChange={handleChange}
-                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm font-medium text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-black/20"
+                className="settings-select-control"
               >
                 <option value="Telebirr">Telebirr Mobile Wallet</option>
                 <option value="CBE Birr">CBE Birr</option>
@@ -215,80 +250,84 @@ export default function Settings() {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Account Number / Phone
-              </label>
-              <Input name="accountNumber" value={formData.accountNumber} onChange={handleChange} />
+            <div className="settings-field-group">
+              <label className="settings-label">Account Number / Phone</label>
+              <input
+                type="text"
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleChange}
+                className="settings-input-control"
+                placeholder="e.g. 1000123456789 or 0912345678"
+              />
             </div>
           </div>
         </div>
 
         {/* Notifications */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div className="p-2.5 rounded-xl bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700">
-              <Bell className="w-5 h-5" />
+        <div className="settings-section-card">
+          <div className="settings-section-header">
+            <div className="settings-icon-badge" style={{ background: "#faf5ff", borderColor: "#e9d5ff", color: "#9333ea" }}>
+              <Bell className="w-6 h-6" />
             </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Notification Preferences
-              </h2>
-              <p className="text-xs text-slate-500">Configure email and dashboard alerts</p>
+            <div className="settings-section-title-group">
+              <h2>Notification Preferences</h2>
+              <p>Configure email and dashboard alerts</p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <label className="flex items-center gap-3 cursor-pointer">
+          <div className="checkbox-list-group">
+            <label className="checkbox-option-row">
               <input
                 type="checkbox"
                 name="emailNotifications"
                 checked={formData.emailNotifications}
                 onChange={handleChange}
-                className="w-4 h-4 rounded border-slate-300 text-black focus:ring-black dark:text-white dark:focus:ring-white"
+                className="custom-checkbox-input"
               />
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              <span className="checkbox-label-text">
                 Email Notifications for Ticket Purchases
               </span>
             </label>
 
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="checkbox-option-row">
               <input
                 type="checkbox"
                 name="registrationAlerts"
                 checked={formData.registrationAlerts}
                 onChange={handleChange}
-                className="w-4 h-4 rounded border-slate-300 text-black focus:ring-black dark:text-white dark:focus:ring-white"
+                className="custom-checkbox-input"
               />
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              <span className="checkbox-label-text">
                 Capacity Milestone Alerts (50%, 75%, 100%)
               </span>
             </label>
 
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="checkbox-option-row">
               <input
                 type="checkbox"
                 name="payoutAlerts"
                 checked={formData.payoutAlerts}
                 onChange={handleChange}
-                className="w-4 h-4 rounded border-slate-300 text-black focus:ring-black dark:text-white dark:focus:ring-white"
+                className="custom-checkbox-input"
               />
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              <span className="checkbox-label-text">
                 Payout & Deposit Confirmation Notices
               </span>
             </label>
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end pt-4">
-          <Button
+        {/* Bottom Save Action Button */}
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-black hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black font-bold px-8 shadow-md"
+            className="btn-save-settings"
           >
-            {isSubmitting ? "Saving Changes..." : "Save Settings"}
-          </Button>
+            <Save className="w-5 h-5" />
+            <span>{isSubmitting ? "Saving..." : "Save Settings"}</span>
+          </button>
         </div>
       </form>
     </div>

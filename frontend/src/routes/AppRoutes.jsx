@@ -50,6 +50,14 @@ import Registrations from "../pages/organizer/Registrations";
 import Analytics from "../pages/organizer/Analytics";
 import Settings from "../pages/organizer/Settings";
 
+// Customer Rebuilt Imports
+import { CustomerProvider } from "../context/CustomerContext";
+import CustomerLayout from "../components/customer/CustomerLayout";
+import CustomerDashboard from "../pages/customer/CustomerDashboard";
+import CustomerEvents from "../pages/customer/CustomerEvents";
+import CustomerNotifications from "../pages/customer/CustomerNotifications";
+import CustomerSettings from "../pages/customer/CustomerSettings";
+
 const ALL_ROLES = [...CUSTOMER_ROLES, ...ORGANIZER_ROLES, ...ADMIN_ROLES];
 
 function AppRoutes() {
@@ -124,38 +132,22 @@ function AppRoutes() {
         {/* Customer & General User Dashboard Routes — PROTECTED */}
         <Route
           element={
-            <ProtectedRoute allowedRoles={ALL_ROLES}>
-              <DashboardLayout />
+            <ProtectedRoute allowedRoles={CUSTOMER_ROLES}>
+              <CustomerProvider>
+                <CustomerLayout />
+              </CustomerProvider>
             </ProtectedRoute>
           }
         >
-          <Route
-            path={ROUTES.CUSTOMER_DASHBOARD}
-            element={
-              <ProtectedRoute allowedRoles={CUSTOMER_ROLES}>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route path={ROUTES.PROFILE} element={<Profile />} />
+          <Route path={ROUTES.CUSTOMER_DASHBOARD} element={<CustomerDashboard />} />
+          <Route path="/customer/registrations" element={<CustomerEvents />} />
+          <Route path={ROUTES.REGISTERED_EVENTS} element={<CustomerEvents />} />
+          <Route path="/customer/notifications" element={<CustomerNotifications />} />
+          <Route path={ROUTES.NOTIFICATIONS} element={<CustomerNotifications />} />
+          <Route path="/customer/profile" element={<CustomerSettings />} />
+          <Route path={ROUTES.PROFILE} element={<CustomerSettings />} />
           <Route path={ROUTES.CREATE_PROFILE} element={<ProfileForm />} />
           <Route path={ROUTES.EDIT_PROFILE} element={<ProfileForm />} />
-          <Route
-            path={ROUTES.REGISTERED_EVENTS}
-            element={
-              <ProtectedRoute allowedRoles={CUSTOMER_ROLES}>
-                <RegisteredEvents />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.NOTIFICATIONS}
-            element={
-              <ProtectedRoute allowedRoles={CUSTOMER_ROLES}>
-                <Notifications />
-              </ProtectedRoute>
-            }
-          />
         </Route>
 
         <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />

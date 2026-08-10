@@ -1,0 +1,323 @@
+/* =========================================================
+   SETTINGS PAGE - CUSTOM VANILLA CSS STYLING
+   Ultra-spacious, uncrowded, modern organizer account settings UI
+   ========================================================= */
+
+.settings-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 36px 24px 80px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  font-family: inherit;
+}
+
+/* Header Card */
+.settings-header-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04);
+}
+
+.settings-title-area h1 {
+  font-size: 28px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.settings-title-area p {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+.btn-save-settings {
+  height: 52px;
+  padding: 0 32px;
+  border-radius: 16px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-save-settings:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(37, 99, 235, 0.45);
+}
+
+.btn-save-settings:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Success Toast */
+.settings-toast-success {
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  border-radius: 20px;
+  padding: 18px 24px;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.1);
+  animation: fadeInToast 0.3s ease-out forwards;
+}
+
+@keyframes fadeInToast {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Settings Form Card Sections */
+.settings-section-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 36px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.settings-section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 20px;
+}
+
+.settings-icon-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-section-title-group h2 {
+  font-size: 19px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+}
+
+.settings-section-title-group p {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+/* Grid Layouts */
+.settings-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 640px) {
+  .settings-grid-2col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.settings-full-width {
+  grid-column: 1 / -1;
+}
+
+/* Custom Input Controls */
+.settings-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.settings-input-control {
+  width: 100%;
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.settings-input-control:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.settings-select-control {
+  width: 100%;
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-select-control:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.settings-textarea-control {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+  line-height: 1.5;
+  box-sizing: border-box;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.settings-textarea-control:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+/* Avatar Upload Box */
+.avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.avatar-preview-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+  flex-shrink: 0;
+}
+
+.avatar-upload-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.avatar-file-input {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.avatar-file-input::-webkit-file-upload-button {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: background 0.2s ease;
+}
+
+.avatar-file-input::-webkit-file-upload-button:hover {
+  background: #1d4ed8;
+}
+
+/* Checkbox Preference Rows */
+.checkbox-list-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.checkbox-option-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.checkbox-option-row:hover {
+  background: #eff6ff;
+  border-color: #dbeafe;
+}
+
+.custom-checkbox-input {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.checkbox-label-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}

@@ -1,0 +1,349 @@
+/* =========================================================
+   ATTENDANTS (CUSTOMER) MANAGEMENT - CUSTOM VANILLA CSS STYLING
+   Ultra-spacious, uncrowded, state-of-the-art attendant UI
+   ========================================================= */
+
+.attendants-wrapper {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 36px 24px 80px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  font-family: inherit;
+}
+
+/* Header Card */
+.attendants-header-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04);
+}
+
+@media (min-width: 768px) {
+  .attendants-header-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.attendants-title-area h1 {
+  font-size: 28px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.attendants-title-area p {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+.attendants-count-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.btn-export-csv {
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-export-csv:hover {
+  background: #f8fafc;
+  border-color: #2563eb;
+  color: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* Stats Summary Cards Grid (3 Columns) */
+.attendants-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 640px) {
+  .attendants-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.attendants-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.attendants-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-card-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.stat-icon-blue { background: #eff6ff; color: #2563eb; }
+.stat-icon-emerald { background: #dcfce7; color: #16a34a; }
+.stat-icon-amber { background: #fef3c7; color: #d97706; }
+
+.stat-card-body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.stat-card-sub {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* Filter Toolbar */
+.attendants-filter-toolbar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+}
+
+@media (min-width: 768px) {
+  .attendants-filter-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.attendants-select-filter {
+  height: 48px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.attendants-select-filter:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+/* Table Card Wrapper */
+.attendants-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.attendants-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.custom-attendants-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.custom-attendants-table th {
+  padding: 20px 24px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.custom-attendants-table td {
+  padding: 22px 24px;
+  font-size: 14px;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.custom-attendants-table tr:last-child td {
+  border-bottom: none;
+}
+
+.custom-attendants-table tr:hover td {
+  background: #f8fafc;
+}
+
+/* Attendee Profile Cell */
+.attendee-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.attendee-avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.attendee-name-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.attendee-contact-sub {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 3px;
+}
+
+.attendee-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ticket-type-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid #dbeafe;
+}
+
+/* Check-In Action Buttons */
+.btn-checkin-action {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: none;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-checkin-action:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.btn-undo-action {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-undo-action:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}

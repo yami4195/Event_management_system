@@ -69,9 +69,36 @@ export async function getProfileByUserId(req, res) {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found.",
+      const userRes = await pool.query(
+        `SELECT user_id, firstname, lastname, phone, created_at FROM users WHERE user_id = $1`,
+        [id]
+      );
+
+      if (userRes.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found.",
+        });
+      }
+
+      const u = userRes.rows[0];
+      return res.json({
+        success: true,
+        message: "Profile retrieved successfully.",
+        data: {
+          profile: {
+            profile_id: null,
+            user_id: u.user_id,
+            firstname: u.firstname,
+            lastname: u.lastname,
+            phone: u.phone,
+            city: null,
+            subcity: null,
+            house_number: null,
+            profile_picture: null,
+            created_at: u.created_at,
+          },
+        },
       });
     }
 
@@ -96,14 +123,18 @@ export async function getProfileByUserId(req, res) {
 export async function createProfile(req, res) {
   try {
     const userId = req.user.id;
-    const { firstname, lastname, phone, city, subcity, house_number, housenumber, profile_picture } = req.body;
+    const { firstname, lastname, phone, city, subcity, house_number, housenumber, profile_picture, name } = req.body;
 
-    // Validate name inputs
-    if (!firstname?.trim()) {
-      return res.status(400).json({ success: false, message: "First name is required." });
+    let fname = firstname;
+    let lname = lastname;
+    if ((!fname || !lname) && name) {
+      const parts = name.trim().split(" ");
+      fname = fname || parts[0];
+      lname = lname || parts.slice(1).join(" ") || "";
     }
-    if (!lastname?.trim()) {
-      return res.status(400).json({ success: false, message: "Last name is required." });
+
+    if (!fname?.trim()) {
+      fname = "Organizer";
     }
 
     // Check if the user already has a profile
@@ -119,6 +150,28 @@ export async function createProfile(req, res) {
       });
     }
 
+    // Process Cloudinary Image Upload
+    let finalProfilePicture = profile_picture ? profile_picture.trim() : null;
+    let imageInput = null;
+
+    if (req.file && req.file.buffer) {
+      imageInput = req.file.buffer;
+    } else if (req.body.image && typeof req.body.image === "string" && req.body.image.trim()) {
+      imageInput = req.body.image.trim();
+    }
+
+    if (imageInput) {
+      try {
+        const cloudinaryResult = await uploadToCloudinary(imageInput, `event_management/profiles/${userId}`);
+        finalProfilePicture = cloudinaryResult.url;
+      } catch (uploadErr) {
+        console.error("Profile picture Cloudinary upload failed:", uploadErr.message || uploadErr);
+        if (typeof imageInput === "string" && (imageInput.startsWith("http://") || imageInput.startsWith("https://"))) {
+          finalProfilePicture = imageInput;
+        }
+      }
+    }
+
     // Insert new profile
     const result = await pool.query(
       `INSERT INTO profiles (user_id, firstname, lastname, phone, city, subcity, house_number, profile_picture)
@@ -126,13 +179,13 @@ export async function createProfile(req, res) {
        RETURNING profile_id, user_id, firstname, lastname, phone, city, subcity, house_number, profile_picture, created_at`,
       [
         userId,
-        firstname.trim(),
-        lastname.trim(),
+        fname.trim(),
+        (lname || "").trim(),
         phone ? phone.trim() : null,
         city ? city.trim() : null,
         subcity ? subcity.trim() : null,
         (house_number ?? housenumber ?? "") ? String(house_number ?? housenumber ?? "").trim() : null,
-        profile_picture ? profile_picture.trim() : null,
+        finalProfilePicture,
       ]
     );
 
@@ -157,7 +210,7 @@ export async function createProfile(req, res) {
 export async function updateProfile(req, res) {
   try {
     const { id } = req.params;
-    const { firstname, lastname, phone, city, subcity, house_number, housenumber, profile_picture } = req.body;
+    const { firstname, lastname, phone, city, subcity, house_number, housenumber, profile_picture, name } = req.body;
 
     if (!isValidId(id)) {
       return res.status(400).json({
@@ -175,6 +228,7 @@ export async function updateProfile(req, res) {
     }
 
     // Get current profile
+    let currentProfile = null;
     const existing = await pool.query(
       `SELECT profile_id, user_id, firstname, lastname, phone, city, subcity, house_number, profile_picture 
        FROM profiles 
@@ -182,37 +236,67 @@ export async function updateProfile(req, res) {
       [id]
     );
 
-    if (existing.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found.",
-      });
+    if (existing.rows.length > 0) {
+      currentProfile = existing.rows[0];
+    } else {
+      const userRes = await pool.query(
+        `SELECT user_id, firstname, lastname, phone FROM users WHERE user_id = $1`,
+        [id]
+      );
+      if (userRes.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found.",
+        });
+      }
+      const u = userRes.rows[0];
+      currentProfile = {
+        profile_id: null,
+        user_id: u.user_id,
+        firstname: u.firstname,
+        lastname: u.lastname,
+        phone: u.phone,
+        city: null,
+        subcity: null,
+        house_number: null,
+        profile_picture: null,
+      };
     }
 
-    const currentProfile = existing.rows[0];
+    // Handle Image Upload to Cloudinary
+    let finalProfilePicture = currentProfile.profile_picture;
+    let imageInput = null;
 
-    // Validate inputs if provided
-    if (firstname !== undefined && !firstname.trim()) {
-      return res.status(400).json({ success: false, message: "First name cannot be empty." });
+    if (req.file && req.file.buffer) {
+      imageInput = req.file.buffer;
+    } else if (req.body.image && typeof req.body.image === "string" && req.body.image.trim()) {
+      imageInput = req.body.image.trim();
+    } else if (profile_picture && typeof profile_picture === "string" && profile_picture.trim()) {
+      imageInput = profile_picture.trim();
     }
-    if (lastname !== undefined && !lastname.trim()) {
-      return res.status(400).json({ success: false, message: "Last name cannot be empty." });
-    }
 
-    // Merge updates
-    let finalProfilePicture = profile_picture !== undefined ? (profile_picture ? profile_picture.trim() : null) : currentProfile.profile_picture;
-
-    if (req.file) {
+    if (imageInput) {
       try {
-        const cloudinaryResult = await uploadToCloudinary(req.file.buffer, `event_management/profiles/${id}`);
+        const cloudinaryResult = await uploadToCloudinary(imageInput, `event_management/profiles/${id}`);
         finalProfilePicture = cloudinaryResult.url;
       } catch (uploadErr) {
-        console.error("Profile picture upload to Cloudinary failed:", uploadErr.message);
+        console.error("Profile picture upload to Cloudinary failed:", uploadErr.message || uploadErr);
+        if (typeof imageInput === "string" && (imageInput.startsWith("http://") || imageInput.startsWith("https://"))) {
+          finalProfilePicture = imageInput;
+        }
       }
     }
 
-    const finalFirstname = firstname !== undefined ? firstname.trim() : currentProfile.firstname;
-    const finalLastname = lastname !== undefined ? lastname.trim() : currentProfile.lastname;
+    let fname = firstname;
+    let lname = lastname;
+    if ((!fname || !lname) && name) {
+      const parts = name.trim().split(" ");
+      fname = fname || parts[0];
+      lname = lname || parts.slice(1).join(" ") || "";
+    }
+
+    const finalFirstname = fname !== undefined ? fname.trim() : currentProfile.firstname || "Organizer";
+    const finalLastname = lname !== undefined ? lname.trim() : currentProfile.lastname || "";
     const finalPhone = phone !== undefined ? (phone ? phone.trim() : null) : currentProfile.phone;
     const finalCity = city !== undefined ? (city ? city.trim() : null) : currentProfile.city;
     const finalSubcity = subcity !== undefined ? (subcity ? subcity.trim() : null) : currentProfile.subcity;
@@ -220,28 +304,61 @@ export async function updateProfile(req, res) {
       ? ((house_number ?? housenumber ?? "") ? String(house_number ?? housenumber ?? "").trim() : null)
       : currentProfile.house_number;
 
-    // Execute update
-    const result = await pool.query(
-      `UPDATE profiles
-       SET firstname = $1, lastname = $2, phone = $3, city = $4, subcity = $5, house_number = $6, profile_picture = $7
-       WHERE user_id = $8
-       RETURNING profile_id, user_id, firstname, lastname, phone, city, subcity, house_number, profile_picture, created_at`,
-      [
-        finalFirstname,
-        finalLastname,
-        finalPhone,
-        finalCity,
-        finalSubcity,
-        finalHouseNumber,
-        finalProfilePicture,
-        id,
-      ]
-    );
+    let savedProfile = null;
+
+    if (currentProfile.profile_id) {
+      const result = await pool.query(
+        `UPDATE profiles
+         SET firstname = $1, lastname = $2, phone = $3, city = $4, subcity = $5, house_number = $6, profile_picture = $7
+         WHERE user_id = $8
+         RETURNING profile_id, user_id, firstname, lastname, phone, city, subcity, house_number, profile_picture, created_at`,
+        [
+          finalFirstname,
+          finalLastname,
+          finalPhone,
+          finalCity,
+          finalSubcity,
+          finalHouseNumber,
+          finalProfilePicture,
+          id,
+        ]
+      );
+      savedProfile = result.rows[0];
+    } else {
+      const result = await pool.query(
+        `INSERT INTO profiles (user_id, firstname, lastname, phone, city, subcity, house_number, profile_picture)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING profile_id, user_id, firstname, lastname, phone, city, subcity, house_number, profile_picture, created_at`,
+        [
+          id,
+          finalFirstname,
+          finalLastname,
+          finalPhone,
+          finalCity,
+          finalSubcity,
+          finalHouseNumber,
+          finalProfilePicture,
+        ]
+      );
+      savedProfile = result.rows[0];
+    }
+
+    // Sync firstname, lastname, phone with users table
+    try {
+      await pool.query(
+        `UPDATE users
+         SET firstname = $1, lastname = $2, phone = COALESCE($3, phone)
+         WHERE user_id = $4`,
+        [finalFirstname, finalLastname, finalPhone, id]
+      );
+    } catch (uErr) {
+      console.warn("User table sync warning:", uErr.message);
+    }
 
     return res.json({
       success: true,
       message: "Profile updated successfully.",
-      data: { profile: result.rows[0] },
+      data: { profile: savedProfile },
     });
   } catch (error) {
     console.error("Update profile error:", error.message);

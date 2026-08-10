@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Edit, Trash2, Users, ArrowUpDown } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import { formatDate, formatCurrency, calculatePercentage } from "../../utils/organizerHelpers";
-import { Button } from "../ui/button";
+import "../../styles/components/my-events.css";
 
 export default function EventTable({ events = [], onDelete, sortBy, sortOrder, onSort }) {
   const handleSortClick = (field) => {
@@ -12,105 +12,105 @@ export default function EventTable({ events = [], onDelete, sortBy, sortOrder, o
   };
 
   return (
-    <div className="organizer-table-wrapper">
-      <div className="table-responsive">
-        <table className="org-table">
+    <div className="table-card-wrapper">
+      <div className="table-scrollable">
+        <table className="custom-events-table">
           <thead>
             <tr>
-              <th onClick={() => handleSortClick("title")} className="cursor-pointer hover:text-blue-600">
-                <div className="flex items-center gap-1.5">
-                  Event Title
+              <th onClick={() => handleSortClick("title")} style={{ cursor: "pointer" }}>
+                <div style={{ display: "flex", itemsCenter: "center", gap: "6px" }}>
+                  Event Details
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </div>
               </th>
               <th>Category</th>
-              <th onClick={() => handleSortClick("date")} className="cursor-pointer hover:text-blue-600">
-                <div className="flex items-center gap-1.5">
-                  Date
+              <th onClick={() => handleSortClick("date")} style={{ cursor: "pointer" }}>
+                <div style={{ display: "flex", itemsCenter: "center", gap: "6px" }}>
+                  Date & Time
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </div>
               </th>
               <th>Status</th>
-              <th onClick={() => handleSortClick("ticketsSold")} className="cursor-pointer hover:text-blue-600">
-                <div className="flex items-center gap-1.5">
+              <th onClick={() => handleSortClick("ticketsSold")} style={{ cursor: "pointer" }}>
+                <div style={{ display: "flex", itemsCenter: "center", gap: "6px" }}>
                   Tickets Sold
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </div>
               </th>
-              <th onClick={() => handleSortClick("revenue")} className="cursor-pointer hover:text-blue-600 text-right">
-                <div className="flex items-center justify-end gap-1.5">
+              <th onClick={() => handleSortClick("revenue")} style={{ cursor: "pointer", textAlign: "right" }}>
+                <div style={{ display: "flex", itemsCenter: "center", justifyContent: "flex-end", gap: "6px" }}>
                   Revenue
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </div>
               </th>
-              <th className="text-right">Actions</th>
+              <th style={{ textAlign: "right" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {events.map((event) => {
               const pct = calculatePercentage(event.ticketsSold, event.capacity);
+              const displayImage =
+                event.image ||
+                event.imageUrl ||
+                event.image_url ||
+                "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300&auto=format&fit=crop&q=80";
+
               return (
                 <tr key={event.id}>
                   <td>
-                    <div className="flex items-center gap-3">
+                    <div className="table-event-info">
                       <img
-                        src={event.image}
+                        src={displayImage}
                         alt={event.title}
-                        className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-800 shrink-0"
+                        className="table-event-thumb"
                       />
                       <div>
-                        <div className="font-bold text-slate-900 dark:text-slate-100 line-clamp-1">
-                          {event.title}
-                        </div>
-                        <div className="text-xs text-slate-500 line-clamp-1">
-                          {event.isOnline ? "Online" : event.location}
+                        <div className="table-event-title">{event.title}</div>
+                        <div className="table-event-sub">
+                          {event.isOnline ? "Online Webinar" : event.location || "Venue TBD"}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span className="inline-block px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    <span style={{ display: "inline-block", padding: "4px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: "700", background: "#f1f5f9", color: "#334155" }}>
                       {event.category}
                     </span>
                   </td>
-                  <td className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                  <td style={{ fontSize: "13px", fontWeight: "600", color: "#475569" }}>
                     {formatDate(event.startDate)}
                   </td>
                   <td>
                     <StatusBadge status={event.status} />
                   </td>
                   <td>
-                    <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      {event.ticketsSold} / {event.capacity}
+                    <div style={{ fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>
+                      {event.ticketsSold} / {event.capacity} ({pct}%)
                     </div>
-                    <div className="w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-1">
-                      <div className="h-full bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
+                    <div className="card-progress-track" style={{ width: "110px", marginTop: "6px" }}>
+                      <div className="card-progress-bar" style={{ width: `${pct}%` }} />
                     </div>
                   </td>
-                  <td className="text-right font-extrabold text-slate-900 dark:text-slate-100 text-sm">
+                  <td style={{ textAlign: "right", fontWeight: "900", color: "#0f172a", fontSize: "15px" }}>
                     {formatCurrency(event.revenue, event.currency)}
                   </td>
                   <td>
-                    <div className="flex items-center justify-end gap-1">
-                      <Link to={`/organizer/events/${event.id}/edit`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px" }}>
+                      <Link to={`/organizer/events/${event.id}/edit`} className="btn-card-edit">
+                        <Edit className="w-3.5 h-3.5" />
                       </Link>
-                      <Link to={`/organizer/registrations?eventId=${event.id}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600">
-                          <Users className="w-4 h-4" />
-                        </Button>
+                      <Link to={`/organizer/registrations?eventId=${event.id}`} className="btn-card-attendees">
+                        <Users className="w-3.5 h-3.5" />
                       </Link>
                       {onDelete && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                        <button
+                          type="button"
                           onClick={() => onDelete(event)}
-                          className="h-8 w-8 text-slate-400 hover:text-rose-600"
+                          className="btn-card-delete"
+                          title="Delete Event"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </Button>
+                        </button>
                       )}
                     </div>
                   </td>

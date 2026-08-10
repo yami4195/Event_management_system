@@ -22,7 +22,7 @@ const EVENT_SELECT_FIELDS = `
     SELECT ei.image_url
     FROM event_images ei
     WHERE ei.event_id = e.event_id
-    ORDER BY ei.uploaded_at ASC, ei.image_id ASC
+    ORDER BY ei.uploaded_at DESC, ei.image_id DESC
     LIMIT 1
   ) AS "imageUrl"
 `;
@@ -297,11 +297,18 @@ export async function createEvent(req, res) {
     const newEvent = result.rows[0];
     let imageUploadFailed = false;
 
-    // If an image file was uploaded, upload to Cloudinary and save to event_images
-    if (req.file) {
+    // Process image upload (accept req.file buffer OR req.body.image base64/URL string)
+    let imageInput = null;
+    if (req.file && req.file.buffer) {
+      imageInput = req.file.buffer;
+    } else if (req.body.image && typeof req.body.image === "string" && req.body.image.trim()) {
+      imageInput = req.body.image.trim();
+    }
+
+    if (imageInput) {
       try {
         const folder = `event_management/events/${newEvent.event_id}`;
-        const cloudinaryResult = await uploadToCloudinary(req.file.buffer, folder);
+        const cloudinaryResult = await uploadToCloudinary(imageInput, folder);
 
         await pool.query(
           `INSERT INTO event_images (event_id, image_url, cloudinary_public_id, caption)
@@ -310,8 +317,23 @@ export async function createEvent(req, res) {
         );
         newEvent.imageUrl = cloudinaryResult.url;
       } catch (uploadError) {
-        console.error("Cloudinary upload error during event creation:", uploadError.message);
+        console.error("Cloudinary upload error during event creation:", uploadError.message || uploadError);
         imageUploadFailed = true;
+
+        // Fallback: if string URL was passed (not base64), store it directly in event_images
+        if (typeof imageInput === "string" && (imageInput.startsWith("http://") || imageInput.startsWith("https://"))) {
+          try {
+            await pool.query(
+              `INSERT INTO event_images (event_id, image_url, cloudinary_public_id, caption)
+               VALUES ($1, $2, $3, $4)`,
+              [newEvent.event_id, imageInput, null, null]
+            );
+            newEvent.imageUrl = imageInput;
+            imageUploadFailed = false;
+          } catch (dbErr) {
+            console.error("Failed to store fallback image URL in DB:", dbErr.message);
+          }
+        }
       }
     }
 
@@ -458,20 +480,26 @@ export async function updateEvent(req, res) {
     const updatedEvent = updateResult.rows[0];
     let imageUploadFailed = false;
 
-    // Handle image update: if a new file was uploaded
-    if (req.file) {
+    let updateImageInput = null;
+    if (req.file && req.file.buffer) {
+      updateImageInput = req.file.buffer;
+    } else if (req.body.image && typeof req.body.image === "string" && req.body.image.trim()) {
+      updateImageInput = req.body.image.trim();
+    }
+
+    if (updateImageInput) {
       try {
         const existingImage = await pool.query(
           `SELECT image_id, cloudinary_public_id
            FROM event_images
            WHERE event_id = $1
-           ORDER BY uploaded_at ASC, image_id ASC
+           ORDER BY uploaded_at DESC, image_id DESC
            LIMIT 1`,
           [id]
         );
 
         const folder = `event_management/events/${id}`;
-        const cloudinaryResult = await uploadToCloudinary(req.file.buffer, folder);
+        const cloudinaryResult = await uploadToCloudinary(updateImageInput, folder);
 
         if (existingImage.rows.length > 0) {
           const oldImage = existingImage.rows[0];
@@ -495,8 +523,33 @@ export async function updateEvent(req, res) {
 
         updatedEvent.imageUrl = cloudinaryResult.url;
       } catch (uploadError) {
-        console.error("Cloudinary upload error during event update:", uploadError.message);
+        console.error("Cloudinary upload error during event update:", uploadError.message || uploadError);
         imageUploadFailed = true;
+
+        if (typeof updateImageInput === "string" && (updateImageInput.startsWith("http://") || updateImageInput.startsWith("https://"))) {
+          try {
+            const existingImage = await pool.query(
+              `SELECT image_id FROM event_images WHERE event_id = $1 ORDER BY uploaded_at DESC LIMIT 1`,
+              [id]
+            );
+            if (existingImage.rows.length > 0) {
+              await pool.query(
+                `UPDATE event_images SET image_url = $1 WHERE image_id = $2`,
+                [updateImageInput, existingImage.rows[0].image_id]
+              );
+            } else {
+              await pool.query(
+                `INSERT INTO event_images (event_id, image_url, cloudinary_public_id, caption)
+                 VALUES ($1, $2, $3, $4)`,
+                [id, updateImageInput, null, null]
+              );
+            }
+            updatedEvent.imageUrl = updateImageInput;
+            imageUploadFailed = false;
+          } catch (dbErr) {
+            console.error("Failed to update image URL fallback in DB:", dbErr.message);
+          }
+        }
       }
     }
 

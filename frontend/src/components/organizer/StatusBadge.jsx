@@ -1,12 +1,15 @@
-import { getStatusBadgeConfig } from "../../utils/organizerHelpers";
+export default function StatusBadge({ status = "upcoming" }) {
+  const norm = String(status).toLowerCase();
+  let statusClass = "status-upcoming";
 
-export default function StatusBadge({ status, className = "" }) {
-  const config = getStatusBadgeConfig(status);
+  if (norm.includes("pub")) statusClass = "status-published";
+  else if (norm.includes("draft")) statusClass = "status-draft";
+  else if (norm.includes("canc")) statusClass = "status-cancelled";
 
   return (
-    <span className={`status-badge ${config.bgColor} ${className}`}>
-      <span className={`status-badge-dot ${config.dotColor}`} />
-      {config.label}
+    <span className={`custom-status-pill ${statusClass}`}>
+      <span className="status-dot" />
+      <span>{status.toUpperCase()}</span>
     </span>
   );
 }

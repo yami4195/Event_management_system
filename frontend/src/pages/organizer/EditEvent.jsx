@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import EventForm from "../../components/organizer/EventForm";
 import { organizerService } from "../../services/organizerService";
 import { useOrganizer } from "../../hooks/useOrganizer";
-import { ArrowLeft, AlertCircle } from "lucide-react";
-import { Button } from "../../components/ui/button";
+import { ArrowLeft, AlertCircle, Edit3, ChevronRight } from "lucide-react";
+import "../../styles/components/create-event.css";
 
 export default function EditEvent() {
   const { id } = useParams();
@@ -35,57 +35,77 @@ export default function EditEvent() {
     if (res.success) {
       navigate("/organizer/events");
     } else {
-      setServerError(res.message || "Failed to update event.");
+      setServerError(res.message || "Failed to update event details.");
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+      <div className="create-event-page-wrapper" style={{ alignItems: "center", justifyContent: "center", minHeight: "400px" }}>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3" />
+        <p style={{ fontSize: "14px", fontWeight: "600", color: "#64748b" }}>Loading Event Configuration...</p>
       </div>
     );
   }
 
   if (!eventData) {
     return (
-      <div className="text-center py-16">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Event Not Found</h2>
-        <Button onClick={() => navigate("/organizer/events")} className="mt-4">
-          Return to Events
-        </Button>
+      <div className="create-event-page-wrapper" style={{ textAlign: "center" }}>
+        <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a" }}>Event Not Found</h2>
+        <p style={{ fontSize: "13px", color: "#64748b" }}>The requested event could not be found or was removed.</p>
+        <button onClick={() => navigate("/organizer/events")} className="btn-primary-custom" style={{ margin: "16px auto 0 auto" }}>
+          Return to My Events
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="h-9 px-3"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back
-        </Button>
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
-            Edit Event: {eventData.title}
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Update event scheduling, pricing, location, or image assets.
-          </p>
+    <div className="create-event-page-wrapper">
+      {/* Breadcrumb Navigation */}
+      <div className="create-event-breadcrumb">
+        <Link to="/organizer/dashboard" className="breadcrumb-link">
+          Dashboard
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5" />
+        <Link to="/organizer/events" className="breadcrumb-link">
+          My Events
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5" />
+        <span className="breadcrumb-current">Edit Event</span>
+      </div>
+
+      {/* Header Banner Card */}
+      <div className="create-event-header-card">
+        <div className="header-title-group">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="back-btn-custom"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <div>
+            <div className="header-badge-tag">
+              <Edit3 className="w-3.5 h-3.5" /> Modify Event Details
+            </div>
+            <h1 className="create-event-title">Edit Event: {eventData.title}</h1>
+            <p className="create-event-subtitle">
+              Update event date/time scheduling, location, seat capacity, ticket price, or cover banner.
+            </p>
+          </div>
         </div>
       </div>
 
+      {/* Server Error Alert */}
       {serverError && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          {serverError}
+        <div className="server-error-banner">
+          <AlertCircle className="w-5 h-5" />
+          <span>{serverError}</span>
         </div>
       )}
 
+      {/* Uncrowded Form with Live Preview */}
       <EventForm
         initialData={eventData}
         onSubmit={handleSubmit}

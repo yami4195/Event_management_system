@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useOrganizer } from "../../hooks/useOrganizer";
 import AnalyticsCard from "../../components/organizer/AnalyticsCard";
-import DashboardCard from "../../components/organizer/DashboardCard";
 import { formatCurrency } from "../../utils/organizerHelpers";
 import { DollarSign, Ticket, TrendingUp, Calendar } from "lucide-react";
+import "../../styles/components/analytics.css";
 
 export default function Analytics() {
   const { loading, analytics } = useOrganizer();
@@ -11,33 +11,28 @@ export default function Analytics() {
 
   if (loading || !analytics) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+      <div className="analytics-wrapper" style={{ alignItems: "center", justifyContent: "center", minHeight: "400px" }}>
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3" />
-        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Loading Analytics & Metrics...</p>
+        <p style={{ fontSize: "14px", fontWeight: "600", color: "#64748b" }}>Loading Performance Metrics...</p>
       </div>
     );
   }
 
-  const hasData = analytics.totalRevenue > 0 || analytics.ticketsSold > 0 || analytics.activeEvents > 0;
-  const maxRevenue = Math.max(...(analytics.monthlyRevenue.map((m) => m.revenue) || [1]), 1);
+  const maxRevenue = Math.max(...(analytics.monthlyRevenue?.map((m) => m.revenue) || [1]), 1);
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
-            Event Analytics & Growth
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Real-time performance metrics, ticket sales distribution, and revenue trends.
-          </p>
+    <div className="analytics-wrapper">
+      {/* Header Card */}
+      <div className="analytics-header-card">
+        <div className="analytics-title-area">
+          <h1>Event Analytics & Growth</h1>
+          <p>Real-time performance metrics, ticket sales distribution, and gross revenue trends.</p>
         </div>
 
         <select
           value={timeRange}
           onChange={(e) => setTimeRange(e.target.value)}
-          className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-black/20"
+          className="analytics-time-select"
         >
           <option value="7_days">Last 7 Days</option>
           <option value="30_days">Last 30 Days</option>
@@ -46,117 +41,120 @@ export default function Analytics() {
       </div>
 
       {/* Top Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <DashboardCard
-          title="Total Ticket Revenue"
-          value={formatCurrency(analytics.totalRevenue)}
-          trend={analytics.revenueTrend}
-          isPositive={true}
-          icon={DollarSign}
-        />
-        <DashboardCard
-          title="Tickets Sold"
-          value={analytics.ticketsSold}
-          trend={analytics.ticketsTrend}
-          isPositive={true}
-          icon={Ticket}
-        />
-        <DashboardCard
-          title="Active Event Listings"
-          value={analytics.activeEvents}
-          trend="Published"
-          isPositive={true}
-          icon={Calendar}
-        />
-        <DashboardCard
-          title="Ticket Conversion Rate"
-          value={analytics.completionRate}
-          trend="+3.2%"
-          isPositive={true}
-          icon={TrendingUp}
-        />
+      <div className="analytics-metrics-grid">
+        <div className="analytics-metric-card">
+          <div className="metric-card-top">
+            <span className="metric-card-label">Total Revenue</span>
+            <div className="metric-icon-box metric-icon-blue">
+              <DollarSign className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="metric-card-bottom">
+            <span className="metric-card-val">{formatCurrency(analytics.totalRevenue)}</span>
+            <span className="metric-trend-badge">{analytics.revenueTrend || "+12.4%"}</span>
+          </div>
+        </div>
+
+        <div className="analytics-metric-card">
+          <div className="metric-card-top">
+            <span className="metric-card-label">Tickets Sold</span>
+            <div className="metric-icon-box metric-icon-emerald">
+              <Ticket className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="metric-card-bottom">
+            <span className="metric-card-val">{analytics.ticketsSold}</span>
+            <span className="metric-trend-badge">{analytics.ticketsTrend || "+8.2%"}</span>
+          </div>
+        </div>
+
+        <div className="analytics-metric-card">
+          <div className="metric-card-top">
+            <span className="metric-card-label">Active Events</span>
+            <div className="metric-icon-box metric-icon-purple">
+              <Calendar className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="metric-card-bottom">
+            <span className="metric-card-val">{analytics.activeEvents}</span>
+            <span className="metric-trend-badge" style={{ background: "#f3e8ff", color: "#9333ea" }}>Published</span>
+          </div>
+        </div>
+
+        <div className="analytics-metric-card">
+          <div className="metric-card-top">
+            <span className="metric-card-label">Completion Rate</span>
+            <div className="metric-icon-box metric-icon-amber">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="metric-card-bottom">
+            <span className="metric-card-val">{analytics.completionRate}</span>
+            <span className="metric-trend-badge" style={{ background: "#fef3c7", color: "#d97706" }}>High Growth</span>
+          </div>
+        </div>
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Revenue Growth Bar Visualizer (2 cols) */}
-        <div className="lg:col-span-2">
-          <AnalyticsCard
-            title="Monthly Revenue Trend (ETB)"
-            subtitle="Gross ticket sales over the past 7 months"
-          >
-            <div className="pt-6 pb-2">
-              <div className="flex items-end justify-between h-56 gap-3">
-                {analytics.monthlyRevenue.map((item) => {
-                  const heightPct = Math.round((item.revenue / maxRevenue) * 100);
-                  return (
-                    <div key={item.month} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold text-black dark:text-white bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded border border-zinc-300 dark:border-zinc-700">
-                        {formatCurrency(item.revenue)}
-                      </div>
-                      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-t-xl h-full flex items-end overflow-hidden">
-                        <div
-                          className="w-full bg-zinc-900 dark:bg-white rounded-t-xl transition-all duration-500 group-hover:brightness-125"
-                          style={{ height: `${heightPct}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                        {item.month}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </AnalyticsCard>
-        </div>
-
-        {/* Category Breakdown (1 col) */}
-        <div>
-          <AnalyticsCard
-            title="Sales by Category"
-            subtitle="Ticket sales distribution by interest"
-          >
-            <div className="space-y-5 pt-4">
-              {analytics.categoryBreakdown.map((cat) => (
-                <div key={cat.name} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-bold">
-                    <span className="text-slate-800 dark:text-slate-200">{cat.name}</span>
-                    <span className="text-slate-500">{cat.count} tickets ({cat.percentage}%)</span>
+      <div className="analytics-charts-grid">
+        {/* Revenue Growth Bar Visualizer */}
+        <AnalyticsCard
+          title="Monthly Revenue Trend (ETB)"
+          subtitle="Gross ticket sales over past 7 months"
+        >
+          <div className="bar-chart-container">
+            {analytics.monthlyRevenue?.map((item) => {
+              const heightPct = Math.round((item.revenue / maxRevenue) * 100);
+              return (
+                <div key={item.month} className="bar-chart-col">
+                  <span className="bar-chart-tooltip">{formatCurrency(item.revenue)}</span>
+                  <div className="bar-chart-track">
+                    <div className="bar-chart-fill" style={{ height: `${heightPct}%` }} />
                   </div>
-                  <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-zinc-900 dark:bg-white rounded-full"
-                      style={{ width: `${cat.percentage}%` }}
-                    />
-                  </div>
+                  <span className="bar-chart-month">{item.month}</span>
                 </div>
-              ))}
-            </div>
-          </AnalyticsCard>
-        </div>
+              );
+            })}
+          </div>
+        </AnalyticsCard>
+
+        {/* Category Breakdown */}
+        <AnalyticsCard
+          title="Sales by Category"
+          subtitle="Ticket sales distribution"
+        >
+          <div className="cat-progress-list">
+            {analytics.categoryBreakdown?.map((cat) => (
+              <div key={cat.name} className="cat-progress-item">
+                <div className="cat-progress-labels">
+                  <span className="cat-progress-name">{cat.name}</span>
+                  <span className="cat-progress-stats">{cat.count} tickets ({cat.percentage}%)</span>
+                </div>
+                <div className="cat-progress-track">
+                  <div className="cat-progress-fill" style={{ width: `${cat.percentage}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </AnalyticsCard>
       </div>
 
       {/* Top Events Leaderboard */}
       <AnalyticsCard
         title="Top Performing Events Leaderboard"
-        subtitle="Ranked by total ticket revenue"
+        subtitle="Ranked by gross ticket revenue"
       >
-        <div className="divide-y divide-slate-100 dark:divide-slate-800 pt-2">
-          {analytics.topEvents.map((evt, idx) => (
-            <div key={evt.name} className="py-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg bg-black text-white dark:bg-white dark:text-black font-extrabold text-xs flex items-center justify-center">
-                  #{idx + 1}
-                </div>
+        <div className="leaderboard-list">
+          {analytics.topEvents?.map((evt, idx) => (
+            <div key={evt.name} className="leaderboard-row">
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div className="leaderboard-rank-badge">#{idx + 1}</div>
                 <div>
-                  <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">{evt.name}</div>
-                  <div className="text-xs text-slate-500">{evt.tickets} tickets sold</div>
+                  <h4 className="leaderboard-event-title">{evt.name}</h4>
+                  <div className="leaderboard-event-sub">{evt.tickets} tickets sold</div>
                 </div>
               </div>
-              <div className="font-extrabold text-slate-900 dark:text-slate-100 text-sm">
-                {formatCurrency(evt.revenue)}
-              </div>
+              <span className="leaderboard-revenue">{formatCurrency(evt.revenue)}</span>
             </div>
           ))}
         </div>

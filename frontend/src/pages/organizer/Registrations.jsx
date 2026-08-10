@@ -6,8 +6,7 @@ import RegistrationTable from "../../components/organizer/RegistrationTable";
 import SearchBar from "../../components/organizer/SearchBar";
 import EmptyState from "../../components/organizer/EmptyState";
 import Pagination from "../../components/organizer/Pagination";
-import DashboardCard from "../../components/organizer/DashboardCard";
-import { Button } from "../../components/ui/button";
+import "../../styles/components/attendants.css";
 
 export default function Registrations() {
   const [searchParams] = useSearchParams();
@@ -47,9 +46,10 @@ export default function Registrations() {
   );
 
   // Quick stats
-  const totalAttendees = registrations.reduce((sum, r) => sum + r.quantity, 0);
+  const totalAttendees = registrations.reduce((sum, r) => sum + (r.quantity || 1), 0);
   const checkedInCount = registrations.filter((r) => r.checkInStatus === "Checked In").length;
   const pendingCount = registrations.filter((r) => r.status === "Pending").length;
+  const checkInRate = Math.round((checkedInCount / (registrations.length || 1)) * 100);
 
   const handleExportCSV = () => {
     alert("Exporting attendee registrations CSV report...");
@@ -57,77 +57,86 @@ export default function Registrations() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+      <div className="attendants-wrapper" style={{ alignItems: "center", justifyContent: "center", minHeight: "400px" }}>
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3" />
-        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Loading Attendee Registrations...</p>
+        <p style={{ fontSize: "14px", fontWeight: "600", color: "#64748b" }}>Loading Customer & Attendant Directory...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
-            Attendee Registrations
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Track confirmed tickets, attendee contact details, and check-in statuses.
-          </p>
+    <div className="attendants-wrapper">
+      {/* Header Banner Card */}
+      <div className="attendants-header-card">
+        <div className="attendants-title-area">
+          <div className="attendants-count-pill">
+            <span>{registrations.length} Total Registered Customers</span>
+          </div>
+          <h1>Customer & Attendants Management</h1>
+          <p>Track confirmed tickets, attendee contact info, payment statuses, and instant door check-ins.</p>
         </div>
 
-        <Button
-          onClick={handleExportCSV}
-          variant="outline"
-          className="font-bold text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700 gap-2"
-        >
+        <button type="button" onClick={handleExportCSV} className="btn-export-csv">
           <Download className="w-4 h-4" />
-          Export CSV
-        </Button>
+          <span>Export CSV Report</span>
+        </button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <DashboardCard
-          title="Total Registrations"
-          value={registrations.length}
-          trend={`${totalAttendees} total tickets`}
-          isPositive={true}
-          icon={Users}
-          iconBg="bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
-        />
-        <DashboardCard
-          title="Checked-In Attendees"
-          value={checkedInCount}
-          trend={`${Math.round((checkedInCount / (registrations.length || 1)) * 100)}% check-in rate`}
-          isPositive={true}
-          icon={CheckCircle}
-          iconBg="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
-        />
-        <DashboardCard
-          title="Pending Payments"
-          value={pendingCount}
-          trend="Action required"
-          isPositive={false}
-          icon={Clock}
-          iconBg="bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"
-        />
+      {/* Summary Stat Cards */}
+      <div className="attendants-stats-grid">
+        <div className="attendants-stat-card">
+          <div className="stat-card-header">
+            <span className="stat-card-label">Total Registrations</span>
+            <div className="stat-card-icon stat-icon-blue">
+              <Users className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="stat-card-body">
+            <span className="stat-card-value">{registrations.length}</span>
+            <span className="stat-card-sub">{totalAttendees} total tickets sold</span>
+          </div>
+        </div>
+
+        <div className="attendants-stat-card">
+          <div className="stat-card-header">
+            <span className="stat-card-label">Checked-In Attendees</span>
+            <div className="stat-card-icon stat-icon-emerald">
+              <CheckCircle className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="stat-card-body">
+            <span className="stat-card-value">{checkedInCount}</span>
+            <span className="stat-card-sub">{checkInRate}% check-in rate</span>
+          </div>
+        </div>
+
+        <div className="attendants-stat-card">
+          <div className="stat-card-header">
+            <span className="stat-card-label">Pending Payments</span>
+            <div className="stat-card-icon stat-icon-amber">
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="stat-card-body">
+            <span className="stat-card-value">{pendingCount}</span>
+            <span className="stat-card-sub" style={{ color: "#d97706" }}>Payment follow-up required</span>
+          </div>
+        </div>
       </div>
 
-      {/* Filters Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Filter Toolbar */}
+      <div className="attendants-filter-toolbar">
         <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder="Search by attendee name, email, or event..."
+          placeholder="Search by attendee name, email, or event title..."
         />
 
-        <div className="flex items-center gap-3">
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm font-medium text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="attendants-select-filter"
           >
             <option value="all">All Registrations</option>
             <option value="confirmed">Confirmed</option>
@@ -137,12 +146,12 @@ export default function Registrations() {
         </div>
       </div>
 
-      {/* Registration Table */}
+      {/* Attendants Table Section */}
       {filteredRegistrations.length === 0 ? (
         <EmptyState
           icon={Users}
           title="No registrations found"
-          description="There are no registrations matching your search filters."
+          description="There are no registered attendants matching your search filters."
           actionLabel="Clear Filters"
           onAction={() => {
             setSearchQuery("");

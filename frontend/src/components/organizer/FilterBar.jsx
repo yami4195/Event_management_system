@@ -1,6 +1,6 @@
 import SearchBar from "./SearchBar";
 import { LayoutGrid, List, RotateCcw } from "lucide-react";
-import { Button } from "../ui/button";
+import "../../styles/components/my-events.css";
 
 export default function FilterBar({
   searchQuery,
@@ -15,19 +15,19 @@ export default function FilterBar({
   onReset,
 }) {
   return (
-    <div className="filter-bar-wrap">
+    <div className="my-events-filter-bar">
       <SearchBar
         value={searchQuery}
         onChange={onSearchChange}
-        placeholder="Search by title, location, or category..."
+        placeholder="Search by event title, location, or category..."
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Status Dropdown */}
+      <div className="filter-controls-group">
+        {/* Status Select */}
         <select
           value={statusFilter}
           onChange={(e) => onStatusChange(e.target.value)}
-          className="h-10 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="filter-select-field"
         >
           <option value="all">All Statuses</option>
           <option value="published">Published</option>
@@ -37,12 +37,12 @@ export default function FilterBar({
           <option value="cancelled">Cancelled</option>
         </select>
 
-        {/* Category Dropdown */}
+        {/* Category Select */}
         {categories.length > 0 && (
           <select
             value={categoryFilter}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="h-10 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="filter-select-field"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
@@ -53,30 +53,21 @@ export default function FilterBar({
           </select>
         )}
 
-        {/* Reset Filters */}
+        {/* Reset Filter Button */}
         {(searchQuery || statusFilter !== "all" || categoryFilter !== "all") && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onReset}
-            className="h-10 px-3 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          >
-            <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+          <button type="button" onClick={onReset} className="reset-filter-btn">
+            <RotateCcw className="w-3.5 h-3.5" />
             Reset
-          </Button>
+          </button>
         )}
 
-        {/* Grid / Table View Switcher */}
+        {/* View Mode Switcher */}
         {onViewModeChange && (
-          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          <div className="view-mode-toggle">
             <button
               type="button"
               onClick={() => onViewModeChange("grid")}
-              className={`p-1.5 rounded-lg text-sm transition-colors ${
-                viewMode === "grid"
-                  ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-              }`}
+              className={`view-mode-btn ${viewMode === "grid" ? "active" : ""}`}
               title="Grid View"
             >
               <LayoutGrid className="w-4 h-4" />
@@ -84,11 +75,7 @@ export default function FilterBar({
             <button
               type="button"
               onClick={() => onViewModeChange("table")}
-              className={`p-1.5 rounded-lg text-sm transition-colors ${
-                viewMode === "table"
-                  ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-              }`}
+              className={`view-mode-btn ${viewMode === "table" ? "active" : ""}`}
               title="Table View"
             >
               <List className="w-4 h-4" />

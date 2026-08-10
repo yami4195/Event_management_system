@@ -1,0 +1,334 @@
+/* =========================================================
+   CUSTOMER PORTAL LAYOUT - CUSTOM VANILLA CSS STYLING
+   Sidebar + Content Area pattern matching Organizer Layout
+   ========================================================= */
+
+.customer-layout-shell {
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #0f172a;
+  display: flex;
+  font-family: inherit;
+}
+
+/* Sidebar Shell */
+.customer-sidebar-shell {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 270px;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 40;
+  transition: width 0.25s ease, transform 0.25s ease;
+  box-shadow: 2px 0 16px rgba(15, 23, 42, 0.03);
+}
+
+.customer-sidebar-shell--collapsed {
+  width: 80px;
+}
+
+@media (max-width: 1023px) {
+  .customer-sidebar-shell {
+    transform: translateX(-100%);
+  }
+  .customer-sidebar-shell--open {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar Brand */
+.customer-sidebar-brand {
+  height: 72px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.customer-sidebar-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.customer-sidebar-brand-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-sidebar-collapse {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-sidebar-collapse:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* Navigation List */
+.customer-sidebar-nav {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.customer-nav-item {
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.customer-nav-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.customer-nav-item--active {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+}
+
+.customer-nav-item--logout {
+  color: #ef4444;
+  margin-top: auto;
+}
+
+.customer-nav-item--logout:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Sidebar Footer Profile Pill */
+.customer-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.customer-user-pill {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.customer-user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.customer-user-details {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.customer-user-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-user-role {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Main Wrapper & Navbar */
+.customer-main-wrapper {
+  margin-left: 270px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left 0.25s ease;
+}
+
+.customer-main-wrapper--expanded {
+  margin-left: 80px;
+}
+
+@media (max-width: 1023px) {
+  .customer-main-wrapper {
+    margin-left: 0;
+  }
+}
+
+.customer-navbar {
+  height: 72px;
+  padding: 0 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.02);
+}
+
+.customer-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-navbar-menu {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .btn-navbar-menu {
+    display: none;
+  }
+}
+
+.customer-navbar-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+}
+
+.customer-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-navbar-cta {
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-navbar-cta:hover {
+  background: #1d4ed8;
+}
+
+.btn-navbar-bell {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.btn-navbar-bell:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.bell-unread-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+}
+
+.customer-content-area {
+  flex: 1;
+  box-sizing: border-box;
+}

@@ -4,19 +4,26 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request interceptor — attach token
+// Request interceptor — attach token & handle FormData boundary
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // CRITICAL: When sending FormData, delete explicit application/json header
+    // so Axios/browser automatically attaches multipart/form-data with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -28,9 +35,6 @@ axiosInstance.interceptors.response.use(
   (error) => {
     const url = error.config?.url || "";
 
-    // Endpoints that are allowed to return 401 without forcing a logout redirect.
-    // Auth endpoints: expected to 401 on bad credentials.
-    // Public read endpoints: unauthenticated users can browse events/categories.
     const isBypassEndpoint =
       url.includes("/auth/login") ||
       url.includes("/auth/register") ||

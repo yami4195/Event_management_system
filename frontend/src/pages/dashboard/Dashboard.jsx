@@ -5,7 +5,8 @@ import { dashboardService } from "../../services";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import { ROUTES } from "../../constants/routes";
 import { ORGANIZER_ROLES } from "../../constants/roles";
-import "./Dashboard.css";
+import { Compass, Ticket, Bell, User, Calendar, ArrowRight } from "lucide-react";
+import "../../styles/components/customer-dashboard.css";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ const Dashboard = () => {
         setActivity(Array.isArray(activityRes.data) ? activityRes.data : []);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
-        setError("Failed to load dashboard data. Please try again later.");
+        setError("Failed to load dashboard metrics. Please refresh.");
       } finally {
         setIsLoading(false);
       }
@@ -46,100 +47,103 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="dashboard-loading">
-        <LoadingSpinner size="lg" text="Loading dashboard..." />
+      <div className="customer-portal-wrapper" style={{ alignItems: "center", justifyContent: "center", minHeight: "400px" }}>
+        <LoadingSpinner size="lg" text="Loading Customer Portal..." />
       </div>
     );
   }
 
-  const organizerStats = [
-    { label: "Total Events", value: stats?.totalEvents ?? 0, icon: "🎫", color: "#6c63ff" },
-    { label: "Published Events", value: stats?.publishedEvents ?? 0, icon: "📢", color: "#43e97b" },
-    { label: "Upcoming Events", value: stats?.upcomingEvents ?? 0, icon: "📅", color: "#ffa600" },
-    { label: "Cancelled Events", value: stats?.cancelledEvents ?? 0, icon: "⛔", color: "#ff6584" },
-    { label: "Total Registrations", value: stats?.totalRegistrations ?? 0, icon: "✅", color: "#6c63ff" },
-  ];
-
   const customerStats = [
-    { label: "Registered Events", value: stats?.registeredEvents ?? 0, icon: "🎫", color: "#6c63ff" },
-    { label: "Upcoming Events", value: stats?.upcomingEvents ?? 0, icon: "📅", color: "#43e97b" },
-    { label: "Completed Events", value: stats?.completedEvents ?? 0, icon: "🏁", color: "#ffa600" },
-    { label: "Unread Notifications", value: stats?.unreadNotifications ?? 0, icon: "🔔", color: "#ff6584" },
+    { label: "Registered Events", value: stats?.registeredEvents ?? 0, icon: "🎫", bg: "#eff6ff", color: "#2563eb" },
+    { label: "Upcoming Events", value: stats?.upcomingEvents ?? 0, icon: "📅", bg: "#dcfce7", color: "#16a34a" },
+    { label: "Completed Events", value: stats?.completedEvents ?? 0, icon: "🏁", bg: "#fef3c7", color: "#d97706" },
+    { label: "Unread Alerts", value: stats?.unreadNotifications ?? 0, icon: "🔔", bg: "#f3e8ff", color: "#9333ea" },
   ];
-
-  const statCards = isOrganizer ? organizerStats : customerStats;
 
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">Welcome back {user?.firstname}!</h1>
-        <p className="dashboard-subtitle">
-          {isOrganizer
-            ? "Manage your events and track registrations."
-            : "Browse events and keep track of your registrations."}
-        </p>
+    <div className="customer-portal-wrapper">
+      {/* Hero Welcome Card */}
+      <div className="customer-hero-card">
+        <div className="customer-hero-info">
+          <div className="customer-badge-pill">
+            <span>Customer Portal</span>
+          </div>
+          <h1 className="customer-hero-title">Welcome back, {user?.firstname || "Friend"}! 👋</h1>
+          <p className="customer-hero-subtitle">
+            Track your ticket passes, explore exciting upcoming conferences & gathering events, and check your activity log.
+          </p>
+        </div>
+
+        <Link to={ROUTES.EVENTS} className="btn-hero-primary">
+          <Compass className="w-5 h-5" />
+          <span>Browse Events</span>
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
 
       {error && (
-        <div className="dashboard-empty-state" style={{ marginBottom: "2rem", borderStyle: "solid" }}>
-          <p>{error}</p>
+        <div style={{ padding: "16px 24px", borderRadius: "16px", background: "#fef2f2", color: "#dc2626", fontWeight: "700", fontSize: "14px" }}>
+          {error}
         </div>
       )}
 
-      <div className="dashboard-stats-grid">
-        {statCards.map((card) => (
-          <div key={card.label} className="stat-card">
-            <div
-              className="stat-card__icon"
-              style={{ background: `${card.color}26`, color: card.color }}
-            >
+      {/* Stats Cards Grid */}
+      <div className="customer-stats-grid">
+        {customerStats.map((card) => (
+          <div key={card.label} className="customer-stat-card">
+            <div className="customer-stat-icon-wrap" style={{ background: card.bg, color: card.color }}>
               {card.icon}
             </div>
-            <div className="stat-card__content">
-              <span className="stat-card__label">{card.label}</span>
-              <span className="stat-card__value">{card.value}</span>
+            <div className="customer-stat-content">
+              <span className="customer-stat-label">{card.label}</span>
+              <span className="customer-stat-val">{card.value}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {!isOrganizer && (
-        <div className="dashboard-quick-links" style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
-          <Link to={ROUTES.EVENTS} className="btn btn--outline">Browse Events</Link>
-          <Link to={ROUTES.REGISTERED_EVENTS} className="btn btn--outline">Registered Events</Link>
-          <Link to={ROUTES.NOTIFICATIONS} className="btn btn--outline">Notifications</Link>
-        </div>
-      )}
+      {/* Quick Navigation Toolbar */}
+      <div className="customer-quick-toolbar">
+        <Link to={ROUTES.EVENTS} className="btn-customer-quick">
+          <Compass className="w-4 h-4" /> Browse Events
+        </Link>
+        <Link to={ROUTES.REGISTERED_EVENTS} className="btn-customer-quick">
+          <Ticket className="w-4 h-4" /> My Registered Passes
+        </Link>
+        <Link to={ROUTES.NOTIFICATIONS} className="btn-customer-quick">
+          <Bell className="w-4 h-4" /> Notifications
+        </Link>
+        <Link to={ROUTES.PROFILE} className="btn-customer-quick">
+          <User className="w-4 h-4" /> My Profile
+        </Link>
+      </div>
 
-      {isOrganizer && (
-        <div className="dashboard-quick-links" style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
-          <Link to={ROUTES.MANAGE_EVENTS} className="btn btn--outline">My Events</Link>
-          <Link to={ROUTES.CREATE_EVENT} className="btn btn--primary">Create Event</Link>
+      {/* Recent Activity Timeline */}
+      <div className="customer-section-card">
+        <div className="customer-card-header">
+          <h2>Recent Activity & Ticket Logs</h2>
         </div>
-      )}
 
-      <div className="dashboard-recent">
-        <h2>Recent Activity</h2>
         {activity.length > 0 ? (
-          <div className="activity-list">
+          <div className="activity-feed-list">
             {activity.map((item) => (
-              <div key={item.id} className="activity-item">
-                <div className={`activity-item__icon activity-item__icon--${item.type.toLowerCase()}`}>
+              <div key={item.id} className="activity-feed-item">
+                <div className="activity-badge-icon">
                   {item.type === "REGISTRATION" && "📝"}
                   {item.type === "PAYMENT" && "💳"}
                   {item.type === "EVENT_UPDATE" && "🔄"}
                   {item.type === "NOTIFICATION" && "🔔"}
                 </div>
-                <div className="activity-item__content">
-                  <p className="activity-item__message">{item.message}</p>
-                  <span className="activity-item__date">{formatDate(item.date)}</span>
+                <div className="activity-feed-body">
+                  <p className="activity-feed-msg">{item.message}</p>
+                  <span className="activity-feed-time">{formatDate(item.date)}</span>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="dashboard-empty-state">
-            <p>No recent activity found.</p>
+          <div style={{ textAlign: "center", padding: "40px", color: "#64748b", fontWeight: "600" }}>
+            No recent activity found. Explore events to register for your first pass!
           </div>
         )}
       </div>

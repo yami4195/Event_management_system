@@ -8,7 +8,7 @@ import EventTable from "../../components/organizer/EventTable";
 import Pagination from "../../components/organizer/Pagination";
 import DeleteModal from "../../components/organizer/DeleteModal";
 import EmptyState from "../../components/organizer/EmptyState";
-import { Button } from "../../components/ui/button";
+import "../../styles/components/my-events.css";
 
 export default function MyEvents() {
   const {
@@ -35,7 +35,6 @@ export default function MyEvents() {
   const [selectedDeleteEvent, setSelectedDeleteEvent] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Extract unique categories for filter dropdown
   const categories = Array.from(new Set(events.map((e) => e.category).filter(Boolean)));
 
   const handleResetFilters = () => {
@@ -55,31 +54,28 @@ export default function MyEvents() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+      <div className="my-events-wrapper" style={{ alignItems: "center", justifyCenter: "center", minHeight: "400px" }}>
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3" />
-        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Loading Events...</p>
+        <p style={{ fontSize: "14px", fontWeight: "600", color: "#64748b" }}>Loading Event Portfolio...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
-            My Events ({events.length})
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Manage your event listings, track ticket progress, and update details.
-          </p>
+    <div className="my-events-wrapper">
+      {/* Header Banner Card */}
+      <div className="my-events-header-card">
+        <div className="header-title-area">
+          <div className="header-stats-pill">
+            <span>{events.length} {events.length === 1 ? "Event" : "Total Events"} Registered</span>
+          </div>
+          <h1>My Event Portfolio</h1>
+          <p>Manage your published listings, monitor live ticket sales progress, and update details.</p>
         </div>
 
-        <Link to="/organizer/events/create">
-          <Button size="lg" className="bg-black hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black font-bold gap-2 shadow-md">
-            <PlusCircle className="w-5 h-5" />
-            Create Event
-          </Button>
+        <Link to="/organizer/events/create" className="create-event-action-btn">
+          <PlusCircle className="w-5 h-5" />
+          <span>Create Event</span>
         </Link>
       </div>
 
@@ -107,7 +103,7 @@ export default function MyEvents() {
           onAction={handleResetFilters}
         />
       ) : viewMode === "grid" ? (
-        <div className="events-grid">
+        <div className="events-cards-grid">
           {paginatedEvents.items.map((evt) => (
             <EventCard
               key={evt.id}
