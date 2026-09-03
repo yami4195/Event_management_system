@@ -7,15 +7,12 @@ import {
   CheckCircle,
   AlertCircle,
   Upload,
-  Sparkles,
+  
   Users,
-  Clock,
   Globe,
   Building,
   Tag,
-  FileText,
   Eye,
-  Check,
   Zap,
   Layers,
 } from "lucide-react";
@@ -91,7 +88,7 @@ export default function EventForm({
       }
     }
     loadCategories();
-  }, []);
+  }, [formData.category_id]);
 
   useEffect(() => {
     if (initialData) {
@@ -225,11 +222,7 @@ export default function EventForm({
     }
   };
 
-  const handlePresetImageSelect = (url) => {
-    setImageFile(null);
-    setImagePreview(url);
-    setFormData((prev) => ({ ...prev, image: url }));
-  };
+  
 
   const validate = () => {
     const newErrors = {};
@@ -267,7 +260,7 @@ export default function EventForm({
       location: formData.isOnline ? "Online / Web" : formData.location.trim(),
       capacity: Number(formData.capacity),
       price: formData.pricingType === "free" ? 0 : Number(formData.price),
-      status: formData.status.toLowerCase() === "published" ? "upcoming" : formData.status.toLowerCase(),
+      status: formData.status.toLowerCase(),
       description: formData.description.trim(),
     };
 
@@ -422,7 +415,7 @@ export default function EventForm({
                 </div>
 
                 <div className="form-group-spacious">
-                  <label className="form-label-custom">Event Status</label>
+                  <label className="form-label-custom">Publishing Status</label>
                   <select
                     name="status"
                     value={formData.status}
@@ -430,10 +423,8 @@ export default function EventForm({
                     className="form-select-custom"
                   >
                     <option value="upcoming">Upcoming (Public)</option>
-                    <option value="ongoing">Ongoing</option>
-                    <option value="completed">Completed</option>
+                    <option value="published">Published</option>
                     <option value="draft">Draft (Hidden)</option>
-                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
               </div>
