@@ -10,7 +10,7 @@ const VALID_REGISTRATION_STATUSES = ["confirmed", "cancelled", "pending"];
  * Parse composite registration ID in formats: "userId_eventId" or "userId:eventId"
  * or default to logged-in user + eventId if single UUID.
  */
-function parseCompositeId(id, loggedInUserIcdd) {
+function parseCompositeId(id, loggedInUserId) {
   if (id.includes("_")) {
     const parts = id.split("_");
     if (parts.length === 2 && isValidId(parts[0]) && isValidId(parts[1])) {

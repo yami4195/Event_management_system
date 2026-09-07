@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { users, updateUser } from "@/data/users";
+import { userService } from "@/services/user.service";
 import {
   Plus,
   Search,
@@ -11,6 +11,7 @@ import {
   UserCheck,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 
 import UserStats from "@/components/admin/UserStats";
@@ -30,22 +31,55 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 export default function Users() {
   const navigate = useNavigate();
-  const [userList, setUserList] = useState(users);
+  const [userList, setUserList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [actionNotice, setActionNotice] = useState(null);
-
-  // Sync user list whenever component mounts or updates
-  useEffect(() => {
-    setUserList([...users]);
-  }, []);
   const [searchIconVisible, setSearchIconVisible] = useState(true);
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await userService.getAll();
+      const rawUsers = res.data?.data?.users || res.data?.users || [];
+      const mapped = rawUsers.map((u) => {
+        const fullName = `${u.firstname || ""} ${u.lastname || ""}`.trim() || "User";
+        const role = u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1).toLowerCase() : "Customer";
+        return {
+          id: u.id || u.user_id,
+          name: fullName,
+          firstname: u.firstname || "",
+          lastname: u.lastname || "",
+          email: u.email || "",
+          role: role,
+          phone: u.phone || "",
+          status: "Active",
+          joinedDate: u.createdAt
+            ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+            : "Recently",
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.id || u.email}`,
+        };
+      });
+      setUserList(mapped);
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+      setActionNotice("Failed to load users from the server.");
+      setTimeout(() => setActionNotice(null), 4000);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   // Filtered Users
   const filteredUsers = useMemo(() => {
@@ -53,7 +87,8 @@ export default function Users() {
       const matchesSearch =
         searchQuery === "" ||
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.phone.includes(searchQuery);
 
       const matchesRole =
         roleFilter === "All" ||
@@ -83,17 +118,28 @@ export default function Users() {
 
   const handleToggleSuspend = (userId, currentStatus) => {
     const newStatus = currentStatus === "Suspended" ? "Active" : "Suspended";
-      updateUser(userId, { status: newStatus });
-
     setUserList((prev) =>
       prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u))
     );
-
     const targetUser = userList.find((u) => u.id === userId);
-    setActionNotice(
-      `${targetUser?.name || "User"} marked as ${newStatus}`
-    );
+    setActionNotice(`${targetUser?.name || "User"} marked as ${newStatus}`);
     setTimeout(() => setActionNotice(null), 3000);
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to permanently delete ${userName}? This will remove all their data.`)) {
+      return;
+    }
+    try {
+      await userService.delete(userId);
+      setUserList((prev) => prev.filter((u) => u.id !== userId));
+      setActionNotice(`User ${userName} deleted successfully.`);
+      setTimeout(() => setActionNotice(null), 3000);
+    } catch (err) {
+      console.error("Delete user error:", err);
+      setActionNotice(err.response?.data?.message || "Failed to delete user.");
+      setTimeout(() => setActionNotice(null), 4000);
+    }
   };
 
   const isFilterActive =
@@ -108,13 +154,9 @@ export default function Users() {
             Users Management
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500">
-            Manage platform users, roles, and account status.
+            Manage platform users, assign roles, and inspect account activity.
           </p>
         </div>
-        <Button className="shrink-0 gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
-          <Plus className="h-4 w-4 stroke-[2.5]" />
-          Add User
-        </Button>
       </div>
 
       {/* Action Notification Toast/Notice */}
@@ -131,25 +173,26 @@ export default function Users() {
       <Card className="border-slate-200/80 shadow-xs">
         <CardHeader className="border-b border-slate-100 pb-5">
           <CardTitle className="text-lg font-bold text-slate-900">
-            All Registered Users
+            All Registered Users ({filteredUsers.length})
           </CardTitle>
 
           {/* Search & Filters Toolbar */}
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Search Input */}
             <div className="relative flex-1 min-w-[240px]">
-              {searchIconVisible &&(
-              <Search className="absolute left-1 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />)}
+              {searchIconVisible && (
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              )}
               <Input
                 type="text"
-                placeholder="      Search by name or email..."
+                placeholder={searchIconVisible ? "      Search by name, email, or phone..." : "Search by name, email, or phone..."}
                 value={searchQuery}
                 onChange={(e) => {
-                  setSearchIconVisible(e.target.value === "" );
+                  setSearchIconVisible(e.target.value === "");
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-9 h-10 border-slate-200 bg-white"
+                className="h-10 border-slate-200 bg-white"
               />
             </div>
 
@@ -182,7 +225,6 @@ export default function Users() {
                 >
                   <option value="All">All Statuses</option>
                   <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
                   <option value="Suspended">Suspended</option>
                 </Select>
               </div>
@@ -202,8 +244,12 @@ export default function Users() {
         </CardHeader>
 
         <CardContent className="p-0">
-          {/* Table or Empty State */}
-          {filteredUsers.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3" />
+              <p className="text-sm font-medium text-slate-500">Loading user accounts...</p>
+            </div>
+          ) : filteredUsers.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center justify-center p-12 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 mb-4">
@@ -232,12 +278,12 @@ export default function Users() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50/70 hover:bg-slate-50/70 border-b border-slate-200/80">
-                   <TableHead className="w-[100px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <TableHead className="w-[80px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Avatar
-                   </TableHead>
-                   <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    </TableHead>
+                    <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Name
-                   </TableHead>
+                    </TableHead>
                     <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Email
                     </TableHead>
@@ -304,7 +350,6 @@ export default function Users() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                       
 
                           {/* Edit Button */}
                           <Button
@@ -332,7 +377,7 @@ export default function Users() {
                             className={`h-8 w-8 ${
                               user.status === "Suspended"
                                 ? "text-emerald-600 hover:bg-emerald-50"
-                                : "text-slate-500 hover:text-rose-600 hover:bg-rose-50"
+                                : "text-slate-500 hover:text-amber-600 hover:bg-amber-50"
                             }`}
                           >
                             {user.status === "Suspended" ? (
@@ -340,6 +385,17 @@ export default function Users() {
                             ) : (
                               <UserX className="h-4 w-4" />
                             )}
+                          </Button>
+
+                          {/* Delete Button */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Delete User"
+                            onClick={() => handleDeleteUser(user.id, user.name)}
+                            className="h-8 w-8 text-slate-500 hover:text-rose-600 hover:bg-rose-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>

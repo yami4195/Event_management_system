@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Calendar, } from "lucide-react";
-import { users } from "@/data/users";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Mail, Calendar, Phone, Shield } from "lucide-react";
+import { userService } from "@/services/user.service";
 import RoleBadge from "@/components/common/RoleBadge";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Avatar } from "@/components/ui/avatar";
@@ -12,15 +13,75 @@ export default function UserDetails() {
   const targetId = userId || id;
   const navigate = useNavigate();
 
-  const user = users.find((u) => u.id === targetId) || {
-    id: targetId,
-    name: "User Not Found",
-    email: "N/A",
-    role: "Customer",
-    status: "Inactive",
-    joinedDate: "N/A",
-    avatar: null,
-  };
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await userService.getById(targetId);
+        const u = res.data?.data?.user || res.data?.user;
+        if (u) {
+          const fullName = `${u.firstname || ""} ${u.lastname || ""}`.trim() || "User";
+          const role = u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1).toLowerCase() : "Customer";
+          setUser({
+            id: u.id || u.user_id,
+            name: fullName,
+            firstname: u.firstname || "",
+            lastname: u.lastname || "",
+            email: u.email || "",
+            role: role,
+            phone: u.phone || "N/A",
+            status: "Active",
+            joinedDate: u.createdAt
+              ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+              : "Recently",
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.id || u.email}`,
+          });
+        } else {
+          setError("User not found.");
+        }
+      } catch (err) {
+        console.error("Failed to load user:", err);
+        setError("Failed to fetch user details from server.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (targetId) {
+      loadUser();
+    }
+  }, [targetId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-slate-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-3" />
+        <p className="text-sm font-medium text-slate-500">Loading user profile...</p>
+      </div>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <div className="min-h-screen space-y-6 bg-slate-50 p-6 lg:p-8 text-slate-900">
+        <Button
+          variant="outline"
+          onClick={() => navigate("/admin/users")}
+          className="gap-2 border-slate-200 bg-white"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to Users
+        </Button>
+        <div className="bg-rose-50 border border-rose-200 p-6 rounded-lg text-rose-700">
+          {error || "User not found."}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen space-y-6 bg-slate-50 p-6 lg:p-8 text-slate-900">
@@ -42,6 +103,13 @@ export default function UserDetails() {
             Viewing details for ID: <code className="bg-slate-200/80 px-1.5 py-0.5 rounded text-xs font-mono text-slate-800 font-bold">{targetId}</code>
           </p>
         </div>
+
+        <Button
+          onClick={() => navigate(`/admin/users/EditUser/${targetId}`)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-9 px-4"
+        >
+          Edit Profile
+        </Button>
       </div>
 
       {/* User Information Card */}
@@ -73,7 +141,7 @@ export default function UserDetails() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 User ID
               </span>
-              <p className="text-sm font-semibold text-slate-800">{user.id}</p>
+              <p className="text-sm font-semibold text-slate-800 font-mono">{user.id}</p>
             </div>
 
             <div className="space-y-1">
@@ -81,6 +149,16 @@ export default function UserDetails() {
                 Email Address
               </span>
               <p className="text-sm font-semibold text-slate-800">{user.email}</p>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Phone Number
+              </span>
+              <p className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                <Phone className="h-3.5 w-3.5 text-slate-400" />
+                {user.phone}
+              </p>
             </div>
 
             <div className="space-y-1">

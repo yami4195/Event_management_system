@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Save, UserCheck } from "lucide-react";
-import { getUserById, updateUser } from "@/data/users";
+import { ArrowLeft, Save, UserCheck, AlertCircle } from "lucide-react";
+import { userService } from "@/services/user.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -13,24 +13,48 @@ export default function EditUser() {
   const navigate = useNavigate();
 
   const [inputValues, setInputValues] = useState({
-    name: "",
+    firstname: "",
+    lastname: "",
     email: "",
-    role: "Customer",
+    phone: "",
+    role: "CUSTOMER",
     status: "Active",
-    joinedDate: "",
   });
 
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const existingUser = getUserById(targetId);
-    if (existingUser) {
-      setInputValues({
-        name: existingUser.name || "",
-        role: existingUser.role || "Customer",
-        status: existingUser.status || "Active",
-        joinedDate: existingUser.joinedDate || "",
-      });
+    async function loadUser() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await userService.getById(targetId);
+        const u = res.data?.data?.user || res.data?.user;
+        if (u) {
+          setInputValues({
+            firstname: u.firstname || "",
+            lastname: u.lastname || "",
+            email: u.email || "",
+            phone: u.phone || "",
+            role: (u.role || "CUSTOMER").toUpperCase(),
+            status: "Active",
+          });
+        } else {
+          setError("User not found.");
+        }
+      } catch (err) {
+        console.error("Failed to load user:", err);
+        setError("Failed to fetch user details from server.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (targetId) {
+      loadUser();
     }
   }, [targetId]);
 
@@ -42,14 +66,40 @@ export default function EditUser() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateUser(targetId, inputValues);
-    setIsSaved(true);
-    setTimeout(() => {
-      navigate("/admin/users");
-    }, 800);
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      await userService.update(targetId, {
+        firstname: inputValues.firstname.trim(),
+        lastname: inputValues.lastname.trim(),
+        email: inputValues.email.trim(),
+        phone: inputValues.phone.trim(),
+        role: inputValues.role.toUpperCase(),
+      });
+
+      setIsSaved(true);
+      setTimeout(() => {
+        navigate("/admin/users");
+      }, 1000);
+    } catch (err) {
+      console.error("Update user error:", err);
+      setError(err.response?.data?.message || "Failed to update user profile.");
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-slate-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-3" />
+        <p className="text-sm font-medium text-slate-500">Loading user settings...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen space-y-6 bg-slate-50 p-6 lg:p-8 text-slate-900">
@@ -65,7 +115,7 @@ export default function EditUser() {
             Back to Users
           </Button>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Edit User Information
+            Edit User Account
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500">
             Update account details for user ID: <code className="bg-slate-200/80 px-1.5 py-0.5 rounded text-xs font-mono text-slate-800 font-bold">{targetId}</code>
@@ -81,6 +131,14 @@ export default function EditUser() {
         </div>
       )}
 
+      {/* Error Banner */}
+      {error && (
+        <div className="rounded-lg bg-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-md flex items-center gap-2">
+          <AlertCircle className="h-5 w-5" />
+          {error}
+        </div>
+      )}
+
       {/* Edit Form Card */}
       <Card className="border-slate-200/80 shadow-xs max-w-2xl">
         <CardHeader className="border-b border-slate-100 pb-4">
@@ -91,27 +149,73 @@ export default function EditUser() {
 
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name Field */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                Full Name
-              </label>
-              <Input
-                type="text"
-                name="name"
-                value={inputValues.name}
-                onChange={handleChange}
-                placeholder="Enter user's full name"
-                required
-                className="h-10 bg-white border-slate-200"
-              />
+            {/* First Name & Last Name */}
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                  First Name
+                </label>
+                <Input
+                  type="text"
+                  name="firstname"
+                  value={inputValues.firstname}
+                  onChange={handleChange}
+                  placeholder="First name"
+                  required
+                  className="h-10 bg-white border-slate-200"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                  Last Name
+                </label>
+                <Input
+                  type="text"
+                  name="lastname"
+                  value={inputValues.lastname}
+                  onChange={handleChange}
+                  placeholder="Last name"
+                  required
+                  className="h-10 bg-white border-slate-200"
+                />
+              </div>
             </div>
 
-           
+            {/* Email & Phone */}
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                  Email Address
+                </label>
+                <Input
+                  type="email"
+                  name="email"
+                  value={inputValues.email}
+                  onChange={handleChange}
+                  placeholder="user@example.com"
+                  required
+                  className="h-10 bg-white border-slate-200"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                  Phone Number
+                </label>
+                <Input
+                  type="text"
+                  name="phone"
+                  value={inputValues.phone}
+                  onChange={handleChange}
+                  placeholder="+251912345678"
+                  className="h-10 bg-white border-slate-200"
+                />
+              </div>
+            </div>
 
             {/* Role & Status Grid */}
             <div className="grid gap-5 sm:grid-cols-2">
-              {/* Role Select */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
                   Role
@@ -122,14 +226,12 @@ export default function EditUser() {
                   onChange={handleChange}
                   className="h-10 border-slate-200 bg-white"
                 >
-                    <option value="Select role" disabled>Select role</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Organizer">Organizer</option>
-                  <option value="Customer">Customer</option>
+                  <option value="CUSTOMER">Customer (Attendee)</option>
+                  <option value="ORGANIZER">Organizer</option>
+                  <option value="ADMIN">Administrator</option>
                 </Select>
               </div>
 
-              {/* Status Select */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
                   Account Status
@@ -141,35 +243,20 @@ export default function EditUser() {
                   className="h-10 border-slate-200 bg-white"
                 >
                   <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
                   <option value="Suspended">Suspended</option>
                 </Select>
               </div>
-            </div>
-
-            {/* Joined Date Field */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                Joined Date
-              </label>
-              <Input
-                type="text"
-                name="joinedDate"
-                value={inputValues.joinedDate}
-                onChange={handleChange}
-                placeholder="e.g. Jan 12, 2024"
-                className="h-10 bg-white border-slate-200"
-              />
             </div>
 
             {/* Action Buttons */}
             <div className="pt-3 flex items-center gap-3">
               <Button
                 type="submit"
+                disabled={isSaving}
                 className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-10 px-5"
               >
                 <Save className="h-4 w-4" />
-                Save Changes
+                {isSaving ? "Saving..." : "Save Changes"}
               </Button>
 
               <Button

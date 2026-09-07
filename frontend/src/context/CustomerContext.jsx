@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { registrationsService } from "../services/registrations.service";
+import { notificationsService } from "../services/notifications.service";
 import useAuth from "../hooks/useAuth";
 
 const CustomerContext = createContext(null);
@@ -9,22 +10,35 @@ export function CustomerProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [registrations, setRegistrations] = useState([]);
-  const [notifications, setNotifications] = useState([
-    { id: "n1", title: "Registration Confirmed", message: "Your ticket for Tech Summit 2026 is confirmed!", timestamp: "10 mins ago", read: false },
-    { id: "n2", title: "Event Reminder", message: "Design Workshop starts tomorrow at 10:00 AM.", timestamp: "2 hours ago", read: false },
-    { id: "n3", title: "Venue Update", message: "Hall B added for Addis Developers Expo.", timestamp: "1 day ago", read: true },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   const fetchCustomerData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await registrationsService.getMyRegistrations();
-      const list = res.data?.data?.registrations ?? [];
+      const [regRes, notifRes] = await Promise.all([
+        registrationsService.getMyRegistrations().catch(() => ({ data: { data: { registrations: [] } } })),
+        notificationsService.getAll().catch(() => ({ data: { data: { notifications: [] } } })),
+      ]);
+
+      const list = regRes.data?.data?.registrations ?? [];
       setRegistrations(Array.isArray(list) ? list : []);
+
+      const rawNotifs = notifRes.data?.data?.notifications ?? notifRes.data?.notifications ?? [];
+      const mappedNotifs = rawNotifs.map((n) => ({
+        id: n.notification_id || n.id,
+        title: n.type === "cancellation" ? "Cancellation Notice" : n.type === "reminder" ? "Event Reminder" : "Event Update",
+        message: n.message,
+        timestamp: n.sent_at
+          ? new Date(n.sent_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+          : "Recently",
+        read: Boolean(n.is_read),
+      }));
+
+      setNotifications(mappedNotifs);
     } catch (err) {
-      console.error("Failed to load customer registrations:", err);
-      setError("Failed to load your event registrations.");
+      console.error("Failed to load customer data:", err);
+      setError("Failed to load your event registrations and alerts.");
     } finally {
       setLoading(false);
     }
@@ -46,21 +60,28 @@ export function CustomerProvider({ children }) {
 
   const cancelRegistration = async (registrationId) => {
     try {
-      if (registrationsService.cancelRegistration) {
-        await registrationsService.cancelRegistration(registrationId);
-      }
-      setRegistrations((prev) => prev.filter((r) => r.id !== registrationId && r.registration_id !== registrationId));
+      await registrationsService.cancelRegistration(registrationId);
+      setRegistrations((prev) => prev.filter((r) => r.id !== registrationId && `${r.user_id}_${r.event_id}` !== registrationId));
       return { success: true, message: "Registration cancelled successfully." };
     } catch (err) {
       console.error("Cancel registration error:", err);
-      return { success: false, message: err.message || "Failed to cancel registration." };
+      return { success: false, message: err.response?.data?.message || err.message || "Failed to cancel registration." };
     }
   };
 
-  const markNotificationRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const markNotificationRead = async (id) => {
+    try {
+      await notificationsService.markAsRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    } catch (err) {
+      console.error("Mark read error:", err);
+      // Update local state even if API fails
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    }
   };
 
   return (

@@ -8,14 +8,14 @@ import {
   Users,
   CheckCircle2,
   XCircle,
-  Pencil,
   Trash2,
-  Star,
-  UserCheck,
   Building2,
   Tag,
+  DollarSign,
+  AlertTriangle,
 } from "lucide-react";
-import { getEventById, updateEvent, deleteEvent } from "@/data/events";
+import { eventsService } from "@/services/events.service";
+import { registrationsService } from "@/services/registrations.service";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -33,14 +33,91 @@ export default function AdminEventDetails() {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
+  const [attendees, setAttendees] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [actionNotice, setActionNotice] = useState(null);
 
   useEffect(() => {
-    const found = getEventById(eventId);
-    if (found) {
-      setEvent({ ...found });
+    async function fetchEventDetails() {
+      setLoading(true);
+      try {
+        const [eventRes, regsRes] = await Promise.all([
+          eventsService.getById(eventId),
+          registrationsService.getByEventId(eventId).catch(() => ({ data: { data: { registrations: [] } } })),
+        ]);
+
+        const e = eventRes.data?.data?.event || eventRes.data?.event;
+        const regs = regsRes.data?.data?.registrations || regsRes.data?.registrations || [];
+
+        if (e) {
+          const status = e.status ? e.status.charAt(0).toUpperCase() + e.status.slice(1).toLowerCase() : "Upcoming";
+          setEvent({
+            id: e.event_id || e.id,
+            title: e.title || "Untitled Event",
+            organizer: e.organizer_name || "Organizer",
+            category: e.category_name || "General",
+            location: e.location || "Venue TBD",
+            date: e.date ? new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "TBD",
+            time: e.time || "10:00 AM",
+            capacity: Number(e.capacity) || 0,
+            price: Number(e.price) || 0,
+            status: status,
+            banner: e.imageUrl || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80",
+            description: e.description || "",
+            createdAt: e.created_at,
+          });
+          setAttendees(regs);
+        }
+      } catch (err) {
+        console.error("Failed to load event details:", err);
+        showToast("Failed to fetch event details from server.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (eventId) {
+      fetchEventDetails();
     }
   }, [eventId]);
+
+  const showToast = (msg) => {
+    setActionNotice(msg);
+    setTimeout(() => setActionNotice(null), 3500);
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      await eventsService.update(eventId, { status: newStatus.toLowerCase() });
+      setEvent((prev) => ({ ...prev, status: newStatus }));
+      showToast(`Event status updated to ${newStatus}.`);
+    } catch (err) {
+      console.error("Status update error:", err);
+      showToast("Failed to update status.");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this event? This will also remove attendee registrations.")) {
+      return;
+    }
+    try {
+      await eventsService.delete(eventId);
+      navigate("/admin/events");
+    } catch (err) {
+      console.error("Delete event error:", err);
+      showToast("Failed to delete event.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-slate-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-3" />
+        <p className="text-sm font-medium text-slate-500">Loading event details...</p>
+      </div>
+    );
+  }
 
   if (!event) {
     return (
@@ -63,26 +140,9 @@ export default function AdminEventDetails() {
     );
   }
 
-  const handleStatusChange = (newStatus) => {
-    const updated = updateEvent(event.id, { status: newStatus });
-    if (updated) {
-      setEvent({ ...updated });
-      setActionNotice(`Event status updated to "${newStatus}"`);
-      setTimeout(() => setActionNotice(null), 3000);
-    }
-  };
-
-  const handleDelete = () => {
-    deleteEvent(event.id);
-    navigate("/admin/events");
-  };
-
-  const remainingSeats = Math.max(0, event.capacity - event.registered);
-  const fillPercentage = Math.min(100, Math.round((event.registered / event.capacity) * 100));
-
   return (
     <div className="min-h-screen space-y-6 bg-slate-50 p-6 lg:p-8 text-slate-900">
-      {/* Back Button & Top Navigation */}
+      {/* Top Actions & Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
         <div>
           <Button
@@ -97,22 +157,19 @@ export default function AdminEventDetails() {
             Event Moderation & Details
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500">
-            Viewing details for Event ID:{" "}
-            <code className="bg-slate-200/80 px-1.5 py-0.5 rounded text-xs font-mono text-slate-800 font-bold">
-              {event.id}
-            </code>
+            Event ID: <code className="bg-slate-200 px-1.5 py-0.5 rounded text-xs font-mono">{event.id}</code>
           </p>
         </div>
 
-        {/* Action Moderation Toolbar */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {event.status !== "Published" && (
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          {event.status !== "Upcoming" && (
             <Button
-              onClick={() => handleStatusChange("Published")}
-              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white h-9 px-4 font-semibold text-xs"
+              onClick={() => handleStatusChange("Upcoming")}
+              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-9 px-3 text-xs"
             >
               <CheckCircle2 className="h-4 w-4" />
-              Approve Event
+              Approve / Publish
             </Button>
           )}
 
@@ -120,17 +177,17 @@ export default function AdminEventDetails() {
             <Button
               onClick={() => handleStatusChange("Cancelled")}
               variant="outline"
-              className="gap-1.5 border-rose-200 text-rose-700 hover:bg-rose-50 h-9 px-4 font-semibold text-xs"
+              className="gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50 h-9 px-3 text-xs font-semibold"
             >
               <XCircle className="h-4 w-4" />
-              Reject / Cancel
+              Cancel Event
             </Button>
           )}
 
           <Button
             onClick={handleDelete}
             variant="outline"
-            className="gap-1.5 border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 h-9 px-3 text-xs font-semibold"
+            className="gap-1.5 border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50 h-9 px-3 text-xs"
           >
             <Trash2 className="h-4 w-4" />
             Delete
@@ -140,243 +197,134 @@ export default function AdminEventDetails() {
 
       {/* Action Notification Toast */}
       {actionNotice && (
-        <div className="rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-md transition-all flex items-center gap-2">
-          <UserCheck className="h-4 w-4 text-emerald-400" />
+        <div className="rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-md">
           {actionNotice}
         </div>
       )}
 
-      {/* Hero Banner Header */}
-      <Card className="overflow-hidden border-slate-200/80 shadow-xs">
-        <div className="relative h-64 sm:h-80 w-full bg-slate-900">
+      {/* Main Event Overview Card */}
+      <Card className="border-slate-200/80 shadow-xs overflow-hidden">
+        <div className="relative h-64 w-full bg-slate-900">
           <img
             src={event.banner}
             alt={event.title}
-            className="h-full w-full object-cover opacity-85"
+            className="h-full w-full object-cover opacity-80"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent flex flex-col justify-end p-6 sm:p-8">
-            <div className="flex items-center gap-3 mb-2 flex-wrap">
-              <Badge className="bg-indigo-600 text-white font-semibold border-none">
-                <Tag className="h-3.5 w-3.5 mr-1" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="text-white">
+              <Badge className="bg-indigo-600/90 text-white hover:bg-indigo-600 mb-2 border-none">
                 {event.category}
               </Badge>
-              <StatusBadge status={event.status} />
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {event.title}
+              </h2>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              {event.title}
-            </h2>
-            <p className="text-sm text-slate-300 mt-1.5 flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-indigo-400" />
-              Organized by <span className="font-semibold text-white">{event.organizer}</span>
-            </p>
+            <StatusBadge status={event.status} />
           </div>
         </div>
-      </Card>
 
-      {/* Content Split: Left (Overview & Details) | Right (Metrics & Feedback) */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left Column (2 Cols wide) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Description Card */}
-          <Card className="border-slate-200/80 shadow-xs">
-            <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-lg font-bold text-slate-900">
-                Event Overview & Description
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-5">
-              <p className="text-sm text-slate-700 leading-relaxed font-normal">
-                {event.description}
-              </p>
-
-              {/* Event Metadata Grid */}
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 pt-5 border-t border-slate-100">
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 shrink-0">
-                    <Calendar className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      Date & Schedule
-                    </span>
-                    <p className="text-sm font-semibold text-slate-900 mt-0.5">
-                      {event.date}
-                    </p>
-                    <p className="text-xs text-slate-500">{event.time}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      Location & Venue
-                    </span>
-                    <p className="text-sm font-semibold text-slate-900 mt-0.5">
-                      {event.location}
-                    </p>
-                    <p className="text-xs text-slate-500">{event.venue}</p>
-                  </div>
-                </div>
+        <CardContent className="p-6 sm:p-8 space-y-8">
+          {/* Key Metric Grid */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/50 p-4">
+              <Building2 className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Organizer
+                </span>
+                <p className="text-sm font-semibold text-slate-800">{event.organizer}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Photo Gallery (if available) */}
-          {event.gallery && event.gallery.length > 0 && (
-            <Card className="border-slate-200/80 shadow-xs">
-              <CardHeader className="border-b border-slate-100 pb-4">
-                <CardTitle className="text-lg font-bold text-slate-900">
-                  Event Gallery
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-5">
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {event.gallery.map((imgUrl, index) => (
-                    <div
-                      key={index}
-                      className="overflow-hidden rounded-xl h-36 bg-slate-100 border border-slate-200"
-                    >
-                      <img
-                        src={imgUrl}
-                        alt={`Gallery preview ${index + 1}`}
-                        className="h-full w-full object-cover hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+            <div className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/50 p-4">
+              <Calendar className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Date & Time
+                </span>
+                <p className="text-sm font-semibold text-slate-800">
+                  {event.date} • {event.time}
+                </p>
+              </div>
+            </div>
 
-          {/* Recent Registrations Table */}
-          <Card className="border-slate-200/80 shadow-xs">
-            <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-lg font-bold text-slate-900">
-                Recent Attendees & Registrations
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {event.recentRegistrations && event.recentRegistrations.length > 0 ? (
+            <div className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/50 p-4">
+              <MapPin className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Location
+                </span>
+                <p className="text-sm font-semibold text-slate-800">{event.location}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/50 p-4">
+              <Users className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Registrations
+                </span>
+                <p className="text-sm font-semibold text-slate-800">
+                  {attendees.length} / {event.capacity} seats filled
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Description Section */}
+          <div className="space-y-2">
+            <h3 className="text-base font-bold text-slate-900">Event Overview</h3>
+            <p className="text-sm text-slate-600 leading-relaxed max-w-4xl">
+              {event.description || "No specific overview provided for this event."}
+            </p>
+          </div>
+
+          {/* Registered Attendees Table */}
+          <div className="space-y-4 pt-4 border-t border-slate-100">
+            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
+              <span>Registered Attendees ({attendees.length})</span>
+            </h3>
+
+            {attendees.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-lg text-sm">
+                No attendees have registered for this event yet.
+              </div>
+            ) : (
+              <div className="overflow-x-auto border border-slate-200/80 rounded-lg">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-50/70 hover:bg-slate-50/70">
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-slate-500 px-4 py-3">
-                        Attendee Name
-                      </TableHead>
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-slate-500 px-4 py-3">
-                        Email
-                      </TableHead>
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-slate-500 px-4 py-3">
-                        Registered Date
-                      </TableHead>
+                    <TableRow className="bg-slate-50 border-b border-slate-200">
+                      <TableHead className="px-4 py-3 text-xs font-bold uppercase text-slate-500">Attendee Name</TableHead>
+                      <TableHead className="px-4 py-3 text-xs font-bold uppercase text-slate-500">Email</TableHead>
+                      <TableHead className="px-4 py-3 text-xs font-bold uppercase text-slate-500">Registration Date</TableHead>
+                      <TableHead className="px-4 py-3 text-xs font-bold uppercase text-slate-500">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {event.recentRegistrations.map((reg, i) => (
-                      <TableRow key={i} className="hover:bg-slate-50/50">
-                        <TableCell className="font-semibold text-slate-900 px-4 py-3 text-sm">
-                          {reg.name}
+                    {attendees.map((reg, index) => (
+                      <TableRow key={reg.user_id || index} className="border-b border-slate-100">
+                        <TableCell className="px-4 py-3 font-semibold text-slate-900">
+                          {reg.user_name || "Attendee"}
                         </TableCell>
-                        <TableCell className="text-slate-600 px-4 py-3 text-sm">
-                          {reg.email}
+                        <TableCell className="px-4 py-3 text-slate-600">{reg.user_email}</TableCell>
+                        <TableCell className="px-4 py-3 text-slate-500 text-sm">
+                          {reg.registration_date ? new Date(reg.registration_date).toLocaleDateString() : "Recent"}
                         </TableCell>
-                        <TableCell className="text-slate-500 px-4 py-3 text-sm">
-                          {reg.date}
+                        <TableCell className="px-4 py-3">
+                          <Badge className={reg.status === "cancelled" ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700"}>
+                            {reg.status}
+                          </Badge>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              ) : (
-                <div className="p-6 text-center text-sm text-slate-500">
-                  No registered attendees recorded for this event yet.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column (1 Col wide) */}
-        <div className="space-y-6">
-          {/* Seat Capacity & Registration Metrics Card */}
-          <Card className="border-slate-200/80 shadow-xs">
-            <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Users className="h-5 w-5 text-indigo-600" />
-                Capacity & Seats
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-5 space-y-4">
-              <div>
-                <div className="flex items-center justify-between text-sm font-semibold mb-1.5">
-                  <span className="text-slate-600">Registered</span>
-                  <span className="text-slate-900">
-                    {event.registered} / {event.capacity}
-                  </span>
-                </div>
-                {/* Progress bar */}
-                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
-                  <div
-                    className="h-full bg-indigo-600 rounded-full transition-all duration-300"
-                    style={{ width: `${fillPercentage}%` }}
-                  />
-                </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-center">
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Remaining
-                  </span>
-                  <p className="text-xl font-extrabold text-slate-900 mt-1">
-                    {remainingSeats}
-                  </p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Occupancy
-                  </span>
-                  <p className="text-xl font-extrabold text-slate-900 mt-1">
-                    {fillPercentage}%
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Feedback & Ratings Summary */}
-          <Card className="border-slate-200/80 shadow-xs">
-            <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
-                Feedback & Reviews
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-5 text-center">
-              {event.feedbackSummary && event.feedbackSummary.rating > 0 ? (
-                <div>
-                  <div className="text-4xl font-black text-slate-900">
-                    {event.feedbackSummary.rating}
-                  </div>
-                  <div className="flex justify-center gap-1 my-2 text-amber-400">
-                    {"★".repeat(Math.round(event.feedbackSummary.rating))}
-                  </div>
-                  <p className="text-xs font-medium text-slate-500">
-                    Based on {event.feedbackSummary.totalReviews} attendee reviews
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500 py-3">
-                  No ratings or reviews submitted for this event yet.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

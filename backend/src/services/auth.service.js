@@ -1,29 +1,29 @@
-const pool = require("../config/db");
-const bcrypt = require("bcrypt");
+import pool from "../config/db.js";
+import bcrypt from "bcrypt";
 
-const register = async (email, password) => {
+export const register = async (userData) => {
+  const { firstname, lastname, email, password, role = "ATTENDEE", phone } = userData;
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    const existingUser = await pool.query(
-        "SELECT * FROM users WHERE email = $1",
-        [email]
-    );
+  const result = await pool.query(
+    `INSERT INTO users (firstname, lastname, email, password, role, phone)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     RETURNING user_id, firstname, lastname, email, role, phone, created_at`,
+    [firstname, lastname, email.toLowerCase(), hashedPassword, role, phone]
+  );
 
-    if (existingUser.rows.length > 0) {
-        throw new Error("User already exists");
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const result = await pool.query(
-        `INSERT INTO users(email, password)
-         VALUES($1, $2)
-         RETURNING user_id, email`,
-        [email, hashedPassword]
-    );
-
-    return result.rows[0];
+  return result.rows[0];
 };
 
-module.exports = {
-    register
+export const findByEmail = async (email) => {
+  const result = await pool.query(
+    "SELECT user_id, firstname, lastname, email, password, role, phone, created_at FROM users WHERE LOWER(email) = LOWER($1)",
+    [email]
+  );
+  return result.rows[0] || null;
+};
+
+export default {
+  register,
+  findByEmail,
 };

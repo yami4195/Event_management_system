@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -14,7 +14,8 @@ import {
   CalendarX,
   UserCheck,
 } from "lucide-react";
-import { events as initialEvents, updateEvent, deleteEvent, createEvent } from "@/data/events";
+import { eventsService } from "@/services/events.service";
+import { categoriesService } from "@/services/category.service";
 import EventStats from "@/components/admin/EventStats";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Input } from "@/components/ui/input";
@@ -38,39 +39,86 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 8;
 
 export default function Events() {
   const navigate = useNavigate();
-  const [eventList, setEventList] = useState(initialEvents);
+  const [eventList, setEventList] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [actionNotice, setActionNotice] = useState(null);
-  const [searchIconVisible,setSearchIconVisible] = useState(true);
-  const [calendarIconVisible,setCalendarIconVisible] = useState(true);
+  const [searchIconVisible, setSearchIconVisible] = useState(true);
 
   // Modal State for Create Event
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [newEventData, setNewEventData] = useState({
     title: "",
-    organizer: "",
-    category: "Technology",
+    category_id: "",
     location: "",
-    venue: "",
     date: "",
-    time: "09:00 AM - 05:00 PM",
-    capacity: 200,
-    banner: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80",
+    time: "10:00 AM",
+    capacity: 100,
+    price: 0,
     description: "",
   });
 
-  // Sync events array whenever component mounts
-  useEffect(() => {
-    setEventList([...initialEvents]);
+  const fetchEventsAndCategories = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [eventsRes, catsRes] = await Promise.all([
+        eventsService.getAll(),
+        categoriesService.getAll().catch(() => ({ data: { data: { categories: [] } } })),
+      ]);
+
+      const rawEvents = eventsRes.data?.data?.events || eventsRes.data?.events || [];
+      const rawCats = catsRes.data?.data?.categories || catsRes.data?.categories || [];
+
+      setCategories(rawCats);
+
+      const mapped = rawEvents.map((e) => {
+        const status = e.status ? e.status.charAt(0).toUpperCase() + e.status.slice(1).toLowerCase() : "Upcoming";
+        return {
+          id: e.event_id || e.id,
+          title: e.title || "Untitled Event",
+          organizer: e.organizer_name || "Organizer",
+          category: e.category_name || "General",
+          category_id: e.category_id,
+          location: e.location || "Venue TBD",
+          date: e.date ? new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "TBD",
+          rawDate: e.date,
+          time: e.time || "10:00 AM",
+          capacity: Number(e.capacity) || 0,
+          attendees: Number(e.attendees) || 0,
+          price: Number(e.price) || 0,
+          status: status,
+          banner: e.imageUrl || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80",
+          description: e.description || "",
+        };
+      });
+
+      setEventList(mapped);
+    } catch (err) {
+      console.error("Failed to load events/categories:", err);
+      showToast("Failed to fetch events from the server.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchEventsAndCategories();
+  }, [fetchEventsAndCategories]);
+
+  const showToast = (msg) => {
+    setActionNotice(msg);
+    setTimeout(() => setActionNotice(null), 3500);
+  };
 
   // Filtered Events
   const filteredEvents = useMemo(() => {
@@ -91,7 +139,7 @@ export default function Events() {
 
       const matchesDate =
         dateFilter === "" ||
-        event.date.toLowerCase().includes(dateFilter.toLowerCase());
+        (event.rawDate && event.rawDate.includes(dateFilter));
 
       return matchesSearch && matchesStatus && matchesCategory && matchesDate;
     });
@@ -112,39 +160,77 @@ export default function Events() {
     setCurrentPage(1);
   };
 
-  const handleStatusChange = (eventId, newStatus) => {
-    updateEvent(eventId, { status: newStatus });
-    setEventList([...initialEvents]);
-    setActionNotice(`Event status updated to "${newStatus}"`);
-    setTimeout(() => setActionNotice(null), 3000);
+  // Status Action Handlers
+  const handleApproveEvent = async (eventId) => {
+    try {
+      await eventsService.update(eventId, { status: "upcoming" });
+      setEventList((prev) =>
+        prev.map((e) => (e.id === eventId ? { ...e, status: "Upcoming" } : e))
+      );
+      showToast("Event approved and published as Upcoming!");
+    } catch (err) {
+      console.error("Approve error:", err);
+      showToast("Failed to update event status.");
+    }
   };
 
-  const handleDeleteEvent = (eventId) => {
-    deleteEvent(eventId);
-    setEventList([...initialEvents]);
-    setActionNotice("Event deleted successfully");
-    setTimeout(() => setActionNotice(null), 3000);
+  const handleRejectEvent = async (eventId) => {
+    try {
+      await eventsService.update(eventId, { status: "cancelled" });
+      setEventList((prev) =>
+        prev.map((e) => (e.id === eventId ? { ...e, status: "Cancelled" } : e))
+      );
+      showToast("Event status marked as Cancelled.");
+    } catch (err) {
+      console.error("Cancel error:", err);
+      showToast("Failed to update event status.");
+    }
   };
 
-  const handleCreateSubmit = (e) => {
+  const handleDeleteEvent = async (eventId, title) => {
+    if (!window.confirm(`Are you sure you want to permanently delete event "${title}"?`)) {
+      return;
+    }
+    try {
+      await eventsService.delete(eventId);
+      setEventList((prev) => prev.filter((e) => e.id !== eventId));
+      showToast(`Event "${title}" deleted successfully.`);
+    } catch (err) {
+      console.error("Delete event error:", err);
+      showToast(err.response?.data?.message || "Failed to delete event.");
+    }
+  };
+
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    createEvent(newEventData);
-    setEventList([...initialEvents]);
-    setIsCreateModalOpen(false);
-    setActionNotice("New event created successfully!");
-    setTimeout(() => setActionNotice(null), 3000);
-    setNewEventData({
-      title: "",
-      organizer: "",
-      category: "Technology",
-      location: "",
-      venue: "",
-      date: "",
-      time: "09:00 AM - 05:00 PM",
-      capacity: 200,
-      banner: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80",
-      description: "",
-    });
+    if (!newEventData.title.trim() || !newEventData.category_id || !newEventData.date || !newEventData.location.trim()) {
+      showToast("Please fill in all required fields.");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const formData = new FormData();
+      formData.append("title", newEventData.title.trim());
+      formData.append("category_id", newEventData.category_id);
+      formData.append("location", newEventData.location.trim());
+      formData.append("date", newEventData.date);
+      formData.append("time", newEventData.time.trim());
+      formData.append("capacity", newEventData.capacity);
+      formData.append("price", newEventData.price);
+      formData.append("status", "upcoming");
+      formData.append("description", newEventData.description.trim());
+
+      await eventsService.create(formData);
+      showToast("New event created successfully!");
+      setIsCreateModalOpen(false);
+      fetchEventsAndCategories();
+    } catch (err) {
+      console.error("Create event error:", err);
+      showToast(err.response?.data?.message || "Failed to create event.");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const isFilterActive =
@@ -154,19 +240,32 @@ export default function Events() {
     dateFilter !== "";
 
   return (
-    <div className="min-h-screen space-y-8 bg-slate-50 p-6 lg:p-8 text-slate-900">
-      {/* Page Header */}
+    <div className="min-h-screen space-y-8 bg-slate-50 p-6 lg:p-8">
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Events Management
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500">
-            Review, moderate, and manage all events across the platform.
+            Review, approve, filter, and moderate platform events across all organizers.
           </p>
         </div>
+
         <Button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => {
+            setNewEventData({
+              title: "",
+              category_id: categories[0]?.category_id || categories[0]?.id || "",
+              location: "",
+              date: "",
+              time: "10:00 AM",
+              capacity: 100,
+              price: 0,
+              description: "",
+            });
+            setIsCreateModalOpen(true);
+          }}
           className="shrink-0 gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xs"
         >
           <Plus className="h-4 w-4 stroke-[2.5]" />
@@ -174,46 +273,46 @@ export default function Events() {
         </Button>
       </div>
 
-      {/* Action Notification Toast */}
+      {/* Action Notification Toast/Notice */}
       {actionNotice && (
-        <div className="rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-md transition-all flex items-center gap-2">
-          <UserCheck className="h-4 w-4 text-emerald-400" />
+        <div className="rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-md transition-all">
           {actionNotice}
         </div>
       )}
 
-      {/* Statistics Section */}
+      {/* Statistics Cards */}
       <EventStats eventList={eventList} />
 
-      {/* Main Content Card: Toolbar & Table */}
+      {/* Main Content Card: Search, Filters, Table & Pagination */}
       <Card className="border-slate-200/80 shadow-xs">
         <CardHeader className="border-b border-slate-100 pb-5">
           <CardTitle className="text-lg font-bold text-slate-900">
-            All Events Directory
+            All Platform Events ({filteredEvents.length})
           </CardTitle>
 
           {/* Search & Filters Toolbar */}
           <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             {/* Search Input */}
             <div className="relative flex-1 min-w-[240px]">
-                {searchIconVisible &&(
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />)}
+              {searchIconVisible && (
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              )}
               <Input
                 type="text"
-                placeholder="       Search events by title, organizer, location..."
+                placeholder={searchIconVisible ? "      Search by title, organizer, or location..." : "Search by title, organizer, or location..."}
                 value={searchQuery}
                 onChange={(e) => {
-                  setSearchIconVisible(e.target.value === "" );
+                  setSearchIconVisible(e.target.value === "");
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-9 h-10 border-slate-200 bg-white"
+                className="h-10 border-slate-200 bg-white"
               />
             </div>
 
-            {/* Filters Toolbar */}
+            {/* Filter Selects & Date */}
             <div className="flex flex-wrap items-center gap-3">
-              {/* Status Select */}
+              {/* Status Filter */}
               <div className="w-[140px]">
                 <Select
                   value={statusFilter}
@@ -221,59 +320,53 @@ export default function Events() {
                     setStatusFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="h-10 border-slate-200 bg-white"
+                  className="h-10 border-slate-200"
                 >
                   <option value="All">All Statuses</option>
-                  <option value="Draft">Draft</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Published">Published</option>
+                  <option value="Upcoming">Upcoming</option>
+                  <option value="Ongoing">Ongoing</option>
                   <option value="Completed">Completed</option>
                   <option value="Cancelled">Cancelled</option>
                 </Select>
               </div>
 
-              {/* Category Select */}
-              <div className="w-[140px]">
+              {/* Category Filter */}
+              <div className="w-[150px]">
                 <Select
                   value={categoryFilter}
                   onChange={(e) => {
                     setCategoryFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="h-10 border-slate-200 bg-white"
+                  className="h-10 border-slate-200"
                 >
                   <option value="All">All Categories</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Design">Design</option>
-                  <option value="Music">Music</option>
-                  <option value="Business">Business</option>
-                  <option value="Health">Health</option>
+                  {categories.map((cat) => (
+                    <option key={cat.category_id || cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
                 </Select>
               </div>
 
-              {/* Date Filter Input */}
-              <div className="relative w-[150px]">
-                {calendarIconVisible && (
-                <Calendar className="absolute left-1 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />)}
+              {/* Date Input */}
+              <div className="w-[150px]">
                 <Input
-                  type="text"
-                  placeholder="     Date filter..."
+                  type="date"
                   value={dateFilter}
                   onChange={(e) => {
-                    setCalendarIconVisible(e.target.value ==="");
                     setDateFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="pl-9 h-10 border-slate-200 bg-white text-xs"
+                  className="h-10 border-slate-200 bg-white text-xs"
                 />
               </div>
 
-              {/* Reset Button */}
               {isFilterActive && (
                 <Button
                   variant="outline"
                   onClick={handleResetFilters}
-                  className="h-10 gap-1.5 border-slate-200 text-slate-600 hover:text-slate-900 bg-white"
+                  className="h-10 gap-1.5 border-slate-200 text-slate-600 hover:text-slate-900"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   Reset
@@ -284,7 +377,12 @@ export default function Events() {
         </CardHeader>
 
         <CardContent className="p-0">
-          {filteredEvents.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3" />
+              <p className="text-sm font-medium text-slate-500">Loading platform events...</p>
+            </div>
+          ) : filteredEvents.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center justify-center p-12 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 mb-4">
@@ -294,13 +392,13 @@ export default function Events() {
                 No events found.
               </h3>
               <p className="mt-1 text-sm text-slate-500 max-w-sm">
-                No platform events matched your search query or active filter criteria.
+                No events matched your current search filters or date criteria.
               </p>
               {isFilterActive && (
                 <Button
                   variant="outline"
                   onClick={handleResetFilters}
-                  className="mt-5 gap-2 border-slate-200 font-semibold bg-white"
+                  className="mt-5 gap-2 border-slate-200 font-semibold"
                 >
                   <RotateCcw className="h-4 w-4" />
                   Clear Filters
@@ -313,29 +411,20 @@ export default function Events() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50/70 hover:bg-slate-50/70 border-b border-slate-200/80">
-                    <TableHead className="w-[80px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
-                      Banner
-                    </TableHead>
-                    <TableHead className="w-[80px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
-                      Title
+                    <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Event Title
                     </TableHead>
                     <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Organizer
                     </TableHead>
-                    <TableHead className="w-[800px] px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Category
                     </TableHead>
                     <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
-                      Date
+                      Date & Time
                     </TableHead>
                     <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Location
-                    </TableHead>
-                    <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
-                      Capacity
-                    </TableHead>
-                    <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
-                      Registered
                     </TableHead>
                     <TableHead className="px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
                       Status
@@ -346,98 +435,94 @@ export default function Events() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedEvents.map((evt) => (
+                  {paginatedEvents.map((event) => (
                     <TableRow
-                      key={evt.id}
+                      key={event.id}
                       className="hover:bg-slate-50/60 transition-colors border-b border-slate-100"
                     >
-                      {/* Banner Thumbnail */}
+                      {/* Title & Banner */}
                       <TableCell className="px-4 py-3">
-                        <div className="h-10 w-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                        <div className="flex items-center gap-3">
                           <img
-                            src={evt.banner}
-                            alt={evt.title}
-                            className="h-full w-full object-cover"
+                            src={event.banner}
+                            alt={event.title}
+                            className="h-10 w-12 rounded object-cover shrink-0 border border-slate-200"
                           />
+                          <div>
+                            <p className="font-semibold text-slate-900 leading-tight">
+                              {event.title}
+                            </p>
+                            <span className="text-xs text-slate-400">
+                              {event.attendees}/{event.capacity} registered
+                            </span>
+                          </div>
                         </div>
                       </TableCell>
 
-                      {/* Title */}
-                      <TableCell className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap max-w-[200px] truncate">
-                        {evt.title}
-                      </TableCell>
-
                       {/* Organizer */}
-                      <TableCell className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                        {evt.organizer}
+                      <TableCell className="px-4 py-3 text-slate-700 whitespace-nowrap font-medium text-sm">
+                        {event.organizer}
                       </TableCell>
 
                       {/* Category */}
                       <TableCell className="px-4 py-3 whitespace-nowrap">
-                        <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-medium">
-                          {evt.category}
+                        <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
+                          {event.category}
                         </Badge>
                       </TableCell>
 
-                      {/* Date */}
-                      <TableCell className="px-4 py-3 text-slate-500 text-sm whitespace-nowrap">
-                        {evt.date}
+                      {/* Date & Time */}
+                      <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-slate-600">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-slate-900">{event.date}</span>
+                          <span className="text-xs text-slate-400">{event.time}</span>
+                        </div>
                       </TableCell>
 
                       {/* Location */}
-                      <TableCell className="px-4 py-3 text-slate-600 text-sm whitespace-nowrap">
-                        {evt.location}
-                      </TableCell>
-
-                      {/* Capacity */}
-                      <TableCell className="px-4 py-3 font-medium text-slate-700 whitespace-nowrap">
-                        {evt.capacity}
-                      </TableCell>
-
-                      {/* Registered */}
-                      <TableCell className="px-4 py-3 font-medium text-indigo-600 whitespace-nowrap">
-                        {evt.registered}
+                      <TableCell className="px-4 py-3 text-slate-600 whitespace-nowrap text-sm">
+                        {event.location}
                       </TableCell>
 
                       {/* Status */}
                       <TableCell className="px-4 py-3 whitespace-nowrap">
-                        <StatusBadge status={evt.status} />
+                        <StatusBadge status={event.status} />
                       </TableCell>
 
                       {/* Actions */}
                       <TableCell className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
-                          {/* View Details Button */}
+                          {/* View Details */}
                           <Button
                             variant="ghost"
                             size="icon"
                             title="View Event Details"
-                            onClick={() => navigate(`/admin/events/${evt.id}`)}
+                            onClick={() => navigate(`/admin/events/${event.id}`)}
                             className="h-8 w-8 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
 
-                          {/* Approve Button */}
-                          {evt.status !== "Published" && (
+                          {/* Approve/Publish Button */}
+                          {event.status !== "Upcoming" && (
                             <Button
                               variant="ghost"
                               size="icon"
-                              title="Approve & Publish Event"
-                              onClick={() => handleStatusChange(evt.id, "Published")}
+                              title="Publish/Approve Event"
+                              onClick={() => handleApproveEvent(event.id)}
                               className="h-8 w-8 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50"
                             >
                               <CheckCircle2 className="h-4 w-4" />
                             </Button>
                           )}
 
-                          {/* Reject / Cancel Button */}
-                          {evt.status !== "Cancelled" && (
+                          {/* Cancel/Reject Button */}
+                          {event.status !== "Cancelled" && (
                             <Button
                               variant="ghost"
                               size="icon"
-                              title="Reject / Cancel Event"
-                              onClick={() => handleStatusChange(evt.id, "Cancelled")}
+                              title="Cancel Event"
+                              onClick={() => handleRejectEvent(event.id)}
                               className="h-8 w-8 text-slate-500 hover:text-amber-600 hover:bg-amber-50"
                             >
                               <XCircle className="h-4 w-4" />
@@ -449,7 +534,7 @@ export default function Events() {
                             variant="ghost"
                             size="icon"
                             title="Delete Event"
-                            onClick={() => handleDeleteEvent(evt.id)}
+                            onClick={() => handleDeleteEvent(event.id, event.title)}
                             className="h-8 w-8 text-slate-500 hover:text-rose-600 hover:bg-rose-50"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -478,7 +563,7 @@ export default function Events() {
                   size="sm"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  className="h-8 px-3 text-xs gap-1 border-slate-200 font-medium bg-white"
+                  className="h-8 px-3 text-xs gap-1 border-slate-200 font-medium"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                   Previous
@@ -494,7 +579,7 @@ export default function Events() {
                       className={`h-8 w-8 text-xs font-semibold ${
                         pageNum === currentPage
                           ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                          : "border-slate-200 text-slate-700 hover:bg-slate-50 bg-white"
+                          : "border-slate-200 text-slate-700 hover:bg-slate-50"
                       }`}
                     >
                       {pageNum}
@@ -507,7 +592,7 @@ export default function Events() {
                   size="sm"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  className="h-8 px-3 text-xs gap-1 border-slate-200 font-medium bg-white"
+                  className="h-8 px-3 text-xs gap-1 border-slate-200 font-medium"
                 >
                   Next
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -519,133 +604,153 @@ export default function Events() {
       </Card>
 
       {/* Create Event Modal */}
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="sm:max-w-[500px] bg-white text-slate-900 border-slate-200">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-900">
-              Create New Event
-            </DialogTitle>
-          </DialogHeader>
+      {isCreateModalOpen && (
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogContent className="max-w-xl">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold text-slate-900">
+                Create New Event
+              </DialogTitle>
+            </DialogHeader>
 
-          <form onSubmit={handleCreateSubmit} className="space-y-4 pt-2">
-            <div className="space-y-1">
-              <label className="text-xs font-bold uppercase text-slate-600">Event Title</label>
-              <Input
-                type="text"
-                value={newEventData.title}
-                onChange={(e) => setNewEventData({ ...newEventData, title: e.target.value })}
-                placeholder="Enter event title"
-                required
-                className="bg-white border-slate-200"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-600">Organizer Name</label>
+            <form onSubmit={handleCreateSubmit} className="space-y-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Event Title *
+                </label>
                 <Input
                   type="text"
-                  value={newEventData.organizer}
-                  onChange={(e) => setNewEventData({ ...newEventData, organizer: e.target.value })}
-                  placeholder="Organizer name"
+                  placeholder="e.g. Annual Tech Symposium 2026"
+                  value={newEventData.title}
+                  onChange={(e) =>
+                    setNewEventData({ ...newEventData, title: e.target.value })
+                  }
                   required
-                  className="bg-white border-slate-200"
+                  className="h-10 border-slate-200"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-600">Category</label>
-                <Select
-                  value={newEventData.category}
-                  onChange={(e) => setNewEventData({ ...newEventData, category: e.target.value })}
-                  className="bg-white border-slate-200"
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Category *
+                  </label>
+                  <Select
+                    value={newEventData.category_id}
+                    onChange={(e) =>
+                      setNewEventData({ ...newEventData, category_id: e.target.value })
+                    }
+                    className="h-10 border-slate-200"
+                    required
+                  >
+                    <option value="" disabled>Select category</option>
+                    {categories.map((c) => (
+                      <option key={c.category_id || c.id} value={c.category_id || c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Location / Venue *
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. Millennium Hall, Addis Ababa"
+                    value={newEventData.location}
+                    onChange={(e) =>
+                      setNewEventData({ ...newEventData, location: e.target.value })
+                    }
+                    required
+                    className="h-10 border-slate-200"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Event Date *
+                  </label>
+                  <Input
+                    type="date"
+                    value={newEventData.date}
+                    onChange={(e) =>
+                      setNewEventData({ ...newEventData, date: e.target.value })
+                    }
+                    required
+                    className="h-10 border-slate-200 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Time
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="10:00 AM"
+                    value={newEventData.time}
+                    onChange={(e) =>
+                      setNewEventData({ ...newEventData, time: e.target.value })
+                    }
+                    className="h-10 border-slate-200"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Max Capacity
+                  </label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={newEventData.capacity}
+                    onChange={(e) =>
+                      setNewEventData({ ...newEventData, capacity: e.target.value })
+                    }
+                    className="h-10 border-slate-200"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Event overview, agenda, and requirements..."
+                  value={newEventData.description}
+                  onChange={(e) =>
+                    setNewEventData({ ...newEventData, description: e.target.value })
+                  }
+                  className="w-full rounded-md border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <DialogFooter className="pt-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
                 >
-                  <option value="Technology">Technology</option>
-                  <option value="Design">Design</option>
-                  <option value="Music">Music</option>
-                  <option value="Business">Business</option>
-                  <option value="Health">Health</option>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-600">City / Location</label>
-                <Input
-                  type="text"
-                  value={newEventData.location}
-                  onChange={(e) => setNewEventData({ ...newEventData, location: e.target.value })}
-                  placeholder="e.g. San Francisco, CA"
-                  required
-                  className="bg-white border-slate-200"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-600">Venue</label>
-                <Input
-                  type="text"
-                  value={newEventData.venue}
-                  onChange={(e) => setNewEventData({ ...newEventData, venue: e.target.value })}
-                  placeholder="e.g. Moscone Center"
-                  className="bg-white border-slate-200"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-600">Date</label>
-                <Input
-                  type="text"
-                  value={newEventData.date}
-                  onChange={(e) => setNewEventData({ ...newEventData, date: e.target.value })}
-                  placeholder="e.g. Oct 15, 2026"
-                  required
-                  className="bg-white border-slate-200"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold uppercase text-slate-600">Seat Capacity</label>
-                <Input
-                  type="number"
-                  value={newEventData.capacity}
-                  onChange={(e) => setNewEventData({ ...newEventData, capacity: parseInt(e.target.value) || 100 })}
-                  required
-                  className="bg-white border-slate-200"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold uppercase text-slate-600">Description</label>
-              <Input
-                type="text"
-                value={newEventData.description}
-                onChange={(e) => setNewEventData({ ...newEventData, description: e.target.value })}
-                placeholder="Brief event description..."
-                className="bg-white border-slate-200"
-              />
-            </div>
-
-            <DialogFooter className="pt-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsCreateModalOpen(false)}
-                className="border-slate-200 text-slate-600"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
-                Create Event
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isCreating}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+                >
+                  {isCreating ? "Publishing..." : "Publish Event"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

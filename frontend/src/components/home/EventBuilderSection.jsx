@@ -8,10 +8,8 @@ const UNSPLASH_EVENT_SERVICES =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop&q=80";
 
 export default function EventBuilderSection() {
-  const [ticketLimit, setTicketLimit] = useState(500);
-  const [scanSpeed, setScanSpeed] = useState(0.4);
+  
   const [serviceView, setServiceView] = useState("Dashboard");
-  const [widgetVisible, setWidgetVisible] = useState(true);
 
   return (
     <section className="builder-section" id="event-services-section">
@@ -118,76 +116,6 @@ export default function EventBuilderSection() {
               </div>
             </div>
 
-            {/* Floating Service Controls Widget Overlay */}
-            {widgetVisible && (
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="builder-widget"
-              >
-                <div className="builder-widget-header">
-                  <span>Service Controls</span>
-                  <X
-                    className="builder-widget-close"
-                    onClick={() => setWidgetVisible(false)}
-                  />
-                </div>
-
-                <div className="builder-widget-group">
-                  <label className="builder-widget-label">Service Module</label>
-                  <select
-                    value={serviceView}
-                    onChange={(e) => setServiceView(e.target.value)}
-                    className="builder-widget-select"
-                  >
-                    <option value="Dashboard">Management Dashboard</option>
-                    <option value="Scanner">QR Gate Check-in</option>
-                    <option value="Analytics">Live Revenue Analytics</option>
-                  </select>
-                </div>
-
-                <div className="builder-widget-group">
-                  <label className="builder-widget-label">Ticket Capacity</label>
-                  <div className="builder-widget-slider-row">
-                    <input
-                      type="range"
-                      min="100"
-                      max="2000"
-                      step="50"
-                      value={ticketLimit}
-                      onChange={(e) => setTicketLimit(Number(e.target.value))}
-                      className="builder-widget-slider"
-                    />
-                    <span className="builder-widget-val">{ticketLimit}</span>
-                  </div>
-                </div>
-
-                <div className="builder-widget-group">
-                  <label className="builder-widget-label">Scan Speed (sec)</label>
-                  <div className="builder-widget-slider-row">
-                    <input
-                      type="range"
-                      min="0.1"
-                      max="1.5"
-                      step="0.1"
-                      value={scanSpeed}
-                      onChange={(e) => setScanSpeed(Number(e.target.value))}
-                      className="builder-widget-slider"
-                    />
-                    <span className="builder-widget-val">{scanSpeed}s</span>
-                  </div>
-                </div>
-
-                <div className="builder-widget-group">
-                  <label className="builder-widget-label">Security Protocol</label>
-                  <div className="builder-widget-color-box">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span style={{ fontSize: "0.75rem", color: "#10b981", fontWeight: "600" }}>256-bit SSL Encrypted</span>
-                  </div>
-                </div>
-              </motion.div>
-            )}
 
             {/* Corner Badge */}
             <div className="builder-floating-badge" title="24/7 Platform Support">
