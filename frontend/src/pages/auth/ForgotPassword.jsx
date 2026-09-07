@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import AuthBackground from "../../components/auth/AuthBackground";
 import "./AuthForm.css";
 
 const ForgotPassword = () => {
@@ -21,10 +22,8 @@ const ForgotPassword = () => {
 
   return (
     <div className="auth-page">
-      {/* Background Blobs */}
-      <div className="auth-page__blob auth-page__blob--1" />
-      <div className="auth-page__blob auth-page__blob--2" />
-      <div className="auth-page__blob auth-page__blob--3" />
+      {/* Abstract Ambient Background System */}
+      <AuthBackground />
 
       <div className="auth-card">
         {/* Logo */}

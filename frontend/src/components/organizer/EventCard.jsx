@@ -12,12 +12,16 @@ export default function EventCard({ event, onDelete }) {
     event.image_url ||
     "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80";
 
+  const rawDate = event.startDate || event.start_date || event.date;
+  const isPast = Boolean(rawDate && new Date(rawDate).getTime() < Date.now());
+  const effectiveStatus = isPast ? "completed" : (event.status || "upcoming");
+
   return (
     <div className="org-event-card">
       <div className="card-media-banner">
         <img src={displayImage} alt={event.title} loading="lazy" />
         <div className="card-badge-status-pos">
-          <StatusBadge status={event.status} />
+          <StatusBadge status={effectiveStatus} />
         </div>
         <div className="card-badge-price-pos">
           {event.price > 0 ? formatCurrency(event.price, event.currency) : "FREE"}

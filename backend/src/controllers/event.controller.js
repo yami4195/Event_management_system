@@ -8,7 +8,12 @@ const EVENT_STATUSES = ["upcoming", "ongoing", "completed", "cancelled", "draft"
 const normalizeEventStatus = (status) => String(status).trim().toLowerCase();
 
 const EVENT_SELECT_FIELDS = `
-  e.event_id, e.title, e.description, e.date, e.time, e.location, e.capacity, e.status,
+  e.event_id, e.title, e.description, e.date, e.time, e.location, e.capacity,
+  CASE
+    WHEN e.status = 'cancelled' THEN 'cancelled'
+    WHEN e.date < CURRENT_DATE THEN 'completed'
+    ELSE e.status
+  END AS status,
   e.organizer_id, e.category_id, e.created_at,
   COALESCE(e.price, 0) AS price,
   c.name AS category_name,

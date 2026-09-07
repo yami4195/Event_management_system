@@ -53,7 +53,11 @@ export default function EventCard({ event }) {
       ? event.seatsLeft
       : Math.max(totalSeats - attendeesCount, 0);
 
-  const isSoldOut = remainingSeats <= 0 || event.status === "Sold Out";
+  // Check if event date is in the past
+  const rawDate = event.date || event.startDate || event.start_date || event.start_time;
+  const isPast = Boolean(rawDate && new Date(rawDate).getTime() < Date.now());
+  const isCompleted = isPast || (event.status && String(event.status).toLowerCase() === "completed");
+  const isSoldOut = !isCompleted && (remainingSeats <= 0 || event.status === "Sold Out");
   const detailUrl = ROUTES?.EVENT_DETAIL
     ? ROUTES.EVENT_DETAIL.replace(":id", eventId)
     : `/events/${eventId}`;
@@ -79,11 +83,27 @@ export default function EventCard({ event }) {
           loading="lazy"
         />
 
-        {(event.category || event.category_name) && (
-          <span className="absolute top-3 left-3 z-20 px-3 py-1 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/10 shadow-sm">
-            {event.category || event.category_name}
+        {/* Top Badges (Category on Left, Status Badge on Right) */}
+        <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between pointer-events-none">
+          {(event.category || event.category_name) ? (
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/10 shadow-sm">
+              {event.category || event.category_name}
+            </span>
+          ) : <div />}
+
+          {/* Status Badge */}
+          <span
+            className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md shadow-sm border ${
+              isCompleted
+                ? "bg-slate-900/90 text-slate-200 border-slate-700/80"
+                : isSoldOut
+                ? "bg-rose-900/85 text-rose-200 border-rose-700/60"
+                : "bg-emerald-950/80 text-emerald-300 border-emerald-700/50"
+            }`}
+          >
+            {isCompleted ? "COMPLETED" : isSoldOut ? "SOLD OUT" : (event.status || "UPCOMING").toUpperCase()}
           </span>
-        )}
+        </div>
       </div>
 
       {/* 2. Title Section */}
@@ -131,17 +151,17 @@ export default function EventCard({ event }) {
             <span className="text-[10px] font-medium text-slate-400 block">Remaining Seat</span>
             <span
               className={`text-xs font-extrabold uppercase truncate block ${
-                isSoldOut
+                isCompleted
+                  ? "text-slate-500 dark:text-slate-400"
+                  : isSoldOut
                   ? "text-rose-600 dark:text-rose-400"
                   : "text-slate-900 dark:text-white"
               }`}
             >
-              {isSoldOut ? "0 SEATS LEFT" : `${remainingSeats} SEATS LEFT`}
+              {isCompleted ? "CONCLUDED" : isSoldOut ? "0 SEATS LEFT" : `${remainingSeats} SEATS LEFT`}
             </span>
           </div>
         </div>
-
-        
 
         {/* Price Box */}
         <div className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 rounded-2xl p-3 flex items-center gap-3">
@@ -161,13 +181,15 @@ export default function EventCard({ event }) {
       <Link
         to={detailUrl}
         className={`w-full h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md mt-1 ${
-          isSoldOut
+          isCompleted
+            ? "bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
+            : isSoldOut
             ? "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed pointer-events-none"
             : "bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white shadow-blue-600/20"
         }`}
       >
-        <span>{isSoldOut ? "Sold Out" : "Book Now"}</span>
-        {!isSoldOut && <ArrowRight className="w-4 h-4" />}
+        <span>{isCompleted ? "View Details (Completed)" : isSoldOut ? "Sold Out" : "Book Now"}</span>
+        <ArrowRight className="w-4 h-4" />
       </Link>
     </div>
   );

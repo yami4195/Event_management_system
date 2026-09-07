@@ -1,0 +1,170 @@
+/* AuthBackground.css - Abstract Ambient Background System */
+
+.auth-bg-abstract {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* 1. Tech Dot Matrix Grid Overlay */
+.auth-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1.25px, transparent 1.25px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.15) 75%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.15) 75%, transparent 100%);
+}
+
+/* 2. Multi-color Ambient Mesh Glows (Softens Monochromatic Dominance) */
+.auth-bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Cyan / Sky accent top-left */
+.auth-glow-cyan {
+  top: -140px;
+  left: -100px;
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(56, 189, 248, 0.08) 55%, transparent 70%);
+  filter: blur(65px);
+  animation: pulseGlow 10s ease-in-out infinite alternate;
+}
+
+/* Deep Indigo accent center */
+.auth-glow-indigo {
+  top: 30%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, rgba(59, 130, 246, 0.05) 60%, transparent 75%);
+  filter: blur(80px);
+}
+
+/* Violet / Purple accent bottom-right */
+.auth-glow-violet {
+  bottom: -160px;
+  right: -120px;
+  width: 640px;
+  height: 640px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(124, 58, 237, 0.06) 60%, transparent 75%);
+  filter: blur(75px);
+  animation: pulseGlow 14s ease-in-out infinite alternate-reverse;
+}
+
+/* Subtle Rose / Coral warmth top-right */
+.auth-glow-rose {
+  top: 10%;
+  right: 5%;
+  width: 440px;
+  height: 440px;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.16) 0%, rgba(244, 63, 94, 0.02) 60%, transparent 70%);
+  filter: blur(70px);
+}
+
+/* Soft Teal / Emerald bottom-left */
+.auth-glow-amber {
+  bottom: 8%;
+  left: 8%;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.18) 0%, rgba(14, 165, 233, 0.04) 60%, transparent 70%);
+  filter: blur(70px);
+}
+
+/* 3. Floating Glassmorphism Geometric Elements */
+.auth-glass-orb {
+  position: absolute;
+  border-radius: 50%;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.25), inset 0 0 20px 0 rgba(255, 255, 255, 0.15);
+}
+
+.auth-orb-1 {
+  top: 15%;
+  left: 10%;
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02));
+  animation: floatOrb 9s ease-in-out infinite alternate;
+}
+
+.auth-orb-2 {
+  bottom: 16%;
+  right: 10%;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.01));
+  animation: floatOrb 12s ease-in-out infinite alternate-reverse;
+}
+
+.auth-glass-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+}
+
+.auth-ring-1 {
+  top: 22%;
+  right: 15%;
+  width: 160px;
+  height: 160px;
+  border-top-color: rgba(56, 189, 248, 0.45);
+  border-right-color: rgba(255, 255, 255, 0.06);
+  transform: rotate(-25deg);
+  animation: slowSpin 28s linear infinite;
+}
+
+.auth-ring-2 {
+  bottom: 20%;
+  left: 14%;
+  width: 200px;
+  height: 200px;
+  border-bottom-color: rgba(167, 139, 250, 0.4);
+  border-left-color: rgba(255, 255, 255, 0.05);
+  transform: rotate(40deg);
+  animation: slowSpin 38s linear infinite reverse;
+}
+
+/* 4. Abstract Vector Waves & Curved Lines */
+.auth-bg-waves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+}
+
+/* Keyframe Animations */
+@keyframes floatOrb {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-16px) scale(1.05); }
+  100% { transform: translateY(8px) scale(0.96); }
+}
+
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Responsive adjustment for small screens */
+@media (max-width: 640px) {
+  .auth-glass-orb,
+  .auth-glass-ring {
+    opacity: 0.45;
+  }
+}

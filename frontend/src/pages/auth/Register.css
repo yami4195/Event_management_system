@@ -21,7 +21,7 @@
 .register-page {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+  background: radial-gradient(ellipse at 50% 0%, #1d4ed8 0%, #1e3a8a 45%, #0f172a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,35 +29,6 @@
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   position: relative;
   overflow: hidden;
-}
-
-/* Layered Background Wave Circles */
-.register-page-bg-circles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
-}
-
-.register-bg-circle-1 {
-  position: absolute;
-  top: -200px;
-  right: -200px;
-  width: 750px;
-  height: 750px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 60%, transparent 70%);
-}
-
-.register-bg-circle-2 {
-  position: absolute;
-  bottom: -250px;
-  left: -250px;
-  width: 800px;
-  height: 800px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 60%, transparent 70%);
 }
 
 /* Centered Registration Card */
@@ -68,7 +39,7 @@
   max-width: 520px;
   background-color: #ffffff;
   border-radius: var(--reg-radius-card);
-  box-shadow: var(--reg-shadow-card);
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2);
   padding: 2.5rem 2.25rem;
   display: flex;
   flex-direction: column;

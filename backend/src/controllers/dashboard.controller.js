@@ -13,11 +13,11 @@ export async function getDashboardStats(req, res) {
       const statsResult = await pool.query(
         `SELECT
            COUNT(*)::int AS total_events,
-           COUNT(*) FILTER (WHERE status IN ('upcoming', 'ongoing'))::int AS published_events,
-           COUNT(*) FILTER (WHERE status = 'upcoming')::int AS upcoming_events,
+           COUNT(*) FILTER (WHERE status IN ('upcoming', 'ongoing') AND (date IS NULL OR date >= CURRENT_DATE))::int AS published_events,
+           COUNT(*) FILTER (WHERE status = 'upcoming' AND (date IS NULL OR date >= CURRENT_DATE))::int AS upcoming_events,
            COUNT(*) FILTER (WHERE status = 'draft')::int AS draft_events,
            COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled_events,
-           COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_events,
+           COUNT(*) FILTER (WHERE status = 'completed' OR (status != 'cancelled' AND date < CURRENT_DATE))::int AS completed_events,
            COALESCE(SUM(capacity), 0)::int AS total_capacity,
            COALESCE(AVG(capacity), 0)::int AS average_capacity,
            COALESCE((

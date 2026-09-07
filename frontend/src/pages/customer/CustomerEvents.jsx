@@ -148,9 +148,25 @@ export default function CustomerEvents() {
                       {reg.quantity || 1}
                     </td>
                     <td>
-                      <span style={{ padding: "4px 12px", borderRadius: "20px", background: "#dcfce7", color: "#16a34a", fontSize: "12px", fontWeight: "800" }}>
-                        {reg.status || "Confirmed"}
-                      </span>
+                      {(() => {
+                        const rawEventDate = reg.event_date || reg.registrationDate;
+                        const isPast = Boolean(rawEventDate && new Date(rawEventDate).getTime() < Date.now());
+                        const statusText = isPast ? "Completed" : (reg.status || "Confirmed");
+                        return (
+                          <span style={{
+                            padding: "4px 12px",
+                            borderRadius: "20px",
+                            background: isPast ? "#f1f5f9" : "#dcfce7",
+                            color: isPast ? "#475569" : "#16a34a",
+                            border: isPast ? "1px solid #cbd5e1" : "1px solid #bbf7d0",
+                            fontSize: "12px",
+                            fontWeight: "800",
+                            textTransform: "uppercase"
+                          }}>
+                            {statusText}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td>
                       <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>

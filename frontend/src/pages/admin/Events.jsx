@@ -82,7 +82,13 @@ export default function Events() {
       setCategories(rawCats);
 
       const mapped = rawEvents.map((e) => {
-        const status = e.status ? e.status.charAt(0).toUpperCase() + e.status.slice(1).toLowerCase() : "Upcoming";
+        const rawDate = e.date || e.startDate || e.start_date;
+        const isPast = Boolean(rawDate && new Date(rawDate).getTime() < Date.now());
+        const status = isPast
+          ? "Completed"
+          : e.status
+          ? e.status.charAt(0).toUpperCase() + e.status.slice(1).toLowerCase()
+          : "Upcoming";
         return {
           id: e.event_id || e.id,
           title: e.title || "Untitled Event",

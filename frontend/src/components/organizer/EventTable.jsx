@@ -55,6 +55,10 @@ export default function EventTable({ events = [], onDelete, sortBy, sortOrder, o
                 event.image_url ||
                 "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300&auto=format&fit=crop&q=80";
 
+              const rawDate = event.startDate || event.start_date || event.date;
+              const isPast = Boolean(rawDate && new Date(rawDate).getTime() < Date.now());
+              const effectiveStatus = isPast ? "completed" : (event.status || "upcoming");
+
               return (
                 <tr key={event.id}>
                   <td>
@@ -81,7 +85,7 @@ export default function EventTable({ events = [], onDelete, sortBy, sortOrder, o
                     {formatDate(event.startDate)}
                   </td>
                   <td>
-                    <StatusBadge status={event.status} />
+                    <StatusBadge status={effectiveStatus} />
                   </td>
                   <td>
                     <div style={{ fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>

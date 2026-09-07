@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, User, Mail, Phone, Lock, UserCheck } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
+import AuthBackground from "../../components/auth/AuthBackground";
 import "./Register.css";
 
 // Social Icons SVGs
@@ -159,11 +160,8 @@ export default function Register() {
 
   return (
     <div className="register-page">
-      {/* Background Decorative Rings */}
-      <div className="register-page-bg-circles" aria-hidden="true">
-        <div className="register-bg-circle-1" />
-        <div className="register-bg-circle-2" />
-      </div>
+      {/* Abstract Ambient Background System */}
+      <AuthBackground />
 
       {/* Centered Card */}
       <motion.div

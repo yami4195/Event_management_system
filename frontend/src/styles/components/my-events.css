@@ -580,6 +580,9 @@
 .status-upcoming { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
 .status-upcoming .status-dot { background: #2563eb; }
 
+.status-completed { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+.status-completed .status-dot { background: #64748b; }
+
 .status-draft { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 .status-draft .status-dot { background: #64748b; }
 

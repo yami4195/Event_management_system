@@ -184,9 +184,11 @@ export default function EventDetails() {
       ? event.seatsLeft
       : Math.max(totalCapacity - attendeesCount, 0);
 
-  const isSoldOut = remainingSeats <= 0 || event.status === "Sold Out";
-  const isCancelled = event.status === "Cancelled";
-  const isCompleted = event.status === "Completed";
+  const rawDate = event.date || event.startDate || event.start_date;
+  const isPast = Boolean(rawDate && new Date(rawDate).getTime() < Date.now());
+  const isCancelled = String(event.status).toLowerCase() === "cancelled";
+  const isCompleted = isPast || String(event.status).toLowerCase() === "completed";
+  const isSoldOut = !isCompleted && (remainingSeats <= 0 || event.status === "Sold Out");
   const userAlreadyRegistered =
     event.user_registered || event.is_registered || registerSuccess;
 
@@ -388,7 +390,11 @@ export default function EventDetails() {
             </div>
 
             {/* Action Buttons */}
-            {userAlreadyRegistered ? (
+            {isCompleted ? (
+              <div style={{ padding: "14px 18px", borderRadius: "14px", background: "rgba(100, 116, 139, 0.08)", border: "1px solid var(--border-color)", textAlign: "center", color: "var(--text-muted)", fontWeight: "700", fontSize: "14px" }}>
+                This event has concluded.
+              </div>
+            ) : userAlreadyRegistered ? (
               <div className="status-alert-success">
                 <CheckCircle2 size={18} /> You're registered for this event!
               </div>

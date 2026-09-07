@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, Sparkles } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
+import AuthBackground from "../../components/auth/AuthBackground";
 import "./Login.css";
 
 // Social Icons SVGs
@@ -114,11 +115,8 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      {/* Background Decorative Rings */}
-      <div className="login-page-bg-circles" aria-hidden="true">
-        <div className="login-bg-circle-1" />
-        <div className="login-bg-circle-2" />
-      </div>
+      {/* Abstract Ambient Background System */}
+      <AuthBackground />
 
       {/* Centered Login Card */}
       <motion.div

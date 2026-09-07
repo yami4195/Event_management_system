@@ -54,8 +54,14 @@ export function formatNumber(num) {
 /**
  * Get status badge configuration (Monochrome / Black & White)
  */
-export function getStatusBadgeConfig(status) {
-  const normalized = (status || "").toLowerCase();
+export function getStatusBadgeConfig(status, eventDate) {
+  let normalized = (status || "").toLowerCase();
+  if (eventDate) {
+    const d = new Date(eventDate);
+    if (!isNaN(d.getTime()) && d.getTime() < Date.now()) {
+      normalized = "completed";
+    }
+  }
 
   switch (normalized) {
     case "published":

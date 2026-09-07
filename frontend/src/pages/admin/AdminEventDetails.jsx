@@ -50,7 +50,13 @@ export default function AdminEventDetails() {
         const regs = regsRes.data?.data?.registrations || regsRes.data?.registrations || [];
 
         if (e) {
-          const status = e.status ? e.status.charAt(0).toUpperCase() + e.status.slice(1).toLowerCase() : "Upcoming";
+          const rawDate = e.date || e.startDate || e.start_date;
+          const isPast = Boolean(rawDate && new Date(rawDate).getTime() < Date.now());
+          const status = isPast
+            ? "Completed"
+            : e.status
+            ? e.status.charAt(0).toUpperCase() + e.status.slice(1).toLowerCase()
+            : "Upcoming";
           setEvent({
             id: e.event_id || e.id,
             title: e.title || "Untitled Event",
