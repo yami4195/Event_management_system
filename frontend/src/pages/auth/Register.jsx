@@ -1,118 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, User, Mail, Phone, Lock, UserCheck } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
 import "./Register.css";
-
-// SVG Illustration component matching the Registration / Onboarding Theme
-function RegisterIllustration() {
-  return (
-    <svg
-      viewBox="0 0 500 420"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="register-illustration-svg"
-    >
-      {/* Background Decorative Palms & Leaves */}
-      <path
-        d="M50 380C20 360 10 300 30 250C50 200 100 180 130 200C150 220 160 280 130 330C100 380 70 390 50 380Z"
-        fill="#3B82F6"
-        fillOpacity="0.85"
-      />
-      <path
-        d="M80 390C60 370 60 320 80 280C100 240 140 230 160 250C180 270 170 320 150 360C130 400 100 400 80 390Z"
-        fill="#2563EB"
-      />
-      <path
-        d="M400 390C440 370 470 320 450 270C430 220 380 200 350 230C320 260 330 320 360 360C390 400 420 400 400 390Z"
-        fill="#F43F5E"
-        fillOpacity="0.75"
-      />
-      <path
-        d="M360 380C390 360 400 310 380 260C360 210 310 200 290 230C270 260 290 320 320 360C340 390 350 390 360 380Z"
-        fill="#1E40AF"
-      />
-
-      {/* Festive Balloons Top */}
-      <g filter="drop-shadow(0px 4px 6px rgba(0,0,0,0.1))">
-        {/* Blue Balloon */}
-        <ellipse cx="210" cy="85" rx="22" ry="28" fill="#2563EB" />
-        <path d="M210 113L208 145" stroke="#94A3B8" strokeWidth="1.5" />
-
-        {/* Navy Balloon */}
-        <ellipse cx="250" cy="60" rx="24" ry="30" fill="#0F172A" />
-        <path d="M250 90L248 145" stroke="#94A3B8" strokeWidth="1.5" />
-
-        {/* Pink Balloon */}
-        <ellipse cx="290" cy="75" rx="22" ry="28" fill="#F43F5E" />
-        <path d="M290 103L285 145" stroke="#94A3B8" strokeWidth="1.5" />
-      </g>
-
-      {/* Ribbon "JOIN EVENTFLOW" Banner */}
-      <path
-        d="M100 150 Q 250 205 400 140 C 410 165 390 185 370 190 Q 250 245 120 185 C 105 175 95 160 100 150 Z"
-        fill="#EFF6FF"
-        stroke="#2563EB"
-        strokeWidth="2.5"
-      />
-      <svg width="500" height="300">
-  <defs>
-    <path
-      id="curve"
-      d="M60,130 Q290,300 400,100"
-      fill="none"
-    />
-  </defs>
-
-  <text
-    fill="#1E3A8A"
-    fontSize="27"
-    fontWeight="700"
-fontFamily="Playfair Display, serif"
-     letterSpacing="2"
-  >
-    <textPath href="#curve" startOffset="49%" textAnchor="middle">
-      CREATE & JOIN
-    </textPath>
-  </text>
-</svg>
-
-      {/* Male Character (Left) */}
-      <g>
-        {/* Hair */}
-        <path d="M70 155 C 70 135, 95 135, 95 150 C 95 155, 75 165, 70 155 Z" fill="#1E3A8A" />
-        {/* Head */}
-        <circle cx="85" cy="155" r="14" fill="#FDBA74" />
-        {/* Torso Red Shirt */}
-        <path d="M65 180 L105 180 L100 235 L70 235 Z" fill="#E11D48" />
-        {/* Arms holding banner */}
-        <path d="M70 185 L115 150" stroke="#FDBA74" strokeWidth="6" strokeLinecap="round" />
-        {/* Blue Pants */}
-        <path d="M70 235 L50 335 L70 335 L85 265 L95 335 L115 335 L100 235 Z" fill="#2563EB" />
-        {/* Shoes */}
-        <ellipse cx="55" cy="338" rx="10" ry="4" fill="#0F172A" />
-        <ellipse cx="120" cy="338" rx="10" ry="4" fill="#0F172A" />
-      </g>
-
-      {/* Female Character (Right) */}
-      <g>
-        {/* Long Hair */}
-        <path d="M420 145 C 440 145, 450 195, 430 225 C 410 205, 410 165, 420 145 Z" fill="#E11D48" />
-        {/* Head */}
-        <circle cx="430" cy="155" r="13" fill="#FDBA74" />
-        {/* Dark Blue Dress */}
-        <path d="M415 180 Q 430 175 445 180 L455 315 Q 425 325 405 315 Z" fill="#1E3A8A" />
-        {/* Arm holding banner */}
-        <path d="M440 183 L385 140" stroke="#FDBA74" strokeWidth="5.5" strokeLinecap="round" />
-        {/* Legs / Shoes */}
-        <path d="M420 315 L418 340 M440 315 L442 340" stroke="#FDBA74" strokeWidth="4" />
-        <ellipse cx="416" cy="341" rx="6" ry="3" fill="#0F172A" />
-        <ellipse cx="444" cy="341" rx="6" ry="3" fill="#0F172A" />
-      </g>
-    </svg>
-  );
-}
 
 // Social Icons SVGs
 function GoogleIcon() {
@@ -274,42 +165,43 @@ export default function Register() {
         <div className="register-bg-circle-2" />
       </div>
 
-      {/* Centered Split-Screen Card */}
+      {/* Centered Card */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="register-card"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="register-card-centered"
       >
-        {/* Left Side - Welcome Illustration */}
-        <div className="register-left-panel">
-          <div className="register-illustration-wrapper">
-            <RegisterIllustration />
-          </div>
+        {/* Brand Header */}
+        <div className="register-brand-header">
+          <Link to="/" className="register-brand-logo">
+            <span className="register-brand-icon">⚡</span>
+            <span className="register-brand-name">EventFlow</span>
+          </Link>
         </div>
 
-        {/* Right Side - Registration Form */}
-        <div className="register-right-panel">
-          <div className="register-header">
-            <h1 className="register-title">Create Account</h1>
-            <p className="register-subtitle">
-              Join EventFlow and discover amazing events
-            </p>
+        <div className="register-header">
+          <h1 className="register-title">Create Account</h1>
+          <p className="register-subtitle">
+            Join EventFlow and discover amazing events
+          </p>
+        </div>
+
+        {serverError && (
+          <div className="register-alert-error" role="alert">
+            {serverError}
           </div>
+        )}
 
-          {serverError && (
-            <div className="register-alert-error" role="alert">
-              {serverError}
-            </div>
-          )}
-
-          <form className="register-form" onSubmit={handleSubmit} noValidate>
-            {/* First Name & Last Name Row */}
-            <div className="register-name-row">
-              <div className="register-field-group">
-                <label className="register-label" htmlFor="register-firstname">
-                  First Name
-                </label>
+        <form className="register-form" onSubmit={handleSubmit} noValidate>
+          {/* First Name & Last Name Row */}
+          <div className="register-name-row">
+            <div className="register-field-group">
+              <label className="register-label" htmlFor="register-firstname">
+                First Name
+              </label>
+              <div className="register-input-wrapper">
+                <User className="register-input-icon" />
                 <input
                   id="register-firstname"
                   type="text"
@@ -320,15 +212,18 @@ export default function Register() {
                   onChange={handleChange}
                   autoComplete="given-name"
                 />
-                {errors.firstname && (
-                  <span className="register-field-error">{errors.firstname}</span>
-                )}
               </div>
+              {errors.firstname && (
+                <span className="register-field-error">{errors.firstname}</span>
+              )}
+            </div>
 
-              <div className="register-field-group">
-                <label className="register-label" htmlFor="register-lastname">
-                  Last Name
-                </label>
+            <div className="register-field-group">
+              <label className="register-label" htmlFor="register-lastname">
+                Last Name
+              </label>
+              <div className="register-input-wrapper">
+                <User className="register-input-icon" />
                 <input
                   id="register-lastname"
                   type="text"
@@ -339,17 +234,20 @@ export default function Register() {
                   onChange={handleChange}
                   autoComplete="family-name"
                 />
-                {errors.lastname && (
-                  <span className="register-field-error">{errors.lastname}</span>
-                )}
               </div>
+              {errors.lastname && (
+                <span className="register-field-error">{errors.lastname}</span>
+              )}
             </div>
+          </div>
 
-            {/* Email Address */}
-            <div className="register-field-group">
-              <label className="register-label" htmlFor="register-email">
-                Email Address
-              </label>
+          {/* Email Address */}
+          <div className="register-field-group">
+            <label className="register-label" htmlFor="register-email">
+              Email Address
+            </label>
+            <div className="register-input-wrapper">
+              <Mail className="register-input-icon" />
               <input
                 id="register-email"
                 type="email"
@@ -360,16 +258,19 @@ export default function Register() {
                 onChange={handleChange}
                 autoComplete="email"
               />
-              {errors.email && (
-                <span className="register-field-error">{errors.email}</span>
-              )}
             </div>
+            {errors.email && (
+              <span className="register-field-error">{errors.email}</span>
+            )}
+          </div>
 
-            {/* Phone Number */}
-            <div className="register-field-group">
-              <label className="register-label" htmlFor="register-phone">
-                Phone Number
-              </label>
+          {/* Phone Number */}
+          <div className="register-field-group">
+            <label className="register-label" htmlFor="register-phone">
+              Phone Number
+            </label>
+            <div className="register-input-wrapper">
+              <Phone className="register-input-icon" />
               <input
                 id="register-phone"
                 type="tel"
@@ -380,84 +281,89 @@ export default function Register() {
                 onChange={handleChange}
                 autoComplete="tel"
               />
-              {errors.phone && (
-                <span className="register-field-error">{errors.phone}</span>
-              )}
             </div>
+            {errors.phone && (
+              <span className="register-field-error">{errors.phone}</span>
+            )}
+          </div>
 
-            {/* Password */}
-            <div className="register-field-group">
-              <label className="register-label" htmlFor="register-password">
-                Password
-              </label>
-              <div className="register-input-wrapper">
-                <input
-                  id="register-password"
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  className={`register-input ${errors.password ? "has-error" : ""}`}
-                  placeholder="Min. 8 chars, 1 upper, 1 lower, 1 number, 1 symbol"
-                  value={formData.password}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  className="register-toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <span className="register-field-error">{errors.password}</span>
-              )}
+          {/* Password */}
+          <div className="register-field-group">
+            <label className="register-label" htmlFor="register-password">
+              Password
+            </label>
+            <div className="register-input-wrapper">
+              <Lock className="register-input-icon" />
+              <input
+                id="register-password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                className={`register-input ${errors.password ? "has-error" : ""}`}
+                placeholder="Min. 8 chars (upper, lower, num, symbol)"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className="register-toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
+            {errors.password && (
+              <span className="register-field-error">{errors.password}</span>
+            )}
+          </div>
 
-            {/* Confirm Password */}
-            <div className="register-field-group">
-              <label className="register-label" htmlFor="register-confirm-password">
-                Confirm Password
-              </label>
-              <div className="register-input-wrapper">
-                <input
-                  id="register-confirm-password"
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  className={`register-input ${errors.confirmPassword ? "has-error" : ""}`}
-                  placeholder="Re-enter your password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  className="register-toggle-password"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <span className="register-field-error">{errors.confirmPassword}</span>
-              )}
+          {/* Confirm Password */}
+          <div className="register-field-group">
+            <label className="register-label" htmlFor="register-confirm-password">
+              Confirm Password
+            </label>
+            <div className="register-input-wrapper">
+              <Lock className="register-input-icon" />
+              <input
+                id="register-confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                className={`register-input ${errors.confirmPassword ? "has-error" : ""}`}
+                placeholder="Re-enter your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className="register-toggle-password"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
+            {errors.confirmPassword && (
+              <span className="register-field-error">{errors.confirmPassword}</span>
+            )}
+          </div>
 
-            {/* Account Role Selector */}
-            <div className="register-field-group">
-              <label className="register-label" htmlFor="register-role">
-                I want to
-              </label>
+          {/* Account Role Selector */}
+          <div className="register-field-group">
+            <label className="register-label" htmlFor="register-role">
+              I want to
+            </label>
+            <div className="register-input-wrapper">
+              <UserCheck className="register-input-icon" />
               <select
                 id="register-role"
                 name="role"
@@ -466,68 +372,68 @@ export default function Register() {
                 onChange={handleChange}
               >
                 <option value="CUSTOMER">Attend Events</option>
-                <option value="ORGANIZER">Organize Events</option>
+                <option value="ORGANIZER">Organize & Host Events</option>
               </select>
             </div>
+          </div>
 
-            {/* Submit Button */}
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="register-submit-btn"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <span className="register-spinner" />
+                <span>Creating Account...</span>
+              </>
+            ) : (
+              "Create Account"
+            )}
+          </button>
+
+          {/* Social Divider */}
+          <div className="register-divider">
+            <span>Or sign up with</span>
+          </div>
+
+          {/* Social Buttons Row */}
+          <div className="register-social-row">
             <button
-              type="submit"
-              className="register-submit-btn"
-              disabled={isSubmitting}
+              type="button"
+              className="register-social-btn"
+              aria-label="Sign up with Google"
+              title="Sign up with Google"
             >
-              {isSubmitting ? (
-                <>
-                  <span className="register-spinner" />
-                  <span>Creating Account...</span>
-                </>
-              ) : (
-                "CREATE ACCOUNT"
-              )}
+              <GoogleIcon />
             </button>
+            <button
+              type="button"
+              className="register-social-btn"
+              aria-label="Sign up with Facebook"
+              title="Sign up with Facebook"
+            >
+              <FacebookIcon />
+            </button>
+            <button
+              type="button"
+              className="register-social-btn"
+              aria-label="Sign up with Twitter"
+              title="Sign up with Twitter"
+            >
+              <TwitterIcon />
+            </button>
+          </div>
+        </form>
 
-            {/* Social Divider */}
-            <div className="register-divider">
-              <span>Or Sign Up With</span>
-            </div>
-
-            {/* Social Icons Row */}
-            <div className="register-social-row">
-              <button
-                type="button"
-                className="register-social-btn"
-                aria-label="Sign up with Facebook"
-                title="Sign up with Facebook"
-              >
-                <FacebookIcon />
-              </button>
-              <button
-                type="button"
-                className="register-social-btn"
-                aria-label="Sign up with Twitter"
-                title="Sign up with Twitter"
-              >
-                <TwitterIcon />
-              </button>
-              <button
-                type="button"
-                className="register-social-btn"
-                aria-label="Sign up with Google"
-                title="Sign up with Google"
-              >
-                <GoogleIcon />
-              </button>
-            </div>
-          </form>
-
-          {/* Login Redirect Footer Link */}
-          <p className="register-footer-text">
-            Already have an account?{" "}
-            <Link to="/login" className="register-login-link">
-              Sign In
-            </Link>
-          </p>
-        </div>
+        {/* Login Redirect Footer Link */}
+        <p className="register-footer-text">
+          Already have an account?{" "}
+          <Link to="/login" className="register-login-link">
+            Sign In
+          </Link>
+        </p>
       </motion.div>
     </div>
   );
