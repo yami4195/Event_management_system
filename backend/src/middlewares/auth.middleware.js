@@ -25,7 +25,8 @@ export function authenticate(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token,JWT_SECRET);
+    req.user = decoded;
     req.token = token;
     next();
   } catch {
