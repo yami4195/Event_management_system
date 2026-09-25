@@ -1,4 +1,6 @@
 services:
+
+#1 Database container
   postgres:
     image: postgres:16-alpine
     container_name: event_management_postgres
@@ -19,6 +21,48 @@ services:
       interval: 7s
       timeout: 7s
       retries: 10
+
+
+#2 backend container
+
+  backend:
+    build: ./backend
+    image: backend_image:1.0
+    container_name: event_management_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DB_HOST=postgres
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      - postgres:
+          condition: service_healthy
+
+#3 frontend container
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3000/api
+        VITE_SOCKET_URL: http://localhost:3000
+    image: frontend_image:1.0          
+    container_name: event_management_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend:
+          condition: service_healthy
+
 
 volumes:
   postgres_data:
