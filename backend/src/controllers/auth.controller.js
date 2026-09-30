@@ -94,15 +94,15 @@ export async function register(req, res) {
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await pool.query(
       `INSERT INTO users (firstname, lastname, email, password, role, phone)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING user_id, firstname, lastname, email, role, phone, created_at`,
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING user_id, firstname, lastname, email, role, phone, created_at`,
       [firstname.trim(), lastname.trim(), normalizedEmail, passwordHash, ROLE_TO_DB[normalizedRole], phoneNum]
     );
 
     const user = formatUser(result.rows[0]);
     return res.status(201).json({
       success: true,
-      message: "Registration successful.",
+      message: "Registration is successful.",
       data: { user, token: signToken(user) },
     });
   } catch (error) {
