@@ -3,7 +3,7 @@ services:
 #1 Database container
   postgres:
     image: postgres:16-alpine
-    container_name: event_management_postgres
+    container_name: event_management_postgres_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -20,7 +20,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-event_management_systems}"]
       interval: 7s
       timeout: 7s
-      retries: 10
+      retries: 20
 
 
 #2 backend container
