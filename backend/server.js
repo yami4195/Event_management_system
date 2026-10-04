@@ -10,6 +10,12 @@ const server = http.createServer(app);
 initSocket(server);
 
 ensureSchema().then(() => {
+  app.get("/health", (req, res)=>{
+    res.status(200).json({
+      status:"OK",
+      message:"The backend is healthy",
+    })
+  });
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Cloudinary Cloud Name: ${process.env.CLOUDINARY_CLOUD_NAME}`);
