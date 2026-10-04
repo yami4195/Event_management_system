@@ -47,9 +47,9 @@ if (!swaggerDocument || Object.keys(swaggerDocument).length === 0) {
   swaggerDocument = {
     openapi: "3.0.3",
     info: {
-      title: "Event Management API",
+      title: "Event Management Backend API",
       version: "1.0.0",
-      description: "API documentation for the Event Management System",
+      description: "API documentation for the Event Management Systems",
     },
     paths: {},
   };

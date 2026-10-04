@@ -13,7 +13,7 @@ ensureSchema().then(() => {
   app.get("/health", (req, res)=>{
     res.status(200).json({
       status:"OK",
-      message:"The backend is healthy",
+      message:"The backend is healthy!!",
     })
   });
   server.listen(PORT, () => {
