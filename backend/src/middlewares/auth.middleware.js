@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_change_in_production";
+const JWT_SECRET = process.env.JWT_SECRET ;
 export const blacklistedTokens = new Set();
 
 export function getToken(req) {
