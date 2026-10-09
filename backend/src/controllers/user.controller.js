@@ -15,7 +15,7 @@ export async function listUsers(req, res) {
     if (req.user.role !== "ADMIN") {
       return res.status(403).json({
         success: false,
-        message: "Access denied. Admin role required.",
+        message: "Access denied. Admin role is required.",
       });
     }
 
@@ -27,14 +27,14 @@ export async function listUsers(req, res) {
 
     return res.json({
       success: true,
-      message: "Users retrieved successfully.",
+      message: "Users retrieved successfully!",
       data: { users: formattedUsers },
     });
   } catch (error) {
     console.error("List users error:", error.message);
     return res.status(500).json({
       success: false,
-      message: "Failed to retrieve users.",
+      message: "Failed to retrieve users from the db.",
     });
   }
 }
