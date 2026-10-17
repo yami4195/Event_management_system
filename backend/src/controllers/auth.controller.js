@@ -107,7 +107,7 @@ export async function register(req, res) {
     });
   } catch (error) {
     console.error("Register error:", error.message);
-    return res.status(500).json({ success: false, message: "Registration failed." });
+    return res.status(500).json({ success: false, message: "Registration is failed." });
   }
 }
 
@@ -116,7 +116,7 @@ export async function login(req, res) {
     const { email, password } = req.body;
 
     if (!email?.trim() || !password) {
-      return res.status(400).json({ success: false, message: "Email and password are required." });
+      return res.status(400).json({ success: false, message: "Both Email and password are required." });
     }
 
     const result = await pool.query(
