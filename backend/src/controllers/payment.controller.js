@@ -71,8 +71,8 @@ export async function listPayments(req, res) {
 
     let queryText = `
       SELECT p.payment_id, p.user_id, p.event_id, p.amount, p.payment_method,
-             p.transaction_reference, p.payment_status, p.paid_at,
-             CONCAT(u.firstname, ' ', u.lastname) AS user_name, e.title AS event_title
+              p.transaction_reference, p.payment_status, p.paid_at,
+              CONCAT(u.firstname, ' ', u.lastname) AS user_name, e.title AS event_title
       FROM payments p
       JOIN users u ON p.user_id = u.user_id
       JOIN events e ON p.event_id = e.event_id
@@ -142,16 +142,16 @@ export async function getUserPayments(req, res) {
       `SELECT p.payment_id, p.user_id, p.event_id, p.amount, p.payment_method,
               p.transaction_reference, p.payment_status, p.paid_at,
               e.title AS event_title
-       FROM payments p
-       JOIN events e ON p.event_id = e.event_id
-       WHERE p.user_id = $1
-       ORDER BY p.paid_at DESC NULLS LAST`,
+        FROM payments p
+        JOIN events e ON p.event_id = e.event_id
+        WHERE p.user_id = $1
+        ORDER BY p.paid_at DESC NULLS LAST`,
       [userId]
     );
 
     return res.json({
       success: true,
-      message: "Payment history retrieved successfully.",
+      message: " your Payment history retrieved successfully.",
       data: { payments: result.rows },
     });
   } catch (error) {
