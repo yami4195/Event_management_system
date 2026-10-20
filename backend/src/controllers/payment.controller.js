@@ -151,7 +151,7 @@ export async function getUserPayments(req, res) {
 
     return res.json({
       success: true,
-      message: " your Payment history retrieved successfully.",
+      message: " your pPayment history retrieved successfully.",
       data: { payments: result.rows },
     });
   } catch (error) {
