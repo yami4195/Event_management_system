@@ -283,8 +283,8 @@ export async function createEvent(req, res) {
     // Execute INSERT
     const result = await pool.query(
       `INSERT INTO events (title, description, date, time, location, capacity, status, organizer_id, category_id, price)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-       RETURNING event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at, price`,
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING event_id, title, description, date, time, location, capacity, status, organizer_id, category_id, created_at, price`,
       [
         title.trim(),
         description ? description.trim() : null,

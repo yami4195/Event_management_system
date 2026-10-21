@@ -116,7 +116,7 @@ export async function login(req, res) {
     const { email, password } = req.body;
 
     if (!email?.trim() || !password) {
-      return res.status(400).json({ success: false, message: "Both Email and password are required." });
+      return res.status(400).json({ success: false, message: "Both Email and password are required.please insert it" });
     }
 
     const result = await pool.query(
